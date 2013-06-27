@@ -1,0 +1,32 @@
+[user]
+	name = Pablo Caro
+	email = me@pcaro.es
+
+[alias]
+    a = add
+    b = branch -v
+    h = help
+
+    c = commit
+    ca = commit -a
+    cm = commit --amend
+
+    cl = clone
+    co = checkout
+    c- = checkout --
+
+    d = diff
+    dc = diff --cached
+    dl = diff HEAD^
+
+    pl = pull
+    ps = push
+
+    r = remote -v
+    s = status
+
+    u = reset HEAD
+    unstage = reset HEAD
+
+[color]
+     ui = auto
