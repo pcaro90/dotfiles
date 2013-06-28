@@ -1,0 +1,233 @@
+" ---------------------------------------------------
+" Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+" Pablo Caro <pablo@pcaro.es> - http://pcaro.es/
+" vimrc
+" ---------------------------------------------------
+
+" Preferences {{{1
+    " Not vi compatible
+        set nocompatible
+
+    " History length
+        set history=1000
+
+    " Show typing command
+        set showcmd
+
+    " Keep a distance of 8 lines when scrolling
+        set scrolloff=8
+
+    " Autoindent the code
+        set autoindent
+
+    " Defining tab behavior: spaces instead of tab, 4 spaces width
+        set expandtab
+        set tabstop=4
+        set softtabstop=4
+        set shiftwidth=4
+
+    " Start with every fold closed
+        set foldlevelstart=0
+
+    " Folding based on specific syntax
+        set foldmethod=syntax
+
+    " Invisible characters
+        set listchars=tab:>\ ,trail:~,eol:$
+
+    " Show before warped lines
+        set showbreak="> "
+
+    " Show line numbers, as well as row and column
+        set number
+        set ruler
+
+    " Highlight searches (not at the beginning), and incremental searching
+        set hlsearch
+        nohlsearch
+        set incsearch
+
+    " Show matching brace
+        set showmatch
+
+    " Smart casing when searching (ignore case unless an uppercase is found)
+        set ignorecase
+        set smartcase
+
+    " A $ sign delimits what is being changed
+        set cpoptions+=$
+
+    " Modified buffers can be put in background
+        set hidden
+
+    " Auto recharge changed files
+        set autoread
+
+    " Visual bell instead of beep
+        set visualbell
+
+    " Status line in the last window
+        set laststatus=2
+
+    " The width of the text is 80 characters maximum
+        set textwidth=80
+
+    " Backspace over autoindent, eol and start of indent.
+    " same as ":set backspace=indent,eol,start"
+        set backspace=2
+
+    " Reduced timeout for mappings and key codes
+        set timeoutlen=500
+
+    " Syntax highlighting on
+        syntax on
+
+" Vundle configuration {{{1
+    filetype off
+
+    set rtp+=~/.vim/bundle/vundle/
+    call vundle#rc()
+
+    " let Vundle manage Vundle
+    Bundle 'gmarik/vundle'
+
+    " repeat.vim - Enable repeating supported plugin maps with "."
+    Bundle 'tpope/vim-repeat'
+
+    " unimpaired.vim - Pairs of handy bracket mappings
+    Bundle 'tpope/vim-unimpaired'
+
+    " commentary.vim - Comment stuff
+    Bundle 'tpope/vim-commentary'
+
+    " surround.vim - quoting/parenthesizing made simple
+    Bundle 'tpope/vim-surround'
+
+    " fugitive.vim - A git wrapper so awesome, it should be illegal
+    Bundle 'tpope/vim-fugitive'
+
+    " snipMate.vim - Implements some of TextMate's snippets features
+    Bundle 'msanders/snipmate.vim'
+
+    " Syntastic - Syntax cheching through external syntax checkers
+    Bundle 'scrooloose/syntastic'
+
+    " matchit - Extended % matching
+    Bundle 'matchit.zip'
+
+    " python-syntax - Python syntax highlighting
+    Bundle 'hdima/python-syntax'
+
+    " DeleteTrailingWhitespace - Delete unwanted whitespace at the end of lines
+    Bundle 'DeleteTrailingWhitespace'
+
+    " AutoClose - Inserts matchend bracket, paren, brace or quote
+    " Note: <leader>a to toggle"
+    Bundle 'vim-scripts/AutoClose'
+
+    " Jellybeans color scheme
+    Bundle 'nanotech/jellybeans.vim'
+
+    " molokai color scheme
+    Bundle 'tomasr/molokai'
+
+    filetype plugin indent on
+
+" Color configuration {{{1
+    set background=dark
+
+    " Jellybeans
+        if &t_Co <= 16
+            let g:jellybeans_use_lowcolor_black=0
+        endif
+        colorscheme jellybeans
+
+    " Molokai
+        let g:molokai_original=1
+        " colorscheme molokai
+
+" Mappings {{{1
+    " Mapping leader
+    let mapleader=","
+
+    " Edit vimrc file
+        nnoremap <leader>v :edit $MYVIMRC<CR>
+
+    " Source vimrc file
+        nnoremap <leader>vv :bdelete vimrc<CR>:source $MYVIMRC<CR>
+
+    " Allow saving of files as super user without start vim using sudo
+    " http://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
+        cnoremap w!! w !sudo tee > /dev/null %
+
+    " Inverted "go to mark" and "go to mark line"
+        nnoremap ' `
+        nnoremap ` '
+
+    " Fold and unfold code
+        nnoremap <Space> za
+        nnoremap <leader>fa zM
+        nnoremap <leader>uf zR
+
+        nnoremap <C-j> zj
+        nnoremap <C-k> zk
+
+    " Fast save
+        nnoremap <C-W> :write<CR>
+
+    " Fast buffer delete
+        nnoremap <C-B> :bdelete<CR>
+
+    " List invisible characters
+        nnoremap <F2> :set list!<CR>
+
+    " Stop search highlighting
+        nnoremap <F3> :nohlsearch<CR>
+
+" Plugins options and mappings {{{1
+    " DeleteTrailingWhitespace
+        nnoremap <leader>s :<C-u>%DeleteTrailingWhitespace<CR>
+        vnoremap <leader>s :DeleteTrailingWhitespace<CR>
+
+        let g:DeleteTrailingWhitespace = 1
+        let g:DeleteTrailingWhitespace_Action = 'delete'
+
+    " Syntastic
+        nnoremap <F5> :write<CR>:SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
+        nnoremap <F6> :lnext<CR>
+
+        let g:syntastic_python_checkers = ['flake8', 'python']
+        let g:syntastic_mode_map = { 'mode': 'pasive',
+                                   \ 'active_filetypes': [],
+                                   \ 'passive_filetypes': [] }
+
+    " commentary.vim
+        nmap <leader>c gc
+        nmap <leader>cc gcc
+
+" Extra functions {{{1
+    " If buffer modified, update any 'Last modified: ' in the first 20 lines.
+    " http://vim.wikia.com/wiki/Insert_current_date_or_time
+    function! LastModified()
+        if &modified
+            let save_cursor = getpos(".")
+            let n = min([20, line("$")])
+            keepjumps exe '1,' . n . 's#^\(.\{,10}Last modified: \).*#\1' .
+                        \ strftime('%a %b %d, %Y  %I:%M%p') . '#e'
+            call histdel('search', -1)
+            call setpos('.', save_cursor)
+        endif
+    endfunction
+
+
+" Autocommands {{{1
+    if has("autocmd")
+        " Update last modified date
+        autocmd BufWritePre * call LastModified()
+
+        " Fold vimrc file using markers
+        autocmd BufNewFile,BufReadPre .vimrc,vimrc setlocal foldmethod=marker
+
+        " Use tabs with makefiles
+        autocmd FileType make setlocal tabstop=8 softtabstop=8 shiftwidth=8 noexpandtab
+    endif

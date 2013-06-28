@@ -1,33 +1,23 @@
+# ---------------------------------------------------
+# Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+# Pablo Caro <pablo@pcaro.es> - http://pcaro.es/
+# bashrc
+# ---------------------------------------------------
 
+# If not running interactively, exit
+[[ $- != *i* ]] && return
+
+# Extend path
+export PATH=$PATH:~/bin
+
+# Vim as system editor
 export EDITOR=vim
 
-# History lengt
+# History length
 export HISTSIZE=1000
-export HISTFILESIZE=2000
-
-# Colors
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
-alias tree='tree -C'
-
-# ddp -> dd progress. dd prints the current speed and progress.
-alias ddp='kill -USR1 `pgrep ^dd`'
-
-# Perl -pie regular expression substitution, with backup.
-alias pie='perl -pi.bak -e'
-
-# Fast reboot
-alias reboot='shutdown -r now'
-
-# Fast poweroff
-alias poweroff='shutdown -h now'
-
-# Vim aliases
-alias v='vim'
-alias g='gvim'
 
 # Terminal colors
-# As seen in http://vim.wikia.com/wiki/256_colors_in_vim
+# Based on http://vim.wikia.com/wiki/256_colors_in_vim
 if [ "$TERM" = "xterm" ] ; then
     if [ -z "$COLORTERM" ] ; then
         if [ -z "$XTERM_VERSION" ] ; then
@@ -53,3 +43,7 @@ if [ "$TERM" = "xterm" ] ; then
     fi
 fi
 
+# Aliases
+if [ -f ~/.bash_alias ] ; then
+    . ~/.bash_alias
+fi

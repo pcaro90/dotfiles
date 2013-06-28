@@ -1,6 +1,12 @@
+# ---------------------------------------------------
+# Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+# Pablo Caro <pablo@pcaro.es> - http://pcaro.es/
+# gitconfig
+# ---------------------------------------------------
+
 [user]
 	name = Pablo Caro
-	email = me@pcaro.es
+	email = pablo@pcaro.es
 
 [alias]
     a = add
@@ -19,6 +25,9 @@
     dc = diff --cached
     dl = diff HEAD^
 
+    l = log
+    last = log -1 HEAD
+
     pl = pull
     ps = push
 
@@ -30,3 +39,6 @@
 
 [color]
      ui = auto
+
+[core]
+	excludesfile = ~/.global_ignore

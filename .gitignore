@@ -1,4 +1,6 @@
 *.swp
 bundle/
 tmp/
+.vim
 .DS_Store
+*._

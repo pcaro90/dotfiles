@@ -1,0 +1,36 @@
+# ---------------------------------------------------
+# Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+# Pablo Caro <pablo@pcaro.es> - http://pcaro.es/
+# bash_alias
+# ---------------------------------------------------
+
+# Faster movement to parent paths
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Colors
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias tree='tree -C'
+
+# Connection speed test
+alias speedtest='curl http://cachefly.cachefly.net/100mb.test > /dev/null'
+
+# dd progress. dd prints the current speed and progress.
+alias ddp='kill -USR1 `pgrep ^dd`'
+
+# Perl -pie regular expression substitution, with backup.
+alias pie='perl -pi.bak -e'
+
+# Fast reboot
+alias reboot='shutdown -r now'
+
+# Fast poweroff
+alias poweroff='shutdown -h now'
+
+# Vim aliases
+alias v='vim'
+alias vi='vim'
+alias g='gvim'
+
