@@ -9,10 +9,18 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
+# Vim aliases
+alias v='vim'
+alias vi='vim'
+alias g='gvim'
+
 # Colors
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias tree='tree -C'
+
+# ToDo
+alias todo='$EDITOR $HOME/.todo'
 
 # Connection speed test
 alias speedtest='curl http://cachefly.cachefly.net/100mb.test > /dev/null'
@@ -28,9 +36,3 @@ alias reboot='shutdown -r now'
 
 # Fast poweroff
 alias poweroff='shutdown -h now'
-
-# Vim aliases
-alias v='vim'
-alias vi='vim'
-alias g='gvim'
-

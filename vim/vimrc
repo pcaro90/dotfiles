@@ -35,8 +35,8 @@
     " Invisible characters
         set listchars=tab:>\ ,trail:~,eol:$
 
-    " Show before warped lines
-        set showbreak="> "
+    " Show before wrapped lines
+        set showbreak=>>>
 
     " Show line numbers, as well as row and column
         set number
@@ -69,8 +69,16 @@
     " Status line in the last window
         set laststatus=2
 
-    " The width of the text is 80 characters maximum
-        set textwidth=80
+    " The width of the text is 79 characters maximum
+        set textwidth=79
+
+    " Formatting options:
+    "   c - Auto-wrap comments
+    "   r - Insert comment leader after <CR> in insert mode
+    "   q - Allow formatting of comments with "gq"
+    "   l - Long lines are not broken in insert mode
+    "   j - Remove comment leader when joining, if applies
+        set formatoptions=crqlj
 
     " Backspace over autoindent, eol and start of indent.
     " same as ":set backspace=indent,eol,start"
@@ -117,6 +125,9 @@
 
     " python-syntax - Python syntax highlighting
     Bundle 'hdima/python-syntax'
+
+    " vim-markdown - Markdown syntax highlight for Vim editor
+    Bundle 'hallison/vim-markdown'
 
     " DeleteTrailingWhitespace - Delete unwanted whitespace at the end of lines
     Bundle 'DeleteTrailingWhitespace'
@@ -172,17 +183,17 @@
         nnoremap <C-j> zj
         nnoremap <C-k> zk
 
-    " Fast save
-        nnoremap <C-W> :write<CR>
-
     " Fast buffer delete
-        nnoremap <C-B> :bdelete<CR>
+        nnoremap <C-b> :bdelete<CR>
 
     " List invisible characters
         nnoremap <F2> :set list!<CR>
 
     " Stop search highlighting
         nnoremap <F3> :nohlsearch<CR>
+
+    " Fast save
+        nnoremap <F4> :write<CR>
 
 " Plugins options and mappings {{{1
     " DeleteTrailingWhitespace
@@ -230,4 +241,7 @@
 
         " Use tabs with makefiles
         autocmd FileType make setlocal tabstop=8 softtabstop=8 shiftwidth=8 noexpandtab
+
+        " Use text auto wrapping
+        autocmd FileType markdown setlocal formatoptions+=t
     endif
