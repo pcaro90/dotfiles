@@ -14,9 +14,9 @@ folders will be renamed to `.whatever.bak` and replaced.
 Install
 -------
 
-`cd
-git clone https://github.com/pcaro90/dotfiles.git
-dotfiles/install.sh`
+    cd
+    git clone https://github.com/pcaro90/dotfiles.git
+    dotfiles/install.sh
 
 Vim
 ---
