@@ -163,6 +163,28 @@
         let g:molokai_original=1
         " colorscheme molokai
 
+
+" Status line {{{1
+    set statusline=
+    set statusline+=%1*\ [%2*%2n%1*]  " Buffer number
+    set statusline+=%3*\ %f  " File name
+    set statusline+=%4*%5r  " ReadOnly flag
+    set statusline+=%5*\ %y  " File type
+    set statusline+=%6*\ %m  " Modified flag
+
+    set statusline+=%=  " Separation
+
+    set statusline+=%1*\ [col\ %3*%v%1*]  " Virtual column number
+    set statusline+=%1*\ [row\ %2*%l%1*/%2*%L%1*\ %p%%]  " Current/total line
+    set statusline+=%1*\ [byte\ %5*%o%1*]  " Byte number in file
+
+    hi User1 ctermfg=255 guifg=#eeeeee ctermbg=235 guibg=#262626
+    hi User2 ctermfg=208 guifg=#ff8700 ctermbg=235 guibg=#262626
+    hi User3 ctermfg=84 guifg=#5fff87 ctermbg=235 guibg=#262626
+    hi User4 ctermfg=67 guifg=#5f87af ctermbg=235 guibg=#262626
+    hi User5 ctermfg=221 guifg=#ffd75f ctermbg=235 guibg=#262626
+    hi User6 ctermfg=88 guifg=#870000 ctermbg=235 guibg=#262626
+
 " Mappings {{{1
     " Mapping leader
         let mapleader=","
