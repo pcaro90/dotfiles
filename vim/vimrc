@@ -29,8 +29,8 @@
     " Start with every fold closed
         set foldlevelstart=0
 
-    " Folding based on specific syntax
-        set foldmethod=syntax
+    " Fold only with 2 levels of nesting
+        set foldnestmax=2
 
     " Invisible characters
         set listchars=tab:>\ ,trail:~,eol:$
@@ -126,6 +126,9 @@
     " python-syntax - Python syntax highlighting
     Bundle 'hdima/python-syntax'
 
+    " jpythonfold.vim - Python fold script
+    Bundle 'pcaro90/jpythonfold.vim'
+
     " vim-markdown - Markdown syntax highlight for Vim editor
     Bundle 'hallison/vim-markdown'
 
@@ -159,13 +162,16 @@
 
 " Mappings {{{1
     " Mapping leader
-    let mapleader=","
+        let mapleader=","
 
     " Edit vimrc file
         nnoremap <leader>v :edit $MYVIMRC<CR>
 
     " Source vimrc file
         nnoremap <leader>vv :bdelete vimrc<CR>:source $MYVIMRC<CR>
+
+    " Fast save
+        nnoremap <leader>w :write<CR>
 
     " Allow saving of files as super user without start vim using sudo
     " http://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
@@ -192,9 +198,6 @@
     " Stop search highlighting
         nnoremap <F3> :nohlsearch<CR>
 
-    " Fast save
-        nnoremap <F4> :write<CR>
-
 " Plugins options and mappings {{{1
     " DeleteTrailingWhitespace
         nnoremap <leader>s :<C-u>%DeleteTrailingWhitespace<CR>
@@ -203,9 +206,12 @@
         let g:DeleteTrailingWhitespace = 1
         let g:DeleteTrailingWhitespace_Action = 'delete'
 
+    " AutoClose
+        nmap <F4> <Plug>ToggleAutoCloseMappings
+
     " Syntastic
-        nnoremap <F5> :write<CR>:SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
-        nnoremap <F6> :lnext<CR>
+        nnoremap <F6> :write<CR>:SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
+        nnoremap <F7> :lnext<CR>
 
         let g:syntastic_python_checkers = ['flake8', 'python']
         let g:syntastic_mode_map = { 'mode': 'pasive',
@@ -236,12 +242,13 @@
         " Update last modified date
         autocmd BufWritePre * call LastModified()
 
-        " Fold vimrc file using markers
-        autocmd BufNewFile,BufReadPre .vimrc,vimrc setlocal foldmethod=marker
+        " Fold vim file using markers
+        autocmd FileType vim setlocal foldmethod=marker
 
         " Use tabs with makefiles
         autocmd FileType make setlocal tabstop=8 softtabstop=8 shiftwidth=8 noexpandtab
 
         " Use text auto wrapping
         autocmd FileType markdown setlocal formatoptions+=t
+
     endif
