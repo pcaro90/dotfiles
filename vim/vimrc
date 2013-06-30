@@ -129,6 +129,9 @@
     " jpythonfold.vim - Python fold script
     Bundle 'pcaro90/jpythonfold.vim'
 
+    " ack.vim - Ack (better than grep!) replacement
+    Bundle 'mileszs/ack.vim'
+
     " vim-markdown - Markdown syntax highlight for Vim editor
     Bundle 'hallison/vim-markdown'
 
