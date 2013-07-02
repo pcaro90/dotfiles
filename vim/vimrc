@@ -181,7 +181,7 @@
     hi User1 ctermfg=255 guifg=#eeeeee ctermbg=235 guibg=#262626
     hi User2 ctermfg=208 guifg=#ff8700 ctermbg=235 guibg=#262626
     hi User3 ctermfg=84 guifg=#5fff87 ctermbg=235 guibg=#262626
-    hi User4 ctermfg=67 guifg=#5f87af ctermbg=235 guibg=#262626
+    hi User4 ctermfg=33 guifg=#0087ff ctermbg=235 guibg=#262626
     hi User5 ctermfg=221 guifg=#ffd75f ctermbg=235 guibg=#262626
     hi User6 ctermfg=88 guifg=#870000 ctermbg=235 guibg=#262626
 
@@ -273,7 +273,9 @@
         " Use tabs with makefiles
         autocmd FileType make setlocal tabstop=8 softtabstop=8 shiftwidth=8 noexpandtab
 
-        " Use text auto wrapping
-        autocmd FileType markdown setlocal formatoptions+=t
+        " Formatting options:
+        "   t - Auto-wrap text
+        "   l - Long lines are not broken in insert mode
+        autocmd FileType markdown setlocal formatoptions+=t formatoptions-=l
 
     endif
