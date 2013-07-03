@@ -2,7 +2,7 @@
 
 # ---------------------------------------------------
 # Copyright (c) 2013 Pablo Caro. All Rights Reserved.
-# Pablo Caro <pablo@pcaro.es> - http://pcaro.es/
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
 # install.sh
 # ---------------------------------------------------
 
