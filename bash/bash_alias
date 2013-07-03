@@ -34,7 +34,7 @@ alias speedtest='curl http://cachefly.cachefly.net/100mb.test > /dev/null'
 alias ddp='kill -USR1 `pgrep ^dd`'
 
 # Perl -pie regular expression substitution, without backup.
-alias pie='perl -pie'
+alias pie='perl -pi -e'
 
 # Perl -pie regular expression substitution, with backup.
 alias pieb='perl -pi.bak -e'
