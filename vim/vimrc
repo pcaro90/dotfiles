@@ -138,9 +138,8 @@
     " DeleteTrailingWhitespace - Delete unwanted whitespace at the end of lines
     Bundle 'DeleteTrailingWhitespace'
 
-    " AutoClose - Inserts matchend bracket, paren, brace or quote
-    " Note: <leader>a to toggle"
-    Bundle 'vim-scripts/AutoClose'
+    " delimetMate - Inserts matchend bracket, paren, brace or quote
+    Bundle 'Raimondi/delimitMate'
 
     " Jellybeans color scheme
     Bundle 'nanotech/jellybeans.vim'
@@ -213,6 +212,10 @@
 
         nnoremap <C-j> zj
         nnoremap <C-k> zk
+
+    " Fast moving between windows
+        nnoremap <C-h> <C-w>w
+        nnoremap <C-l> <C-w>W
 
     " Fast buffer delete
         nnoremap <C-b> :bdelete<CR>
