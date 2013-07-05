@@ -1,0 +1,20 @@
+" ---------------------------------------------------
+" Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+" Pablo Caro <me@pcaro.es> - http://pcaro.es/
+" gvimrc
+" ---------------------------------------------------
+
+" Preferences {{{1
+    " Font settings
+        set guifont=Inconsolata\ 12
+
+    " GUI options
+        set guioptions=
+        set guioptions+=c  " Use console for simple choices
+        set guioptions+=g  " Grey items
+
+    " Don't use beep nor visual bell
+        set visualbell t_vb=
+
+    " Pixels substracted from height
+        set guiheadroom=0

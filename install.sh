@@ -103,6 +103,9 @@ function install_vim {
     # Vim config
     install_file "vimrc" $folder
 
+    # Gvim config
+    install_file "gvimrc" $folder
+
     # Vim extra folders
     mkdir vim/tmp
     mkdir vim/bundle

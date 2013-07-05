@@ -63,8 +63,8 @@
     " Auto recharge changed files
         set autoread
 
-    " Visual bell instead of beep
-        set visualbell
+    " Don't use beep nor visual bell
+        set visualbell t_vb=
 
     " Status line in the last window
         set laststatus=2
