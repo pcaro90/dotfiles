@@ -29,12 +29,14 @@ category lists and briefly explains all the plugins.
 Note that some plugins (like [Syntastic][]) require additional software to work
 properly, which is not automatically installed.
 
-Copyright
----------
+License
+-------
 
 Copyright (c) 2013 Pablo Caro. All Rights Reserved.
 
 Pablo Caro <<me@pcaro.es>> - <http://pcaro.es/>
+
+See LICENSE file.
 
 [Vundle]: https://github.com/gmarik/vundle
 [Syntastic]: https://github.com/scrooloose/syntastic
