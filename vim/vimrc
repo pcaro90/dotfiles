@@ -90,6 +90,9 @@
     " Syntax highlighting on
         syntax on
 
+    " Default to latex instead of plain tex
+        let g:tex_flavor = "latex"
+
 " Vundle configuration {{{1
     filetype off
 
@@ -140,6 +143,12 @@
 
     " delimetMate - Inserts matchend bracket, paren, brace or quote
     Bundle 'Raimondi/delimitMate'
+
+    " LaTeX-BoX - Lightweight Toolbox for LaTeX
+    Bundle 'LaTeX-Box-Team/LaTeX-Box'
+
+    " TeX-PDF - Lightweight TeX-to-PDF development support
+    Bundle 'TeX-PDF'
 
     " Jellybeans color scheme
     Bundle 'nanotech/jellybeans.vim'
@@ -226,6 +235,9 @@
     " Stop search highlighting
         nnoremap <F3> :nohlsearch<CR>
 
+    " Call Make (it may change depending on the file type)
+        nnoremap <F5> :make<CR>
+
 " Plugins options and mappings {{{1
     " DeleteTrailingWhitespace
         nnoremap <leader>s :<C-u>%DeleteTrailingWhitespace<CR>
@@ -249,6 +261,12 @@
     " commentary.vim
         nmap <leader>c gc
         nmap <leader>cc gcc
+
+    " TeX-PDF
+        let g:tex_pdf_map_keys = 0
+        if has("autocmd")
+            autocmd FileType tex nnoremap <silent> <F5> :BuildTexPdf<CR>
+        endif
 
 " Extra functions {{{1
     " If buffer modified, update any 'Last modified: ' in the first 20 lines.
