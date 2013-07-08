@@ -118,7 +118,12 @@
     Bundle 'tpope/vim-fugitive'
 
     " snipMate.vim - Implements some of TextMate's snippets features
-    Bundle 'msanders/snipmate.vim'
+    Bundle 'MarcWeber/vim-addon-mw-utils'
+    Bundle 'tomtom/tlib_vim'
+    Bundle 'garbas/vim-snipmate'
+
+    " vim-snippets - Snippets to be used with Snipmate/UltiSnip
+    Bundle 'honza/vim-snippets'
 
     " Syntastic - Syntax cheching through external syntax checkers
     Bundle 'scrooloose/syntastic'
