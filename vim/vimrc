@@ -137,6 +137,9 @@
     " jpythonfold.vim - Python fold script
     Bundle 'pcaro90/jpythonfold.vim'
 
+    " Jedi-vim - Awesome Python autocompletion
+    Bundle 'davidhalter/jedi-vim'
+
     " ack.vim - Ack (better than grep!) replacement
     Bundle 'mileszs/ack.vim'
 
@@ -180,6 +183,7 @@
 " Status line {{{1
     set statusline=
     set statusline+=%1*\ [%2*%2n%1*]  " Buffer number
+    set statusline+=%<  " Truncate the path if needed
     set statusline+=%3*\ %f  " File name
     set statusline+=%4*%5r  " ReadOnly flag
     set statusline+=%5*\ %y  " File type
@@ -228,8 +232,8 @@
         nnoremap <C-k> zk
 
     " Fast moving between windows
-        nnoremap <C-h> <C-w>w
-        nnoremap <C-l> <C-w>W
+        nnoremap <C-h> <C-w>W
+        nnoremap <C-l> <C-w>w
 
     " Fast buffer delete
         nnoremap <C-b> :bdelete<CR>
@@ -251,17 +255,11 @@
         let g:DeleteTrailingWhitespace = 1
         let g:DeleteTrailingWhitespace_Action = 'delete'
 
-    " AutoClose
-        nmap <F4> <Plug>ToggleAutoCloseMappings
-
     " Syntastic
         nnoremap <F6> :write<CR>:SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
         nnoremap <F7> :lnext<CR>
 
         let g:syntastic_python_checkers = ['flake8', 'python']
-        let g:syntastic_mode_map = { 'mode': 'pasive',
-                                   \ 'active_filetypes': [],
-                                   \ 'passive_filetypes': [] }
 
     " commentary.vim
         nmap <leader>c gc
@@ -270,7 +268,7 @@
     " TeX-PDF
         let g:tex_pdf_map_keys = 0
         if has("autocmd")
-            autocmd FileType tex nnoremap <silent> <F5> :BuildTexPdf<CR>
+            autocmd FileType tex nnoremap <buffer> <silent> <F5> :BuildTexPdf<CR>
         endif
 
 " Extra functions {{{1
@@ -302,6 +300,9 @@
         " Formatting options:
         "   t - Auto-wrap text
         "   l - Long lines are not broken in insert mode
-        autocmd FileType markdown setlocal formatoptions+=t formatoptions-=l
+        autocmd FileType markdown,tex setlocal formatoptions+=t formatoptions-=l
+
+        " Python execute
+        autocmd FileType python nnoremap <buffer> <F5> :!python %<CR>
 
     endif
