@@ -239,10 +239,10 @@
         nnoremap <C-b> :bdelete<CR>
 
     " List invisible characters
-        nnoremap <F2> :set list!<CR>
+        nnoremap <silent> <F3> :set list!<CR>
 
     " Stop search highlighting
-        nnoremap <F3> :nohlsearch<CR>
+        nnoremap <silent> <F4> :nohlsearch<CR>
 
     " Call Make (it may change depending on the file type)
         nnoremap <F5> :make<CR>
@@ -256,8 +256,7 @@
         let g:DeleteTrailingWhitespace_Action = 'delete'
 
     " Syntastic
-        nnoremap <F6> :write<CR>:SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
-        nnoremap <F7> :lnext<CR>
+        nnoremap <F6> :SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
 
         let g:syntastic_python_checkers = ['flake8', 'python']
 
