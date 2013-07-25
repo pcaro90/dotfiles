@@ -262,6 +262,7 @@
 
     " commentary.vim
         nmap <leader>c gc
+        vmap <leader>c gc
         nmap <leader>cc gcc
 
     " TeX-PDF
@@ -304,4 +305,22 @@
         " Python execute
         autocmd FileType python nnoremap <buffer> <F5> :!python %<CR>
 
+        " Comment string for different files
+        autocmd FileType python setlocal commentstring=#\ %s " Caused by did_ftplugin in jedi.vim
+
+        augroup LaTeX
+            autocmd!
+            autocmd FileType tex imap <buffer> á \'a
+            autocmd FileType tex imap <buffer> Á \'A
+            autocmd FileType tex imap <buffer> é \'e
+            autocmd FileType tex imap <buffer> É \'E
+            autocmd FileType tex imap <buffer> í \'i
+            autocmd FileType tex imap <buffer> Í \'I
+            autocmd FileType tex imap <buffer> ó \'o
+            autocmd FileType tex imap <buffer> Ó \'O
+            autocmd FileType tex imap <buffer> ú \'u
+            autocmd FileType tex imap <buffer> Ú \'U
+            autocmd FileType tex imap <buffer> ñ \~n
+            autocmd FileType tex imap <buffer> Ñ \~N
+        augroup end
     endif
