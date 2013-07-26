@@ -194,6 +194,9 @@
     " delimetMate - Inserts matchend bracket, paren, brace or quote
     Bundle 'Raimondi/delimitMate'
 
+    " Ultimate auto-completion system
+    Bundle 'Shougo/neocomplcache.vim'
+
     " LaTeX-BoX - Lightweight Toolbox for LaTeX
     Bundle 'LaTeX-Box-Team/LaTeX-Box'
 
@@ -300,9 +303,10 @@
         let g:syntastic_python_checkers = ['flake8', 'python']
 
     " commentary.vim
-        nnoremap <leader>c gc
-        vnoremap <leader>c gc
-        nnoremap <leader>cc gcc
+    " NOTE: These mappings HAVE to allow recursive mapping
+        nmap <leader>c gc
+        vmap <leader>c gc
+        nmap <leader>cc gcc
 
     " TeX-PDF
         let g:tex_pdf_map_keys = 0
@@ -312,11 +316,41 @@
 
     " NERDtree
         nnoremap <F9> :NERDTreeToggle<CR>
+
         let NERDTreeMapOpenSplit='s'
         let NERDTreeMapOpenVSplit='v'
+        let NERDTreeQuitOnOpen=1
 
     " Tagbar
         nnoremap <F10> :TagbarToggle<CR>
+
+    " neocomplcache
+        let g:neocomplcache_enable_at_startup = 1
+        let g:neocomplcache_enable_smart_case = 1
+        let g:neocomplcache_enable_auto_select = 0
+
+        if has("autocmd")
+            autocmd FileType python let b:did_ftplugin = 1
+        endif
+
+        let g:neocomplcache_force_overwrite_completefunc = 1
+
+        if !exists('g:neocomplcache_omni_functions')
+            let g:neocomplcache_omni_functions = {}
+        endif
+        let g:neocomplcache_omni_functions['python'] = 'jedi#complete'
+
+        if !exists('g:neocomplcache_force_omni_patterns')
+            let g:neocomplcache_force_omni_patterns = {}
+        endif
+        let g:neocomplcache_force_omni_patterns.python = '[^. \t]\.\w*'
+
+    " jedi-vim
+        let g:jedi#auto_initialization = 1
+        let g:jedi#popup_select_first = 0
+        let g:jedi#show_function_definition = "0"
+        let g:jedi#popup_on_dot = 0
+        let g:jedi#auto_vim_configuration = 0
 
 " Extra functions {{{1
     " If buffer modified, update any 'Last modified: ' in the first 20 lines.
