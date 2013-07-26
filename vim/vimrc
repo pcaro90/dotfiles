@@ -128,6 +128,12 @@
     " Syntastic - Syntax cheching through external syntax checkers
     Bundle 'scrooloose/syntastic'
 
+    " NERDtree - A tree explorer plugin
+    Bundle 'scrooloose/nerdtree'
+
+    " Tagbar - Class outline viewer
+    Bundle 'majutsushi/tagbar'
+
     " matchit - Extended % matching
     Bundle 'matchit.zip'
 
@@ -145,6 +151,9 @@
 
     " vim-markdown - Markdown syntax highlight for Vim editor
     Bundle 'hallison/vim-markdown'
+
+    " ShowTrailingWhitespace - Detect unwanted whitespace at the end of lines
+    Bundle 'ShowTrailingWhitespace'
 
     " DeleteTrailingWhitespace - Delete unwanted whitespace at the end of lines
     Bundle 'DeleteTrailingWhitespace'
@@ -270,6 +279,14 @@
         if has("autocmd")
             autocmd FileType tex nnoremap <buffer> <silent> <F5> :BuildTexPdf<CR>
         endif
+
+    " NERDtree
+        nnoremap <F9> :NERDTreeToggle<CR>
+        let NERDTreeMapOpenSplit='s'
+        let NERDTreeMapOpenVSplit='v'
+
+    " Tagbar
+        nnoremap <F10> :TagbarToggle<CR>
 
 " Extra functions {{{1
     " If buffer modified, update any 'Last modified: ' in the first 20 lines.
