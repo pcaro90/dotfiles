@@ -224,10 +224,6 @@
     " Fast save
         nnoremap <leader>w :write<CR>
 
-    " Allow saving of files as super user without start vim using sudo
-    " http://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
-        cnoremap w!! w !sudo tee > /dev/null %
-
     " Inverted "go to mark" and "go to mark line"
         nnoremap ' `
         nnoremap ` '
@@ -256,13 +252,14 @@
     " Call Make (it may change depending on the file type)
         nnoremap <F5> :make<CR>
 
+    " Allow saving of files as super user without start vim using sudo
+    " http://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
+        cnoremap w!! w !sudo tee > /dev/null %
+
 " Plugins options and mappings {{{1
     " DeleteTrailingWhitespace
-        nnoremap <leader>s :<C-u>%DeleteTrailingWhitespace<CR>
-        vnoremap <leader>s :DeleteTrailingWhitespace<CR>
-
         let g:DeleteTrailingWhitespace = 1
-        let g:DeleteTrailingWhitespace_Action = 'delete'
+        let g:DeleteTrailingWhitespace_Action = 'ask'
 
     " Syntastic
         nnoremap <F6> :SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
@@ -270,9 +267,9 @@
         let g:syntastic_python_checkers = ['flake8', 'python']
 
     " commentary.vim
-        nmap <leader>c gc
-        vmap <leader>c gc
-        nmap <leader>cc gcc
+        nnoremap <leader>c gc
+        vnoremap <leader>c gc
+        nnoremap <leader>cc gcc
 
     " TeX-PDF
         let g:tex_pdf_map_keys = 0
