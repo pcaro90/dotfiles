@@ -182,6 +182,9 @@
     " Jedi-vim - Awesome Python autocompletion
     Bundle 'davidhalter/jedi-vim'
 
+    " neocomplete - Next generation completion framework after neocomplcache
+    Bundle 'Shougo/neocomplete.vim'
+
     " ack.vim - Ack (better than grep!) replacement
     Bundle 'mileszs/ack.vim'
 
@@ -196,9 +199,6 @@
 
     " delimetMate - Inserts matchend bracket, paren, brace or quote
     Bundle 'Raimondi/delimitMate'
-
-    " Ultimate auto-completion system
-    Bundle 'Shougo/neocomplcache.vim'
 
     " LaTeX-BoX - Lightweight Toolbox for LaTeX
     Bundle 'LaTeX-Box-Team/LaTeX-Box'
@@ -295,6 +295,20 @@
     " http://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
         cnoremap w!! w !sudo tee > /dev/null %
 
+    " Map ctrl+space for autocompletion
+    inoremap <buffer><expr> <Nul> pumvisible() \|\| &omnifunc == '' ?
+            \ "\<lt>C-n>" :
+            \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
+            \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
+            \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
+
+    inoremap <buffer><expr> <C-Space> pumvisible() \|\| &omnifunc == '' ?
+            \ "\<lt>C-n>" :
+            \ "\<lt>C-x>\<lt>C-o><c-r>=pumvisible() ?" .
+            \ "\"\\<lt>c-n>\\<lt>c-p>\\<lt>c-n>\" :" .
+            \ "\" \\<lt>bs>\\<lt>C-n>\"\<CR>"
+
+
 " Plugins options and mappings {{{1
     " DeleteTrailingWhitespace
         let g:DeleteTrailingWhitespace = 1
@@ -327,33 +341,34 @@
     " Tagbar
         nnoremap <F10> :TagbarToggle<CR>
 
-    " neocomplcache
-        let g:neocomplcache_enable_at_startup = 1
-        let g:neocomplcache_enable_smart_case = 1
-        let g:neocomplcache_enable_auto_select = 0
+    " neocomplete
+        let g:neocomplete#enable_at_startup = 1
+        let g:neocomplete#enable_smart_case = 1
+        let g:neocomplete#enable_auto_select = 0
 
         if has("autocmd")
             autocmd FileType python let b:did_ftplugin = 1
         endif
 
-        let g:neocomplcache_force_overwrite_completefunc = 1
+        let g:neocomplete#force_overwrite_completefunc = 1
 
-        if !exists('g:neocomplcache_omni_functions')
-            let g:neocomplcache_omni_functions = {}
+        if !exists('g:neocomplete#sources#omni#functions')
+            let g:neocomplete#sources#omni#functions = {}
         endif
-        let g:neocomplcache_omni_functions['python'] = 'jedi#complete'
+        let g:neocomplete#sources#omni#functions['python'] = 'jedi#complete'
 
-        if !exists('g:neocomplcache_force_omni_patterns')
-            let g:neocomplcache_force_omni_patterns = {}
+        if !exists('g:neocomplete#sources#omni#input_patterns')
+            let g:neocomplete#sources#omni#input_patterns = {}
         endif
-        let g:neocomplcache_force_omni_patterns.python = '[^. \t]\.\w*'
+        let g:neocomplete#sources#omni#input_patterns.python = '[^. \t]\.\w*'
 
     " jedi-vim
         let g:jedi#auto_initialization = 1
         let g:jedi#popup_select_first = 0
-        let g:jedi#show_function_definition = "0"
+        let g:jedi#show_function_definition = 0
         let g:jedi#popup_on_dot = 0
         let g:jedi#auto_vim_configuration = 0
+        call jedi#configure_function_definition()
 
 " Extra functions {{{1
     " If buffer modified, update any 'Last modified: ' in the first 20 lines.
