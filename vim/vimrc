@@ -20,6 +20,7 @@
 "          <C-h> : Focus previous window
 "          <C-l> : Focus next window
 "          <C-b> : Delete buffer
+"          <C-Space> : Autocomplete
 "
 "      Function keys
 "          <F3> : Show hidden characters
