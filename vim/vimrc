@@ -105,6 +105,9 @@
     " The width of the text is 79 characters maximum
         set textwidth=79
 
+    " Mark the column next to textwidth
+        set colorcolumn=+1
+
     " Formatting options
         set formatoptions=
         set formatoptions+=c  " Auto-wrap comments
