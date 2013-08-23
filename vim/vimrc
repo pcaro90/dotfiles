@@ -216,6 +216,11 @@
     filetype plugin indent on
 
 " Color configuration {{{1
+
+    if $COLORTERM == 'gnome-terminal'
+        set t_Co=256
+    endif
+
     set background=dark
 
     " Jellybeans
