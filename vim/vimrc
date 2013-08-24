@@ -20,6 +20,8 @@
 "          <C-h> : Focus previous window
 "          <C-l> : Focus next window
 "          <C-b> : Delete buffer
+"          <C-u> : Expand snippet
+"          <C-y> : List available snippets
 "          <C-Space> : Autocomplete
 "
 "      Function keys
@@ -154,13 +156,8 @@
     " fugitive.vim - A git wrapper so awesome, it should be illegal
     Bundle 'tpope/vim-fugitive'
 
-    " snipMate.vim - Implements some of TextMate's snippets features
-    Bundle 'MarcWeber/vim-addon-mw-utils'
-    Bundle 'tomtom/tlib_vim'
-    Bundle 'garbas/vim-snipmate'
-
-    " vim-snippets - Snippets to be used with Snipmate/UltiSnip
-    Bundle 'honza/vim-snippets'
+    " UltiSnip - Implementation of TextMate's Snippets
+    Bundle 'SirVer/ultisnips'
 
     " Syntastic - Syntax cheching through external syntax checkers
     Bundle 'scrooloose/syntastic'
@@ -346,6 +343,13 @@
 
     " Tagbar
         nnoremap <F10> :TagbarToggle<CR>
+
+    " UltiSnips
+        let g:UltiSnipsExpandTrigger="<C-u>"
+        let g:UltiSnipsJumpForwardTrigger="<C-u>"
+        let g:UltiSnipsListSnippets="<C-y>"
+        " let g:UltiSnipsJumpBackwardTrigger="<C-m>"
+
 
     " neocomplete
         let g:neocomplete#enable_at_startup = 1
