@@ -41,4 +41,4 @@
      ui = auto
 
 [core]
-	excludesfile = ~/.global_ignore
+	excludesfile = ~/.gitignore_global
