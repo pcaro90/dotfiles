@@ -20,8 +20,8 @@
 "          <C-h> : Focus previous window
 "          <C-l> : Focus next window
 "          <C-b> : Delete buffer
-"          <C-u> : Expand snippet
-"          <C-y> : List available snippets
+"          <C-h> : Expand snippet
+"          <C-j> : List available snippets
 "          <C-Space> : Autocomplete
 "
 "      Function keys
@@ -35,7 +35,6 @@
 "          <F10> : Toggle Tagbar
 "
 "      Others
-"          ' and ` exchanged
 "          <Space> : Fold/Unfold
 "          w!! (command mode) : Write file as super user
 "
@@ -156,6 +155,9 @@
     " fugitive.vim - A git wrapper so awesome, it should be illegal
     Bundle 'tpope/vim-fugitive'
 
+    " delimetMate - Inserts matchend bracket, paren, brace or quote
+    Bundle 'Raimondi/delimitMate'
+
     " UltiSnip - Implementation of TextMate's Snippets
     Bundle 'SirVer/ultisnips'
 
@@ -177,11 +179,8 @@
     " jpythonfold.vim - Python fold script
     Bundle 'pcaro90/jpythonfold.vim'
 
-    " Jedi-vim - Awesome Python autocompletion
-    Bundle 'davidhalter/jedi-vim'
-
-    " neocomplete - Next generation completion framework after neocomplcache
-    Bundle 'Shougo/neocomplete.vim'
+    " YouCompleteMe - Code completion engine
+    Bundle 'Valloric/YouCompleteMe'
 
     " ack.vim - Ack (better than grep!) replacement
     Bundle 'mileszs/ack.vim'
@@ -194,9 +193,6 @@
 
     " DeleteTrailingWhitespace - Delete unwanted whitespace at the end of lines
     Bundle 'DeleteTrailingWhitespace'
-
-    " delimetMate - Inserts matchend bracket, paren, brace or quote
-    Bundle 'Raimondi/delimitMate'
 
     " LaTeX-BoX - Lightweight Toolbox for LaTeX
     Bundle 'LaTeX-Box-Team/LaTeX-Box'
@@ -214,6 +210,7 @@
 
 " Color configuration {{{1
 
+    " Confused gnome-terminal is confused
     if $COLORTERM == 'gnome-terminal'
         set t_Co=256
     endif
@@ -265,10 +262,6 @@
 
     " Fast save
         nnoremap <leader>w :write<CR>
-
-    " Inverted "go to mark" and "go to mark line"
-        nnoremap ' `
-        nnoremap ` '
 
     " Fold and unfold code
         nnoremap <Space> za
@@ -328,6 +321,12 @@
         vmap <leader>c gc
         nmap <leader>cc gcc
 
+    " delimitMate
+    let delimitMate_expand_cr = 1
+    if has("autocmd")
+        au FileType python let b:delimitMate_nesting_quotes = ['"']
+    endif
+
     " TeX-PDF
         let g:tex_pdf_map_keys = 0
         if has("autocmd")
@@ -345,40 +344,13 @@
         nnoremap <F10> :TagbarToggle<CR>
 
     " UltiSnips
-        let g:UltiSnipsExpandTrigger="<C-u>"
-        let g:UltiSnipsJumpForwardTrigger="<C-u>"
-        let g:UltiSnipsListSnippets="<C-y>"
-        " let g:UltiSnipsJumpBackwardTrigger="<C-m>"
+        let g:UltiSnipsExpandTrigger="<C-h>"
+        let g:UltiSnipsJumpForwardTrigger="<C-h>"
+        let g:UltiSnipsListSnippets="<C-j>"
 
+    " delimitMate
+        imap <C-\> <Plug>delimitMateS-Tab
 
-    " neocomplete
-        let g:neocomplete#enable_at_startup = 1
-        let g:neocomplete#enable_smart_case = 1
-        let g:neocomplete#enable_auto_select = 0
-
-        if has("autocmd")
-            autocmd FileType python let b:did_ftplugin = 1
-        endif
-
-        let g:neocomplete#force_overwrite_completefunc = 1
-
-        if !exists('g:neocomplete#sources#omni#functions')
-            let g:neocomplete#sources#omni#functions = {}
-        endif
-        let g:neocomplete#sources#omni#functions['python'] = 'jedi#complete'
-
-        if !exists('g:neocomplete#sources#omni#input_patterns')
-            let g:neocomplete#sources#omni#input_patterns = {}
-        endif
-        let g:neocomplete#sources#omni#input_patterns.python = '[^. \t]\.\w*'
-
-    " jedi-vim
-        let g:jedi#auto_initialization = 1
-        let g:jedi#popup_select_first = 0
-        let g:jedi#show_function_definition = 0
-        let g:jedi#popup_on_dot = 0
-        let g:jedi#auto_vim_configuration = 0
-        call jedi#configure_function_definition()
 
 " Extra functions {{{1
     " If buffer modified, update any 'Last modified: ' in the first 20 lines.
@@ -413,9 +385,6 @@
 
         " Python execute
         autocmd FileType python nnoremap <buffer> <F5> :!python %<CR>
-
-        " Comment string for different files
-        autocmd FileType python setlocal commentstring=#\ %s " Caused by did_ftplugin in jedi.vim
 
         augroup LaTeX
             autocmd!
