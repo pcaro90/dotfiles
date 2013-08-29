@@ -1,0 +1,16 @@
+# ---------------------------------------------------
+# Copyright (c)  Pablo Caro. All Rights Reserved.
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
+# bash_profile
+# ---------------------------------------------------
+
+# If not running interactively, exit
+[[ $- != *i* ]] && return
+
+# Start the SSH and GPG agent once logged in
+eval $(keychain --eval)
+
+# Bashrc
+if [ -f ~/.bashrc ] ; then
+    . ~/.bashrc
+fi

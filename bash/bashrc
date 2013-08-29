@@ -4,9 +4,6 @@
 # bashrc
 # ---------------------------------------------------
 
-# If not running interactively, exit
-[[ $- != *i* ]] && return
-
 # Extend path
 export PATH=$PATH:~/bin
 
