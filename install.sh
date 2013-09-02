@@ -69,7 +69,10 @@ function install_bash {
 
     folder="bash"
 
-    # Bash configuration
+    # Bash configuration (login)
+    install_file "bash_profile" $folder
+
+    # Bash configuration (not login)
     install_file "bashrc" $folder
 
     # Bash alias definition
