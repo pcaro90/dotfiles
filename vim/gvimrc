@@ -6,7 +6,7 @@
 
 " Preferences {{{1
     " Font settings
-        set guifont=Inconsolata\ 12
+        set guifont=Hermit\ 11
 
     " GUI options
         set guioptions=

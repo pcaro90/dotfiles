@@ -118,6 +118,10 @@
         set formatoptions+=l  " Long lines are not broken in insert mode
         set formatoptions+=j  " Remove comment leader when joining, if applies
 
+    " Set autocompletion behaviour similar to bash
+        set wildmode=longest,full
+        set wildmenu
+
     " Backspace over autoindent, eol and start of indent.
     " same as ":set backspace=indent,eol,start"
         set backspace=2
@@ -349,7 +353,11 @@
         let g:UltiSnipsListSnippets="<C-j>"
 
     " delimitMate
-        imap <C-\> <Plug>delimitMateS-Tab
+        imap <C-\> <Plug>delimitMateJumpMany
+
+    " Adjust S-Tab mapping in YCM, overwritten by delimitMate
+        inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
 
 
 " Extra functions {{{1
