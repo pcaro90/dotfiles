@@ -24,6 +24,10 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias tree='tree -C'
 
+# Arch aliases
+alias pacman='pacmatic --color=auto'
+alias yao='yaourt'
+
 # ToDo
 alias todo='$EDITOR $HOME/.todo'
 
