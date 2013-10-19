@@ -214,25 +214,17 @@ bar {
 
 # Autostart
 
-## Turn on/off system beep
+# Turn on/off system beep
 exec xset b off &
 
-## Restores wallpaper
+# Restores wallpaper
 exec nitrogen --restore
-
-## Windows composition (shadows, transparent windows)
-# exec cb-compositor --start
 
 # Pnmixer (tray volume controller)
 exec (sleep 5s && pnmixer) &
 
-## Start Dropbox
-# exec (sleep 10s && dropbox start) &
-
-## Start Wireless connection daemon
-# exec (sleep 10s && wicd-client -t) &
+# Start Dropbox
+exec (sleep 10s && dropbox start) &
 
 # Thunar daemon (automount)
 exec thunar --daemon &
-
-
