@@ -4,20 +4,26 @@
 # bash_alias
 # ---------------------------------------------------
 
+# SSH and GPG agents
+alias ssh='eval $(keychain --eval --agents ssh id_rsa) && ssh'
+alias gpg='eval $(keychain --eval --agents gpg 54917E91) && gpg'
+
 # Faster movement to parent paths
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
-# Vim aliases
+# Vim alias
 alias v='vim'
-alias vi='vim'
-alias g='gvim'
 
 # Python aliases
 alias py='python'
+alias py2='python2'
 alias py3='python3'
 alias bpy='bpython'
+
+# Git aliases
+alias g='git'
 
 # Colors
 alias ls='ls --color=auto'
@@ -25,7 +31,8 @@ alias grep='grep --color=auto'
 alias tree='tree -C'
 
 # Arch aliases
-alias pacman='pacmatic --color=auto'
+alias pac='pacmatic --color=auto'
+alias spac='sudo pacmatic --color=auto'
 alias yao='yaourt'
 
 # ToDo

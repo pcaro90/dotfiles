@@ -4,11 +4,21 @@
 # bash_profile
 # ---------------------------------------------------
 
-# If not running interactively, exit
-[[ $- != *i* ]] && return
+# MPD daemon start (if no other user instance exists)
+[ ! -s ~/.mpd/pid ] && mpd
 
-# Start the SSH and GPG agent once logged in
-eval $(keychain --eval)
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+fi
+
+# Ruby gems path
+if which ruby >/dev/null && which gem >/dev/null; then
+    PATH="$(ruby -rubygems -e 'puts Gem.user_dir')/bin:$PATH"
+fi
+
+# Python local path
+export PYTHONPATH=~/.local
 
 # Bashrc
 if [ -f ~/.bashrc ] ; then

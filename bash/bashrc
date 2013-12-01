@@ -4,16 +4,8 @@
 # bashrc
 # ---------------------------------------------------
 
-# Extend path
-export PATH=~/bin:~/.local/bin:$PATH
-
-# Ruby gems path
-if which ruby >/dev/null && which gem >/dev/null; then
-    PATH="$(ruby -rubygems -e 'puts Gem.user_dir')/bin:$PATH"
-fi
-
-# Python local path
-export PYTHONPATH=~/.local
+# If not running interactively, exit
+[[ $- != *i* ]] && return
 
 # Vim as system editor
 export EDITOR=vim
