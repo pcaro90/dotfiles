@@ -355,6 +355,9 @@
     " delimitMate
         imap <C-\> <Plug>delimitMateJumpMany
 
+    " YouCompleteMe
+        let g:ycm_autoclose_preview_window_after_insertion = 1
+
     " Adjust S-Tab mapping in YCM, overwritten by delimitMate
         inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
