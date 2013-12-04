@@ -6,7 +6,7 @@
 
 " Preferences {{{1
     " Font settings
-        set guifont=Hermit\ 11
+        set guifont=Hermit\ 10
 
     " GUI options
         set guioptions=
