@@ -22,7 +22,7 @@ TEXT
     { "full_text" : "${if_mpd_playing}${mpd_status}: ${mpd_smart} ${mpd_elapsed}/${mpd_length}${endif}", "color" : "\#0055aa"},
     { "full_text" : "U ${uptime}" },
     # { "full_text" : "W ${wireless_link_qual_perc wlan0}%", "color" : ${if_match ${wireless_link_qual_perc wlan0}<=30}"\#cc0000"${else}${if_match ${wireless_link_qual_perc wlan0}<=60}"\#ff8000"${else}"\#00bb00"${endif}${endif} },
-    { "full_text" : "D ${downspeedf enp13s0}K U ${upspeedf enp13s0}K"},
+    { "full_text" : "D ${downspeedf enp15s0}K U ${upspeedf enp15s0}K"},
     { "full_text" : "C ${cpu}%", "color" : ${if_match ${cpu}>75}"\#cc0000"${else}${if_match ${cpu}>25}"\#ff8000"${else}"\#00bb00"${endif}${endif} },
     { "full_text" : "R ${memperc}%", "color" : ${if_match ${memperc}>75}"\#cc0000"${else}${if_match ${memperc}>50}"\#ff8000"${else}"\#00bb00"${endif}${endif} },
     { "full_text" : "/ ${fs_used_perc /}%", "color" : ${if_match ${fs_used_perc /}>75}"\#cc0000"${else}${if_match ${fs_used_perc /}>30}"\#ff8000"${else}"\#00bb00"${endif} },
