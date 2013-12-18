@@ -29,6 +29,6 @@ TEXT
     { "full_text" : "~ ${fs_used_perc /home}%", "color" : ${if_match ${fs_used_perc /home}>75}"\#cc0000"${else}${if_match ${fs_used_perc /home}>30}"\#ff8000"${else}"\#00bb00"${endif} },
     { "full_text" : "A1 ${fs_used_perc /mnt/Almacenamiento}%", "color" : ${if_match ${fs_used_perc /mnt/Almacenamiento}>75}"\#cc0000"${else}${if_match ${fs_used_perc /mnt/Almacenamiento}>50}"\#ff8000"${else}"\#00bb00"${endif}${endif} },
     { "full_text" : "A2 ${fs_used_perc /mnt/Almacenamiento2}%", "color" : ${if_match ${fs_used_perc /mnt/Almacenamiento2}>75}"\#cc0000"${else}${if_match ${fs_used_perc /mnt/Almacenamiento2}>50}"\#ff8000"${else}"\#00bb00"${endif}${endif} },
-    { "full_text" : "${time %Y/%m/%d %k:%M}" }
+    { "full_text" : "${time %Y/%m/%d %a %k:%M}" }
 
 ],
