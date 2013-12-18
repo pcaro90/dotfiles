@@ -1,11 +1,14 @@
 # ---------------------------------------------------
 # Copyright (c)  Pablo Caro. All Rights Reserved.
 # Pablo Caro <me@pcaro.es> - http://pcaro.es/
-# bash_profile
+# profile
 # ---------------------------------------------------
 
 # MPD daemon start (if no other user instance exists)
 [ ! -s ~/.mpd/pid ] && mpd
+
+# Start agents
+eval $(keychain --eval --agents ssh,gpg)
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
@@ -21,6 +24,6 @@ fi
 export PYTHONPATH=~/.local
 
 # Bashrc
-if [ -f ~/.bashrc ] ; then
-    . ~/.bashrc
+if [ -f ~/.zshrc ] ; then
+    . ~/.zshrc
 fi
