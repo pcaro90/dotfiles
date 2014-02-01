@@ -394,6 +394,9 @@
         " Python execute
         autocmd FileType python nnoremap <buffer> <F5> :!python %<CR>
 
+        " Javascript execute
+        autocmd Filetype javascript setlocal tabstop=2 softtabstop=2 shiftwidth=2
+
         augroup LaTeX
             autocmd!
             autocmd FileType tex imap <buffer> á \'a
@@ -409,4 +412,5 @@
             autocmd FileType tex imap <buffer> ñ \~n
             autocmd FileType tex imap <buffer> Ñ \~N
         augroup end
+
     endif
