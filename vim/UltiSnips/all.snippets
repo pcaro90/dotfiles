@@ -4,33 +4,58 @@
 # all.snippets
 # ---------------------------------------------------
 
+# Global functions
+global !p
+import vim
+
+## Open comment
+def oc():
+    b, e = vim.eval("&commentstring").split( '%s' )
+    if b and b[-1] != ' ': b += ' '
+    return b
+
+## Close comment
+def cc():
+    b, e = vim.eval("&commentstring").split( '%s' )
+    if e and e[0] != ' ': e = ' ' + e
+    return e
+
+## Commented
+def com(s):
+    b = oc()
+    e = cc()
+    ss = b + s + e
+    if ss[-1] == ' ': ss = ss[:-1]
+    return ss
+endglobal
+
+
 # Global snippets
 
-snippet he "Simple header"
-----------------------------------------------------------
-Copyright (c) `date +%Y` Pablo Caro. All Rights Reserved.
-Pablo Caro <me@pcaro.es> - https://pcaro.es/
-`!v expand("%:t")`
-----------------------------------------------------------
+snippet he "Simple header" b!
+`!p snip.rv = com('-' * 70)`
+`!p snip.rv = oc() + 'Copyright (c) '``date +%Y` Pablo Caro. All Rights Reserved.`!p snip.rv = cc()`
+`!p snip.rv = com('Pablo Caro <me@pcaro.es> - https://pcaro.es/')`
+`!p snip.rv = com(fn) + '\n' + com('-' * 70)`
 endsnippet
 
-snippet heg "GPL header"
-----------------------------------------------------------------------
-Copyright (c) `date +%Y` Pablo Caro
-Pablo Caro <me@pcaro.es> - https://pcaro.es/
-`!v expand("%:t")`
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-----------------------------------------------------------------------
+snippet heg "GPL header" b!
+`!p snip.rv = com('-' * 70)`
+`!p snip.rv = oc() + 'Copyright (c) '``date +%Y` Pablo Caro. All Rights Reserved.`!p snip.rv = cc()`
+`!p snip.rv = com('Pablo Caro <me@pcaro.es> - https://pcaro.es/')`
+`!p snip.rv = com(fn)`
+`!p snip.rv = com('')`
+`!p snip.rv = com('This program is free software: you can redistribute it and/or modify')`
+`!p snip.rv = com('it under the terms of the GNU General Public License as published by')`
+`!p snip.rv = com('the Free Software Foundation, either version 3 of the License, or')`
+`!p snip.rv = com('(at your option) any later version.')`
+`!p snip.rv = com('')`
+`!p snip.rv = com('This program is distributed in the hope that it will be useful,')`
+`!p snip.rv = com('but WITHOUT ANY WARRANTY; without even the implied warranty of')`
+`!p snip.rv = com('MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the')`
+`!p snip.rv = com('GNU General Public License for more details.')`
+`!p snip.rv = com('')`
+`!p snip.rv = com('You should have received a copy of the GNU General Public License')`
+`!p snip.rv = com('along with this program.  If not, see <http://www.gnu.org/licenses/>.')`
+`!p snip.rv = com('-' * 70)`
 endsnippet
