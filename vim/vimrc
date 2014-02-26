@@ -321,6 +321,7 @@
         nmap <leader>c gc
         vmap <leader>c gc
         nmap <leader>cc gcc
+        au FileType c,cpp set commentstring=//\ %s
 
     " delimitMate
     let delimitMate_expand_cr = 1
