@@ -222,10 +222,11 @@ bar {
 
 bar {
     id bar-2
+    status_command $HOME/.i3/conky-i3bar-empty
     position top
     font pango:Hermit 10
     output DFP9
-    tray_output none
+    tray_output None
 }
 
 # Autostart
@@ -241,6 +242,9 @@ exec (sleep 5s && pnmixer) &
 
 # Start Dropbox
 exec (sleep 10s && dropboxd) &
+
+# Start ownCloud
+exec (sleep 10s && owncloud) &
 
 # Thunar daemon (automount)
 exec thunar --daemon &
