@@ -418,4 +418,11 @@
         " License file type
         autocmd BufEnter LICENSE set filetype=license
 
+        " Gitignore file type
+        augroup Gitignore
+            autocmd!
+            autocmd BufEnter .gitignore set filetype=gitignore
+            autocmd FileType gitignore set commentstring=#%s
+        augroup end
+
     endif
