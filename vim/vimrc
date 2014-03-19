@@ -315,6 +315,7 @@
         nnoremap <F6> :SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
 
         let g:syntastic_python_checkers = ['flake8', 'python', 'pep257']
+        let g:syntastic_php_checkers = ['php', 'phpcs', 'phpmd']
 
     " commentary.vim
     " NOTE: These mappings HAVE to allow recursive mapping
