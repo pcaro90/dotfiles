@@ -6,13 +6,14 @@
 "
 "   Mappings summary {{{1
 "      Leader
-"          ,v : Edit vimrc
-"          ,vv : Close and source vimrc
-"          ,w : Write file (:w)
-"          ,fa : Fold all
-"          ,uf : Unfold all
-"          ,c : gc (commentary.vim)
-"          ,cc : gcc (commentary.vim)
+"          <leader> v : Edit vimrc
+"          <leader> vv : Close and source vimrc
+"          <leader> w : Write file (:w)
+"          <leader> f : Fold/Unfold
+"          <leader> fa : Fold all
+"          <leader> uf : Unfold all
+"          <leader> c : gc (commentary.vim)
+"          <leader> cc : gcc (commentary.vim)
 "
 "      Ctrl
 "          <C-j> : Next fold group
@@ -35,7 +36,6 @@
 "          <F10> : Toggle Tagbar
 "
 "      Others
-"          <Space> : Fold/Unfold
 "          w!! (command mode) : Write file as super user
 "
 
@@ -253,7 +253,7 @@
 
 " Mappings {{{1
     " Mapping leader
-        let mapleader=","
+        let mapleader=" "
 
     " Edit vimrc file
         nnoremap <leader>v :edit $MYVIMRC<CR>
@@ -265,7 +265,7 @@
         nnoremap <leader>w :write<CR>
 
     " Fold and unfold code
-        nnoremap <Space> za
+        nnoremap <leader>f za
         nnoremap <leader>fa zM
         nnoremap <leader>uf zR
 
