@@ -222,7 +222,6 @@ bar {
 
 bar {
     id bar-2
-    status_command $HOME/.i3/conky-i3bar-empty
     position top
     font pango:Hermit 10
     output DFP9
