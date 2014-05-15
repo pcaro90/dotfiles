@@ -23,9 +23,6 @@ fi
 # Python local path
 export PYTHONPATH=~/.local
 
-# Android tools path
-PATH="$HOME/android-sdk-linux/platform-tools:$HOME/android-sdk-linux/tools:$PATH"
-
 # ZSHrc
 if [ -f ~/.zshrc ] ; then
     . ~/.zshrc
