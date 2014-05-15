@@ -23,6 +23,11 @@ fi
 # Python local path
 export PYTHONPATH=~/.local
 
+# Cabal path
+if [ -d "$HOME/.cabal/bin" ] ; then
+    PATH="$HOME/.cabal/bin:$PATH"
+fi
+
 # ZSHrc
 if [ -f ~/.zshrc ] ; then
     . ~/.zshrc
