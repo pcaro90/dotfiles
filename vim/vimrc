@@ -138,75 +138,76 @@
 " Vundle configuration {{{1
     filetype off
 
-    set rtp+=~/.vim/bundle/vundle/
-    call vundle#rc()
+    set rtp+=~/.vim/bundle/Vundle.vim
+    call vundle#begin()
 
     " let Vundle manage Vundle
-    Bundle 'gmarik/vundle'
+    Plugin 'gmarik/Vundle.vim'
 
     " repeat.vim - Enable repeating supported plugin maps with "."
-    Bundle 'tpope/vim-repeat'
+    Plugin 'tpope/vim-repeat'
 
     " unimpaired.vim - Pairs of handy bracket mappings
-    Bundle 'tpope/vim-unimpaired'
+    Plugin 'tpope/vim-unimpaired'
 
     " commentary.vim - Comment stuff
-    Bundle 'tpope/vim-commentary'
+    Plugin 'tpope/vim-commentary'
 
     " surround.vim - quoting/parenthesizing made simple
-    Bundle 'tpope/vim-surround'
+    Plugin 'tpope/vim-surround'
 
     " fugitive.vim - A git wrapper so awesome, it should be illegal
-    Bundle 'tpope/vim-fugitive'
+    Plugin 'tpope/vim-fugitive'
 
     " delimetMate - Inserts matchend bracket, paren, brace or quote
-    Bundle 'Raimondi/delimitMate'
+    Plugin 'Raimondi/delimitMate'
 
     " UltiSnip - Implementation of TextMate's Snippets
-    Bundle 'SirVer/ultisnips'
+    Plugin 'SirVer/ultisnips'
 
     " Syntastic - Syntax cheching through external syntax checkers
-    Bundle 'scrooloose/syntastic'
+    Plugin 'scrooloose/syntastic'
 
     " NERDtree - A tree explorer plugin
-    Bundle 'scrooloose/nerdtree'
+    Plugin 'scrooloose/nerdtree'
 
     " Tagbar - Class outline viewer
-    Bundle 'majutsushi/tagbar'
+    Plugin 'majutsushi/tagbar'
 
     " python-syntax - Python syntax highlighting
-    Bundle 'hdima/python-syntax'
+    Plugin 'hdima/python-syntax'
 
     " jpythonfold.vim - Python fold script
-    Bundle 'pcaro90/jpythonfold.vim'
+    Plugin 'pcaro90/jpythonfold.vim'
 
     " YouCompleteMe - Code completion engine
-    Bundle 'Valloric/YouCompleteMe'
+    Plugin 'Valloric/YouCompleteMe'
 
     " ack.vim - Ack (better than grep!) replacement
-    Bundle 'mileszs/ack.vim'
+    Plugin 'mileszs/ack.vim'
 
     " vim-markdown - Markdown syntax highlight for Vim editor
-    Bundle 'hallison/vim-markdown'
+    Plugin 'hallison/vim-markdown'
 
     " ShowTrailingWhitespace - Detect unwanted whitespace at the end of lines
-    Bundle 'ShowTrailingWhitespace'
+    Plugin 'ShowTrailingWhitespace'
 
     " DeleteTrailingWhitespace - Delete unwanted whitespace at the end of lines
-    Bundle 'DeleteTrailingWhitespace'
+    Plugin 'DeleteTrailingWhitespace'
 
     " LaTeX-BoX - Lightweight Toolbox for LaTeX
-    Bundle 'LaTeX-Box-Team/LaTeX-Box'
+    Plugin 'LaTeX-Box-Team/LaTeX-Box'
 
     " TeX-PDF - Lightweight TeX-to-PDF development support
-    Bundle 'TeX-PDF'
+    Plugin 'TeX-PDF'
 
     " Jellybeans color scheme
-    Bundle 'nanotech/jellybeans.vim'
+    Plugin 'nanotech/jellybeans.vim'
 
     " molokai color scheme
-    Bundle 'tomasr/molokai'
+    Plugin 'tomasr/molokai'
 
+    call vundle#end()
     filetype plugin indent on
 
 " Color configuration {{{1
