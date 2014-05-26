@@ -23,7 +23,7 @@
 "          <C-l> : Focus next window
 "          <C-b> : Delete buffer
 "          <C-h> : Expand snippet
-"          <C-j> : List available snippets
+"          <C-y> : List available snippets
 "          <C-Space> : Autocomplete
 "
 "      Function keys
@@ -226,9 +226,9 @@
         endif
         colorscheme jellybeans
 
-    " Molokai
-        let g:molokai_original=1
-        " colorscheme molokai
+    " " Molokai
+    "     let g:molokai_original=1
+    "     colorscheme molokai
 
 
 " Status line {{{1
@@ -352,7 +352,7 @@
     " UltiSnips
         let g:UltiSnipsExpandTrigger="<C-h>"
         let g:UltiSnipsJumpForwardTrigger="<C-h>"
-        let g:UltiSnipsListSnippets="<C-j>"
+        let g:UltiSnipsListSnippets="<C-y>"
 
     " delimitMate
         imap <C-\> <Plug>delimitMateJumpMany
