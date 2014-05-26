@@ -9,7 +9,8 @@
 "          <leader> v : Edit vimrc
 "          <leader> vv : Close and source vimrc
 "          <leader> w : Write file (:w)
-"          <leader> f : Fold/Unfold
+"          <leader> h : Fold
+"          <leader> l : Unfold
 "          <leader> fa : Fold all
 "          <leader> uf : Unfold all
 "          <leader> c : gc (commentary.vim)
@@ -266,7 +267,8 @@
         nnoremap <leader>w :write<CR>
 
     " Fold and unfold code
-        nnoremap <leader>f za
+        nnoremap <leader>l zo
+        nnoremap <leader>h zc
         nnoremap <leader>fa zM
         nnoremap <leader>uf zR
 
