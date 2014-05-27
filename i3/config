@@ -260,6 +260,9 @@ exec xset b off &
 # Restores wallpaper
 exec nitrogen --restore
 
+# Start compositor
+exec compton -b
+
 # Pnmixer (tray volume controller)
 exec (sleep 5s && pnmixer) &
 
@@ -270,4 +273,4 @@ exec (sleep 10s && dropboxd) &
 exec (sleep 10s && owncloud) &
 
 # Thunar daemon (automount)
-exec thunar --daemon &
+exec (sleep 15s && thunar --daemon) &
