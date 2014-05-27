@@ -186,7 +186,7 @@ bindsym $mod+F12 exec amixer set Master 3dB+ unmute
 client.focused          #444444 #222222 #ffffff #999999
 client.focused_inactive #333333 #666666 #ffffff #484e50
 client.unfocused        #333333 #666666 #ffffff #484e50
-client.urgent           #2f343a #900000 #ffffff #900000
+client.urgent           #2f343a #d75f5f #ffffff #d75f5f
 
 # Workspaces configuration between screens
 workspace $1 output DFP10
@@ -218,6 +218,18 @@ bar {
     font pango:Hermit 10
     output DFP10
     tray_output DFP10
+
+    colors {
+        background #151515
+        statusline #ffffff
+        separator #666666
+
+        focused_workspace  #87d7ff #5f87ff #ffffff
+        active_workspace   #333333 #666666 #ffffff
+        inactive_workspace #333333 #222222 #888888
+        urgent_workspace   #ffd75f #d75f5f #ffffff
+    }
+
 }
 
 bar {
@@ -226,6 +238,18 @@ bar {
     font pango:Hermit 10
     output DFP9
     tray_output None
+
+    colors {
+        background #151515
+        statusline #ffffff
+        separator #666666
+
+        focused_workspace  #87d7ff #5f87ff #ffffff
+        active_workspace   #333333 #666666 #ffffff
+        inactive_workspace #333333 #222222 #888888
+        urgent_workspace   #ffd75f #d75f5f #ffffff
+    }
+
 }
 
 # Autostart
