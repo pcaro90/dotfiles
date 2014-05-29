@@ -203,7 +203,7 @@ workspace $10 output DFP9
 # Specific window behaviour
 assign [class="Firefox"] $2
 assign [class="Pidgin"] $3
-assign [class="Hotot"] $3
+assign [class="Polly"] $3
 assign [class="Thunderbird"] $9
 assign [class="Exaile"] $10
 
@@ -258,7 +258,7 @@ bar {
 exec xset b off &
 
 # Restores wallpaper
-exec nitrogen --restore
+exec eval $(cat ~/.fehbg)
 
 # Start compositor
 exec compton -b
