@@ -21,6 +21,7 @@ bindkey -v
 # History options
 setopt HIST_IGNORE_DUPS
 setopt EXTENDED_HISTORY
+setopt SHARE_HISTORY
 HISTSIZE=2000
 SAVEHIST=2000
 HISTFILE=~/.zhistory
