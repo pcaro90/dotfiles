@@ -260,9 +260,6 @@ exec xset b off &
 # Restores wallpaper
 exec eval $(cat ~/.fehbg)
 
-# Start compositor
-exec compton -b
-
 # Pnmixer (tray volume controller)
 exec (sleep 5s && pnmixer) &
 
