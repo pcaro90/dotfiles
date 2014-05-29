@@ -1,0 +1,54 @@
+# ---------------------------------------------------
+# Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
+# zsh_alias
+# ---------------------------------------------------
+
+# SSH and GPG agents
+alias ssh='eval $(keychain --eval --agents ssh id_rsa) && ssh'
+alias gpg='eval $(keychain --eval --agents gpg 54917E91) && gpg'
+
+# Faster movement to parent paths
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Vim alias
+alias v='vim'
+
+# Python aliases
+alias py='python'
+alias py2='python2'
+alias py3='python3'
+alias bpy='bpython'
+
+# Git alias
+alias g='git'
+
+# Ranger alias
+alias r='ranger'
+
+# Colors
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias tree='tree -C'
+
+# Arch aliases
+alias pac='pacmatic --color=auto'
+alias spac='sudo pacmatic --color=auto'
+alias yao='yaourt'
+
+# ToDo
+alias todo='$EDITOR $HOME/.todo'
+
+# Connection speed test
+alias speedtest='curl http://cachefly.cachefly.net/100mb.test > /dev/null'
+
+# dd progress. dd prints the current speed and progress.
+alias ddp='sudo kill -USR1 `pgrep "^dd$"`'
+
+# Perl -pie regular expression substitution, without backup.
+alias pie='perl -pi -e'
+
+# Perl -pie regular expression substitution, with backup.
+alias pieb='perl -pi.bak -e'

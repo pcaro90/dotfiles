@@ -1,0 +1,111 @@
+# ---------------------------------------------------
+# Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
+# zsh_prompt
+# ---------------------------------------------------
+# From https://github.com/slashbeast/things/blob/master/configs/DOTzshrc
+# ---------------------------------------------------
+
+# # Fancy prompt.
+# if over_ssh && [ -z "${TMUX}" ]; then
+#         prompt_is_ssh='%F{blue}[%F{red}SSH%F{blue}] '
+# elif over_ssh; then
+#         prompt_is_ssh='%F{blue}[%F{253}SSH%F{blue}] '
+# else
+#         unset prompt_is_ssh
+# fi
+
+setopt PROMPT_SUBST
+
+function lprompt_status() {
+    status_string=''
+
+    # Error code
+    if [ $RETVAL -ne 0 ]; then
+        status_string+="%F{red}$RETVAL%f"
+    fi
+
+    # Background jobs
+    if [ $(jobs -l | wc -l) -gt 0 ]; then
+        status_string+="%F{blue}B%f"
+    fi
+
+    # Surrounded by brackets
+    if [ -n "$status_string" ]; then
+        status_string="[$status_string] "
+    fi
+
+    echo -n "$status_string"
+}
+
+function build_lprompt() {
+    RETVAL="$?"
+
+    # Background
+    echo -n "%K{235}"
+
+    # Status
+    lprompt_status
+
+    # Username and hostname
+    echo -n "[%B%F{green}%n%f@%F{yellow}%m%f] "
+
+    # Current dir
+    echo -n "%~ "
+
+    # End
+    echo -en "%k%F{235}\ue0b0 %f"
+    echo -n "%b%k%f"
+}
+
+function parse_git_branch() {
+    (git symbolic-ref -q HEAD || git name-rev --name-only --no-undefined --always HEAD) 2> /dev/null
+}
+
+function git_status() {
+    git_status_string=''
+
+    # Untracked
+    if [[ -n $(git ls-files --other --exclude-standard 2> /dev/null) ]]; then
+        git_status_string+="%F{red}U%f"
+    fi
+
+    # Modified
+    if ! git diff --quiet 2> /dev/null; then
+        git_status_string+="%F{blue}M%f"
+    fi
+
+    # Clean
+    if [[ -z $git_status_string ]]; then
+        git_status_string="%F{green}C%f"
+    fi
+
+    # Surrounded by brackets
+    if [ -n "$git_status_string" ]; then
+        git_status_string="[$git_status_string] "
+    fi
+
+    echo -n "$git_status_string"
+}
+
+function git_prompt() {
+    local git_where="$(parse_git_branch)"
+    if [ -n "$git_where" ]; then
+        echo -ne "\ue0a0 ${git_where#(refs/heads/|tags/)} "
+        git_status
+    fi
+}
+
+function build_rprompt() {
+    # Background
+    echo -en "%k%F{235}\ue0b2%f"
+    echo -n "%K{235} "
+
+    git_prompt
+
+    echo -n ":)"
+    echo -n "%b%k%f"
+}
+
+PROMPT='$(build_lprompt)'
+RPROMPT='$(build_rprompt)'
