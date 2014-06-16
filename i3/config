@@ -32,8 +32,10 @@ font pango:Hermit 10
 floating_modifier $mod
 
 # start a terminal
-# bindsym $mod+Return exec i3-sensible-terminal
-bindsym $mod+Return exec lilyterm
+bindsym $mod+Return exec urxvtcd
+
+# start a terminal with ranger
+bindsym $mod+backslash exec urxvtcd -e ranger
 
 # kill focused window
 bindsym $mod+q kill
@@ -209,6 +211,8 @@ assign [class="Exaile"] $10
 
 for_window [class="fontforge"] floating enable
 
+# Layout configuration
+exec --no-startup-id $HOME/.i3/restore_layout.sh
 
 # i3bar configuration
 bar {

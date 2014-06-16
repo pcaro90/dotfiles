@@ -1,0 +1,62 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "normal",
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1028,
+       "width": 829,
+       "x": 0,
+       "y": 0
+    },
+    "name": "Polly",
+    "percent": 0.433333333333333,
+    "swallows": [
+       {
+       "class": "^Polly$",
+       "instance": "^polly$"
+       }
+    ],
+    "type": "con"
+}
+
+{
+    "border": "normal",
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1028,
+       "width": 251,
+       "x": 833,
+       "y": 78
+    },
+    "name": "Buddy List",
+    "percent": 0.133333333333333,
+    "swallows": [
+       {
+       "class": "^Pidgin$",
+       "instance": "^Pidgin$",
+       "window_role": "^buddy_list$"
+       }
+    ],
+    "type": "con"
+}
+
+{
+    "border": "normal",
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1028,
+       "width": 828,
+       "x": 0,
+       "y": 0
+    },
+    "percent": 0.433333333333333,
+    "swallows": [
+       {
+       "class": "^Pidgin$",
+       "instance": "^Pidgin$",
+       "window_role": "^conversation$"
+       }
+    ],
+    "type": "con"
+}
+
