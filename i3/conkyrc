@@ -20,7 +20,7 @@ TEXT
 
 [
     { "full_text" : "${if_mpd_playing}${mpd_status}: ${exec mpc current | sed 's/"/\\"/g'} ${mpd_elapsed}/${mpd_length}${endif}", "color" : "\#5f87ff"},
-    { "full_text" : "D ${downspeedf enp15s0}K U ${upspeedf enp15s0}K"},
+    { "full_text" : "D ${downspeedf enp13s0}K U ${upspeedf enp13s0}K"},
     { "full_text" : "C ${cpu}%", "color" : ${if_match ${cpu}>75}"\#cf6a4c"${else}${if_match ${cpu}>25}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
     { "full_text" : "R ${memperc}%", "color" : ${if_match ${memperc}>75}"\#cf6a4c"${else}${if_match ${memperc}>50}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
     { "full_text" : "/ ${fs_used_perc /}%", "color" : ${if_match ${fs_used_perc /}>75}"\#cf6a4c"${else}${if_match ${fs_used_perc /}>30}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
