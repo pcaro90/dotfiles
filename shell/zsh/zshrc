@@ -44,12 +44,6 @@ if [ -f ~/.zsh_prompt ] ; then
     . ~/.zsh_prompt
 fi
 
-# Terminal colors
-COLORSCHEME="$HOME/dotfiles/shell/colorscheme.sh"
-if [ -f $COLORSCHEME ] ; then
-    . $COLORSCHEME
-fi
-
 # Bind special keys
 typeset -A key
 
