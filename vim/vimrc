@@ -166,6 +166,9 @@
     " UltiSnip - Implementation of TextMate's Snippets
     Plugin 'SirVer/ultisnips'
 
+    " Snippets
+    Plugin 'honza/vim-snippets'
+
     " Syntastic - Syntax cheching through external syntax checkers
     Plugin 'scrooloose/syntastic'
 
