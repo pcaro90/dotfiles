@@ -55,3 +55,7 @@ alias pie='perl -pi -e'
 
 # Perl -pie regular expression substitution, with backup.
 alias pieb='perl -pi.bak -e'
+
+# Fast calculations
+function my-calc { echo $* | bc -l }
+alias c='noglob my-calc'
