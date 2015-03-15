@@ -34,8 +34,8 @@ floating_modifier $mod
 # start a terminal
 bindsym $mod+Return exec terminator
 
-# start a terminal with ranger
-bindsym $mod+backslash exec urxvtcd -e ranger
+# start a file explorer
+bindsym $mod+backslash exec thunar
 
 # kill focused window
 bindsym $mod+q kill
