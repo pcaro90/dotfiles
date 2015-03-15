@@ -163,6 +163,19 @@ mode "resize" {
     bindsym Escape mode "default"
 }
 
+# Quick open mode
+bindsym $mod+d mode "qopen"
+mode "qopen" {
+    bindsym f exec firefox, mode "default"
+    bindsym s exec polly; exec pidgin, mode "default"
+    bindsym t exec thunderbird, mode "default"
+
+    bindsym a exec --no-startup-id polly; exec --no-startup-id pidgin; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
 # Media keys
 bindsym XF86AudioMute exec amixer set Master toggle
 bindsym XF86AudioLowerVolume exec amixer set Master 3dB- unmute
