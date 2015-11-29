@@ -45,7 +45,7 @@ if [ -f ~/.zsh_prompt ] ; then
 fi
 
 # Source "command not found" hook
-source /usr/share/doc/pkgfile/command-not-found.zsh
+source /etc/profile.d/cnf.sh
 
 # Bind special keys
 typeset -A key
