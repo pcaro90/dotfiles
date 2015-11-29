@@ -56,3 +56,8 @@ alias pieb='perl -pi.bak -e'
 # Fast calculations
 function my-calc { echo $* | bc -l }
 alias c='noglob my-calc'
+
+# Custom locate
+function my-locate { ag $* $HOME/.locatedb}
+alias locate='noglob my-locate'
+alias updatedb="find / >$HOME/.locatedb 2>/dev/null"
