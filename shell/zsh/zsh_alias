@@ -38,9 +38,6 @@ alias pac='pacman --color=auto'
 alias spac='sudo pacman --color=auto'
 alias yao='yaourt'
 
-# Ag (silver searcher)
-alias ag='ag --smart-case'
-
 # ToDo
 alias todo='$EDITOR $HOME/.todo'
 
