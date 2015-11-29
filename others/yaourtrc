@@ -5,4 +5,4 @@
 # ---------------------------------------------------
 
 # Use pacmatic instead of pacman
-PACMAN="pacmatic"
+PACMAN="pacman"

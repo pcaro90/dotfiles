@@ -34,8 +34,8 @@ alias grep='grep --color=auto'
 alias tree='tree -C'
 
 # Arch aliases
-alias pac='pacmatic --color=auto'
-alias spac='sudo pacmatic --color=auto'
+alias pac='pacman --color=auto'
+alias spac='sudo pacman --color=auto'
 alias yao='yaourt'
 
 # Ag (silver searcher)
