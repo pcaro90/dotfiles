@@ -7,6 +7,15 @@
 # If not running interactively, exit
 [[ $- != *i* ]] && return
 
+# Adjust Termite behavior
+if [[ $TERM == xterm-termite ]]; then
+    . /etc/profile.d/vte.sh
+    __vte_osc7
+
+    # DIRTY
+    export TERM=xterm-256color
+fi
+
 # Vim as system editor
 export EDITOR=vim
 

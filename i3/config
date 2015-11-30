@@ -32,7 +32,7 @@ font pango:Hermit 10
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec terminator
+bindsym $mod+Return exec termite
 
 # start a file explorer
 bindsym $mod+backslash exec thunar
