@@ -1,0 +1,24 @@
+[options]
+font = Hermit 10
+allow_bold = false
+clickable_url = true
+browser = firefox
+scrollback_lines = 20000
+
+[colors]
+color0 = #121212
+color1 = #d75f5f
+color2 = #87af5f
+color3 = #ffd75f
+color4 = #5f87ff
+color5 = #af5faf
+color6 = #87dfff
+color7 = #d7d7d7
+color8 = #3a3a3a
+color9 = #d75f5f
+color10 = #87af5f
+color11 = #ffd75f
+color12 = #5f87ff
+color13 = #af5faf
+color14 = #87dfff
+color15 = #e4e4e4
