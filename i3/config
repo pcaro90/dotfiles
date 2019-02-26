@@ -261,17 +261,23 @@ bar {
 # Turn on/off system beep
 exec xset b off &
 
-# Restores wallpaper
-exec eval $(cat ~/.fehbg)
+# Redshift
+exec --no-startup-id (redshift-gtk) &
 
 # Pnmixer (tray volume controller)
 exec (sleep 5s && pnmixer) &
 
+# Start clipboard manager
+exec (sleep 5s && parcellite --daemon) &
+
+# Start Bluetooth manager
+exec (sleep 5s && blueberry-tray) &
+
 # Start Dropbox
 exec (sleep 10s && dropboxd) &
 
-# Start ownCloud
-exec (sleep 10s && owncloud) &
+# Start Nextcloud
+exec (sleep 10s && nextcloud) &
 
 # Thunar daemon (automount)
 exec (sleep 15s && thunar --daemon) &
