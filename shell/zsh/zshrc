@@ -38,6 +38,11 @@ HISTFILE=~/.zhistory
 # Extended patterns
 setopt EXTENDED_GLOB
 
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$HOME/tools:$HOME/.local/bin:$HOME/go/bin:/home/pcaro/.gem/ruby/2.6.0/bin:$PATH"
+fi
+
 # Aliases
 if [ -f ~/.zsh_alias ] ; then
     . ~/.zsh_alias
