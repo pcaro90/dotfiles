@@ -189,16 +189,16 @@ client.unfocused        #333333 #666666 #ffffff #484e50
 client.urgent           #2f343a #d75f5f #ffffff #d75f5f
 
 # Workspaces configuration between screens
-workspace $1 output DFP10
-workspace $2 output DFP10
-workspace $3 output DFP9
-workspace $4 output DFP10
-workspace $5 output DFP10
-workspace $6 output DFP10
-workspace $7 output DFP9
-workspace $8 output DFP9
-workspace $9 output DFP9
-workspace $10 output DFP9
+workspace $1 output DP-4
+workspace $2 output DP-4
+workspace $3 output HDMI-0
+workspace $4 output DP-4
+workspace $5 output DP-4
+workspace $6 output DP-4
+workspace $7 output HDMI-0
+workspace $8 output HDMI-0
+workspace $9 output HDMI-0
+workspace $10 output HDMI-0
 
 # Specific window behaviour
 assign [class="Firefox"] $2
