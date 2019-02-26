@@ -204,9 +204,10 @@ workspace $10 output HDMI-0
 assign [class="Firefox"] $2
 assign [class="Google-chrome"] $2
 assign [class="Pidgin"] $3
-assign [class="Polly"] $3
+assign [class="Corebird"] $3
 assign [class="Thunderbird"] $9
 assign [class="Exaile"] $10
+assign [class="KeePass2"] $8
 
 for_window [class="fontforge"] floating enable
 
