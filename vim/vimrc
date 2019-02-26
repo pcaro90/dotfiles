@@ -319,8 +319,9 @@
 
 " Plugins options and mappings {{{1
     " DeleteTrailingWhitespace
-        let g:DeleteTrailingWhitespace = 1
-        let g:DeleteTrailingWhitespace_Action = 'ask'
+        let g:DeleteTrailingWhitespace = 0
+        " let g:DeleteTrailingWhitespace_Action = 'ask'
+        nnoremap <Leader>d :<C-u>%DeleteTrailingWhitespace<CR>
 
     " Syntastic
         nnoremap <F6> :SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
