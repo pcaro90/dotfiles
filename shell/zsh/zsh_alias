@@ -5,7 +5,7 @@
 # ---------------------------------------------------
 
 # SSH and GPG agents
-alias ssh='eval $(keychain --eval --agents ssh id_rsa) && ssh'
+alias ssh='eval $(keychain --eval --agents ssh id_rsa landofooo) && ssh'
 alias gpg='eval $(keychain --eval --agents gpg 54917E91) && gpg'
 
 # Faster movement to parent paths
