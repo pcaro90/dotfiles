@@ -210,6 +210,9 @@
     " TeX-PDF - Lightweight TeX-to-PDF development support
     Plugin 'TeX-PDF'
 
+    " Vim-Go - Go development plugin for Vim
+    Plugin 'fatih/vim-go'
+
     " Jellybeans color scheme
     Plugin 'nanotech/jellybeans.vim'
 
