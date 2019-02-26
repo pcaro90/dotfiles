@@ -166,11 +166,11 @@ mode "resize" {
 # Quick open mode
 bindsym $mod+d mode "qopen"
 mode "qopen" {
-    bindsym f exec firefox, mode "default"
-    bindsym s exec polly; exec pidgin, mode "default"
+    bindsym f exec google-chrome-stable, mode "default"
+    bindsym s exec xfce4-screenshooter, mode "default"
     bindsym t exec thunderbird, mode "default"
 
-    bindsym a exec --no-startup-id polly; exec --no-startup-id pidgin; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
+    bindsym a exec --no-startup-id corebird; exec --no-startup-id telegram-desktop; exec --no-startup-id google-chrome-stable; exec --no-startup-id thunderbird, mode "default"
 
     bindsym Return mode "default"
     bindsym Escape mode "default"
@@ -217,6 +217,7 @@ workspace $10 output DFP9
 
 # Specific window behaviour
 assign [class="Firefox"] $2
+assign [class="Google-chrome"] $2
 assign [class="Pidgin"] $3
 assign [class="Polly"] $3
 assign [class="Thunderbird"] $9
