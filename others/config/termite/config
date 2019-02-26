@@ -2,7 +2,7 @@
 font = Hermit 10
 allow_bold = false
 clickable_url = true
-browser = firefox
+browser = google-chrome-stable
 scrollback_lines = 20000
 
 [colors]
