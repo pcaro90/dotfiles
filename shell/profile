@@ -4,9 +4,6 @@
 # profile
 # ---------------------------------------------------
 
-# MPD daemon start (if no other user instance exists)
-[ ! -s ~/.mpd/pid ] && mpd
-
 # Start agents
 eval $(keychain --eval --agents ssh,gpg)
 
@@ -15,18 +12,8 @@ if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 fi
 
-# Ruby gems path
-if which ruby >/dev/null && which gem >/dev/null; then
-    PATH="$(ruby -rubygems -e 'puts Gem.user_dir')/bin:$PATH"
-fi
-
 # Python local path
 export PYTHONPATH=~/.local
-
-# Cabal path
-if [ -d "$HOME/.cabal/bin" ] ; then
-    PATH="$HOME/.cabal/bin:$PATH"
-fi
 
 # ZSHrc
 if [ -f ~/.zshrc ] ; then
