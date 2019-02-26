@@ -61,3 +61,12 @@ alias c='noglob my-calc'
 function my-locate { ag $* $HOME/.locatedb}
 alias locate='noglob my-locate'
 alias updatedb="find / >$HOME/.locatedb 2>/dev/null"
+
+# Wait for a PID to finnish
+function waitfor(){
+    for PID in "$@"; do
+        while s=`ps -p $PID -o s=` && [[ "$s" && "$s" != 'Z' ]]; do
+            sleep 0.5
+        done
+    done
+}
