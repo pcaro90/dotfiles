@@ -42,7 +42,7 @@ alias yao='yaourt'
 alias todo='$EDITOR $HOME/.todo'
 
 # Connection speed test
-alias speedtest='curl http://cachefly.cachefly.net/100mb.test > /dev/null'
+alias speedtest='wget --output-document=/dev/null http://speedtest.wdc01.softlayer.com/downloads/test500.zip'
 
 # dd progress. dd prints the current speed and progress.
 alias ddp='sudo kill -USR1 `pgrep "^dd$"`'
