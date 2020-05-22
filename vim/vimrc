@@ -62,8 +62,8 @@
         set softtabstop=4
         set shiftwidth=4
 
-    " Start with every fold closed
-        set foldlevelstart=0
+    " Start with every fold opened
+        set foldlevelstart=1
 
     " Fold only with 2 levels of nesting
         set foldnestmax=2
@@ -190,7 +190,7 @@
     Plugin 'pcaro90/jpythonfold.vim'
 
     " YouCompleteMe - Code completion engine
-    Plugin 'Valloric/YouCompleteMe'
+    " Plugin 'Valloric/YouCompleteMe'
 
     " ack.vim - Ack (better than grep!) replacement
     Plugin 'mileszs/ack.vim'
