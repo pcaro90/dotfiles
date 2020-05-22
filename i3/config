@@ -49,6 +49,8 @@ bindsym $mod+t exec dmenu_run -fn 'Hermit-10' -nb '#121212' -sb '#5f87ff' -h 26
 # installed.
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
+bindsym $mod+Shift+M exec autorandr -l mobile
+
 # change focus
 bindsym $mod+h focus left
 bindsym $mod+j focus down
@@ -174,9 +176,10 @@ bindsym $mod+d mode "qopen"
 mode "qopen" {
     bindsym f exec google-chrome-stable, mode "default"
     bindsym s exec flameshot gui, mode "default"
-    bindsym t exec thunderbird, mode "default"
+    # bindsym t exec thunderbird, mode "default"
 
-    bindsym a exec --no-startup-id corebird; exec --no-startup-id telegram-desktop; exec --no-startup-id google-chrome-stable; exec --no-startup-id thunderbird, mode "default"
+    # bindsym a exec --no-startup-id corebird; exec --no-startup-id telegram-desktop; exec --no-startup-id google-chrome-stable; exec --no-startup-id thunderbird, mode "default"
+    bindsym a exec --no-startup-id telegram-desktop; exec --no-startup-id google-chrome-stable, mode "default"
 
     bindsym Return mode "default"
     bindsym Escape mode "default"
@@ -194,20 +197,34 @@ client.focused_inactive #333333 #666666 #ffffff #484e50
 client.unfocused        #333333 #666666 #ffffff #484e50
 client.urgent           #2f343a #d75f5f #ffffff #d75f5f
 
+# # Workspaces configuration between screens
+# workspace $1 output eDP1
+# workspace $2 output eDP1
+# workspace $3 output VGA1
+# workspace $4 output eDP1
+# workspace $5 output eDP1
+# workspace $6 output eDP1
+# workspace $7 output VGA1
+# workspace $8 output VGA1
+# workspace $9 output VGA1
+# workspace $10 output VGA1
+
 # Workspaces configuration between screens
-workspace $1 output DP-4
-workspace $2 output DP-4
-workspace $3 output HDMI-0
-workspace $4 output DP-4
-workspace $5 output DP-4
-workspace $6 output DP-4
-workspace $7 output HDMI-0
-workspace $8 output HDMI-0
-workspace $9 output HDMI-0
-workspace $10 output HDMI-0
+workspace $1 output VGA1
+workspace $2 output VGA1
+workspace $3 output DP1
+workspace $4 output VGA1
+workspace $5 output VGA1
+workspace $6 output VGA1
+workspace $7 output DP1
+workspace $8 output DP1
+workspace $9 output DP1
+workspace $10 output DP1
+workspace A output HDMI2
+workspace B output HDMI2
 
 # Specific window behaviour
-assign [class="Firefox"] $2
+# assign [class="Firefox"] $2
 assign [class="Google-chrome"] $2
 assign [class="Pidgin"] $3
 assign [class="Corebird"] $3
@@ -220,16 +237,17 @@ for_window [class="fontforge"] floating enable
 for_window [class="Microsoft Teams - Preview"] floating enable
 
 # Layout configuration
-exec --no-startup-id $HOME/.i3/restore_layout.sh
+# exec --no-startup-id $HOME/.i3/restore_layout.sh
 
 # i3bar configuration
 bar {
     id bar-1
     status_command $HOME/.i3/conky-i3bar
+    # status_command i3blocks
     position top
     font pango:Hermit 10
-    output DP-4
-    tray_output DP-4
+    output eDP1
+    tray_output eDP1
 
     colors {
         background #151515
@@ -246,9 +264,33 @@ bar {
 
 bar {
     id bar-2
+    status_command $HOME/.i3/conky-i3bar
+    # status_command i3blocks
     position top
     font pango:Hermit 10
-    output HDMI-0
+    output VGA1
+    tray_output VGA1
+
+    colors {
+        background #151515
+        statusline #ffffff
+        separator #666666
+
+        focused_workspace  #87d7ff #5f87ff #ffffff
+        active_workspace   #333333 #666666 #ffffff
+        inactive_workspace #333333 #222222 #888888
+        urgent_workspace   #ffd75f #d75f5f #ffffff
+    }
+
+}
+
+bar {
+    id bar-3
+    status_command $HOME/.i3/conky-i3bar
+    # status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output DP1
     tray_output none
 
     colors {
@@ -264,16 +306,50 @@ bar {
 
 }
 
+bar {
+    id bar-4
+    status_command $HOME/.i3/conky-i3bar
+    # status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output HDMI2
+    tray_output none
+
+    colors {
+        background #151515
+        statusline #ffffff
+        separator #666666
+
+        focused_workspace  #87d7ff #5f87ff #ffffff
+        active_workspace   #333333 #666666 #ffffff
+        inactive_workspace #333333 #222222 #888888
+        urgent_workspace   #ffd75f #d75f5f #ffffff
+    }
+
+}
 # Autostart
+exec autorandr -c &
 
 # Turn on/off system beep
 exec xset b off &
+
+# Restore wallpaper
+exec nitrogen --restore &
+
+# Start NetworkManager applet
+exec --no-startup-id nm-applet
+
+# Lock on lid close
+exec --no-startup-id xss-lock -- ~/.i3/i3exit lock
 
 # Redshift
 exec --no-startup-id redshift-gtk
 
 # Pnmixer (tray volume controller)
 exec --no-startup-id pnmixer
+
+# Battery icon
+exec --no-startup-id cbatticon
 
 # Start clipboard manager
 exec --no-startup-id parcellite --daemon

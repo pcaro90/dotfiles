@@ -19,16 +19,11 @@ cpu_avg_samples 2  # Average CPU use with 2 samples
 TEXT
 
 [
-#    { "full_text" : "${if_mpd_playing}${mpd_status}: ${exec mpc current | sed 's/"/\\"/g'} ${mpd_elapsed}/${mpd_length}${endif}", "color" : "\#5f87ff"},
     { "full_text" : ${if_match "${exec deadbeef --nowplaying-tf '%isplaying%'}"=="1"}"${exec deadbeef --nowplaying-tf '%artist% - %title% %playback_time%/%length%' | sed 's/\"/\\\"/g'}"${else}""${endif}, "color" : "\#5f87ff"},
-    { "full_text" : "enp11s0 D ${downspeedf enp11s0}K U ${upspeedf enp11s0}K"},
-    { "full_text" : "enp13s0 D ${downspeedf enp13s0}K U ${upspeedf enp13s0}K"},
+    { "full_text" : "enp0s25 D ${downspeedf enp0s25}K U ${upspeedf enp0s25}K"},
+    { "full_text" : "wlo1 D ${downspeedf wlo1}K U ${upspeedf wlo1}K"},
     { "full_text" : "C ${cpu}%", "color" : ${if_match ${cpu}>75}"\#cf6a4c"${else}${if_match ${cpu}>25}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
     { "full_text" : "R ${memperc}%", "color" : ${if_match ${memperc}>75}"\#cf6a4c"${else}${if_match ${memperc}>50}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
     { "full_text" : "/ ${fs_used_perc /}%", "color" : ${if_match ${fs_used_perc /}>75}"\#cf6a4c"${else}${if_match ${fs_used_perc /}>30}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
-    { "full_text" : "~ ${fs_used_perc /home}%", "color" : ${if_match ${fs_used_perc /home}>75}"\#cf6a4c"${else}${if_match ${fs_used_perc /home}>30}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
-    { "full_text" : "S ${fs_used_perc /mnt/Storage}%", "color" : ${if_match ${fs_used_perc /mnt/Storage}>75}"\#cf6a4c"${else}${if_match ${fs_used_perc /mnt/Storage}>50}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
-#   { "full_text" : "Cr ${fs_used_perc /mnt/Cracking}%", "color" : ${if_match ${fs_used_perc /mnt/Cracking}>75}"\#cf6a4c"${else}${if_match ${fs_used_perc /mnt/Cracking}>50}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
-    { "full_text" : "WS ${fs_used_perc /mnt/WindowsStorage}%", "color" : ${if_match ${fs_used_perc /mnt/WindowsStorage}>75}"\#cf6a4c"${else}${if_match ${fs_used_perc /mnt/WindowsStorage}>50}"\#ffd75f"${else}"\#87af5f"${endif}${endif} },
     { "full_text" : "${time %Y/%m/%d %a %k:%M}" }
 ],
