@@ -1,12 +1,11 @@
 # ---------------------------------------------------
-# Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+# Copyright (c) 2020 Pablo Caro. All Rights Reserved.
 # Pablo Caro <me@pcaro.es> - http://pcaro.es/
 # zsh_alias
 # ---------------------------------------------------
 
-# SSH and GPG agents
-alias ssh='eval $(keychain --eval --agents ssh id_rsa landofooo) && ssh'
-alias gpg='eval $(keychain --eval --agents gpg 54917E91) && gpg'
+# Use ripgrep config
+alias rg='RIPGREP_CONFIG_PATH=/home/pcaro/.ripgreprc rg'
 
 # Faster movement to parent paths
 alias ..='cd ..'
@@ -44,6 +43,9 @@ alias todo='$EDITOR $HOME/.todo'
 # Connection speed test
 alias speedtest='wget --output-document=/dev/null http://speedtest.wdc01.softlayer.com/downloads/test500.zip'
 
+# Public IP
+alias iip='curl icanhazip.com'
+
 # dd progress. dd prints the current speed and progress.
 alias ddp='sudo kill -USR1 `pgrep "^dd$"`'
 
@@ -58,7 +60,7 @@ function my-calc { echo $* | bc -l }
 alias c='noglob my-calc'
 
 # Custom locate
-function my-locate { ag $* $HOME/.locatedb}
+function my-locate { rg $* $HOME/.locatedb}
 alias locate='noglob my-locate'
 alias updatedb="find / >$HOME/.locatedb 2>/dev/null"
 
@@ -69,4 +71,17 @@ function waitfor(){
             sleep 0.5
         done
     done
+}
+
+function b64(){
+    echo "$1" | base64 -d
+}
+
+function p(){
+    if [ -z "$1" ]; then
+        TARGET="8.8.8.8"
+    else
+        TARGET="$1"
+    fi
+    ping -a $TARGET
 }
