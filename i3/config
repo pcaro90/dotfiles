@@ -20,6 +20,8 @@ set $7 7
 set $8 8
 set $9 9:Email
 set $10 10:Music
+set $11 A
+set $12 B
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below. ISO 10646 = Unicode
@@ -111,6 +113,8 @@ bindsym $mod+7 workspace $7
 bindsym $mod+8 workspace $8
 bindsym $mod+9 workspace $9
 bindsym $mod+0 workspace $10
+bindsym $mod+minus workspace $11
+bindsym $mod+equal workspace $12
 
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $1
@@ -123,6 +127,8 @@ bindsym $mod+Shift+7 move container to workspace $7
 bindsym $mod+Shift+8 move container to workspace $8
 bindsym $mod+Shift+9 move container to workspace $9
 bindsym $mod+Shift+0 move container to workspace $10
+bindsym $mod+Shift+minus move container to workspace $11
+bindsym $mod+Shift+equal move container to workspace $12
 
 # reload the configuration file
 bindsym $mod+Shift+C reload
@@ -167,7 +173,7 @@ mode "resize" {
 bindsym $mod+d mode "qopen"
 mode "qopen" {
     bindsym f exec google-chrome-stable, mode "default"
-    bindsym s exec xfce4-screenshooter, mode "default"
+    bindsym s exec flameshot gui, mode "default"
     bindsym t exec thunderbird, mode "default"
 
     bindsym a exec --no-startup-id corebird; exec --no-startup-id telegram-desktop; exec --no-startup-id google-chrome-stable; exec --no-startup-id thunderbird, mode "default"
@@ -208,8 +214,10 @@ assign [class="Corebird"] $3
 assign [class="Thunderbird"] $9
 assign [class="Exaile"] $10
 assign [class="KeePass2"] $8
+assign [title="Burp Suite Professional .*"] A
 
 for_window [class="fontforge"] floating enable
+for_window [class="Microsoft Teams - Preview"] floating enable
 
 # Layout configuration
 exec --no-startup-id $HOME/.i3/restore_layout.sh
@@ -262,22 +270,19 @@ bar {
 exec xset b off &
 
 # Redshift
-exec --no-startup-id (redshift-gtk) &
+exec --no-startup-id redshift-gtk
 
 # Pnmixer (tray volume controller)
-exec (sleep 5s && pnmixer) &
+exec --no-startup-id pnmixer
 
 # Start clipboard manager
-exec (sleep 5s && parcellite --daemon) &
+exec --no-startup-id parcellite --daemon
 
 # Start Bluetooth manager
-exec (sleep 5s && blueberry-tray) &
-
-# Start Dropbox
-exec (sleep 10s && dropboxd) &
-
-# Start Nextcloud
-exec (sleep 10s && nextcloud) &
+exec --no-startup-id "sleep 5s && blueberry-tray"
 
 # Thunar daemon (automount)
-exec (sleep 15s && thunar --daemon) &
+exec --no-startup-id "sleep 15s && thunar --daemon"
+
+# Start Nextcloud
+exec --no-startup-id "sleep 20s && nextcloud"
