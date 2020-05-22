@@ -39,9 +39,7 @@ HISTFILE=~/.zhistory
 setopt EXTENDED_GLOB
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$HOME/tools:$HOME/.local/bin:$HOME/go/bin:/home/pcaro/.gem/ruby/2.6.0/bin:$PATH"
-fi
+PATH="$HOME/bin:$HOME/utils:$HOME/tools:$HOME/.local/bin:$HOME/go/bin:/home/pcaro/.gem/ruby/2.6.0/bin:$PATH"
 
 # Aliases
 if [ -f ~/.zsh_alias ] ; then
@@ -57,9 +55,6 @@ fi
 if [ -f ~/.zsh_prompt ] ; then
     . ~/.zsh_prompt
 fi
-
-# Source "command not found" hook
-source /etc/profile.d/cnf.sh
 
 # Bind special keys
 typeset -A key
