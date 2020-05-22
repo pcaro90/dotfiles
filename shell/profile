@@ -8,9 +8,7 @@
 eval $(keychain --eval --agents ssh,gpg)
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$HOME/.local/bin:$PATH"
-fi
+PATH="$HOME/utils:$HOME/bin:$HOME/.local/bin:$PATH"
 
 # Python local path
 export PYTHONPATH=~/.local
