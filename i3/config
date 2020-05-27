@@ -271,25 +271,26 @@ bar {
 # Autostart
 
 # Turn on/off system beep
-exec xset b off &
+exec xset b off
 
 # Redshift
-exec --no-startup-id (redshift-gtk) &
+exec --no-startup-id redshift-gtk
+
+# NetworkManager applet
+exec --no-startup-id nm-applet
 
 # Pnmixer (tray volume controller)
-exec (sleep 5s && pnmixer) &
+exec "sleep 5s && pnmixer"
 
 # Start clipboard manager
-exec (sleep 5s && parcellite --daemon) &
+exec "sleep 5s && parcellite --daemon"
 
 # Start Bluetooth manager
-exec (sleep 5s && blueberry-tray) &
+exec "sleep 5s && blueberry-tray"
 
-# Start Dropbox
-exec (sleep 10s && dropboxd) &
-
-# Start Nextcloud
-exec (sleep 10s && nextcloud) &
 
 # Thunar daemon (automount)
-exec (sleep 15s && thunar --daemon) &
+exec "sleep 15s && thunar --daemon"
+
+# Start Nextcloud
+exec "sleep 20s && nextcloud"
