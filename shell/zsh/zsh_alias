@@ -37,8 +37,20 @@ alias pac='pacman --color=auto'
 alias spac='sudo pacman --color=auto'
 alias yao='yaourt'
 
-# ToDo
-alias todo='$EDITOR $HOME/.todo'
+# TaskWarrior
+alias t='task'
+alias ta='task add'
+alias ts='task start'
+alias td='task done'
+alias tm='task modify'
+
+# TaskWarrior context
+alias tp='task context personal'
+alias tn='task context none'
+alias tw='task context trabajo'
+
+## TaskWarrior work
+alias taw='task add project:trabajo'
 
 # Connection speed test
 alias speedtest='wget --output-document=/dev/null http://speedtest.wdc01.softlayer.com/downloads/test500.zip'
