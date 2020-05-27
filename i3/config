@@ -4,6 +4,23 @@
 # config
 # ---------------------------------------------------
 
+set $base00 #212121
+set $base01 #303030
+set $base02 #353535
+set $base03 #4A4A4A
+set $base04 #B2CCD6
+set $base05 #EEFFFF
+set $base06 #EEFFFF
+set $base07 #FFFFFF
+set $base08 #F07178
+set $base09 #F78C6C
+set $base0A #FFCB6B
+set $base0B #C3E88D
+set $base0C #89DDFF
+set $base0D #82AAFF
+set $base0E #C792EA
+set $base0F #FF5370
+
 # Super
 set $mod Mod4
 
@@ -236,14 +253,16 @@ bar {
     tray_output DP-4
 
     colors {
-        background #151515
-        statusline #ffffff
-        separator #666666
+        background $base00
+        separator $base01
+        statusline $base07
 
-        focused_workspace  #87d7ff #5f87ff #ffffff
-        active_workspace   #333333 #666666 #ffffff
-        inactive_workspace #333333 #222222 #888888
-        urgent_workspace   #ffd75f #d75f5f #ffffff
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
     }
 
 }
