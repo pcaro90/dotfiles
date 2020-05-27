@@ -1,0 +1,62 @@
+# i3blocks configuration file
+#
+# The i3blocks man page describes the usage of the binary,
+# and its website describes the configuration:
+#
+#     https://vivien.github.io/i3blocks
+
+
+# Global properties
+separator=true
+separator_block_width=15
+command=blocks/$BLOCK_NAME
+
+[taskwarrior]
+label= 
+interval=2
+
+[bandwidth]
+interval=persist
+markup=pango
+label= 11
+INTERFACE=enp11s0
+USE_BITS=1
+
+[bandwidth]
+interval=persist
+markup=pango
+label= 13
+INTERFACES=enp13s0
+USE_BITS=1
+
+[cpu]
+label= 
+interval=2
+
+[memory]
+label= 
+interval=5
+
+[disk]
+label= 
+DIR=/
+interval=30
+
+[disk]
+label= 
+DIR=/home
+interval=30
+
+[disk]
+label= 
+DIR=/mnt/Storage
+interval=30
+
+[disk]
+label= 
+DIR=/mnt/WindowsStorage
+interval=30
+
+[calendar]
+interval=1
+DATEFMT=+%Y-%m-%d %a %k:%M
