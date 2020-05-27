@@ -167,7 +167,8 @@ mode "resize" {
 bindsym $mod+d mode "qopen"
 mode "qopen" {
     bindsym f exec google-chrome-stable, mode "default"
-    bindsym s exec xfce4-screenshooter, mode "default"
+    # bindsym s exec xfce4-screenshooter, mode "default"
+    bindsym s exec flameshot gui, mode "default"
     bindsym t exec thunderbird, mode "default"
 
     bindsym a exec --no-startup-id corebird; exec --no-startup-id telegram-desktop; exec --no-startup-id google-chrome-stable; exec --no-startup-id thunderbird, mode "default"
