@@ -40,6 +40,9 @@ bindsym $mod+backslash exec thunar
 # kill focused window
 bindsym $mod+q kill
 
+# Never steal my focus
+focus_on_window_activation urgent
+
 # start dmenu (a program launcher)
 bindsym $mod+t exec dmenu_run -fn 'Hermit-10' -nb '#121212' -sb '#5f87ff' -h 26
 # There also is the (new) i3-dmenu-desktop which only displays applications
