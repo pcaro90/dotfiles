@@ -217,7 +217,8 @@ exec --no-startup-id $HOME/.i3/restore_layout.sh
 # i3bar configuration
 bar {
     id bar-1
-    status_command $HOME/.i3/conky-i3bar
+    # status_command $HOME/.i3/conky-i3bar
+    status_command i3blocks
     position top
     font pango:Hermit 10
     output DP-4
