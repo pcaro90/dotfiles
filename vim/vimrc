@@ -232,10 +232,20 @@
     set background=dark
 
     " Jellybeans
-        if &t_Co <= 16
-            let g:jellybeans_use_lowcolor_black=0
-        endif
-        colorscheme jellybeans
+
+    " if &t_Co <= 16
+    "     let g:jellybeans_use_lowcolor_black=1
+    " endif
+    " let g:jellybeans_use_lowcolor_black=1
+
+    let g:jellybeans_overrides = {
+    \    'background': { 'ctermbg': 'none', '256ctermbg': 'none' },
+    \}
+    if has('termguicolors') && &termguicolors
+        let g:jellybeans_overrides['background']['guibg'] = 'none'
+    endif
+
+    colorscheme jellybeans
 
     " " Molokai
     "     let g:molokai_original=1
@@ -257,12 +267,12 @@
     set statusline+=%1*\ [row\ %2*%l%1*/%2*%L%1*\ %p%%]  " Current/total line
     set statusline+=%1*\ [byte\ %5*%o%1*]  " Byte number in file
 
-    hi User1 ctermfg=255 guifg=#eeeeee ctermbg=235 guibg=#262626
-    hi User2 ctermfg=167 guifg=#d75757 ctermbg=235 guibg=#262626
-    hi User3 ctermfg=107 guifg=#87af5f ctermbg=235 guibg=#262626
-    hi User4 ctermfg=33 guifg=#0087ff ctermbg=235 guibg=#262626
-    hi User5 ctermfg=221 guifg=#ffd75f ctermbg=235 guibg=#262626
-    hi User6 ctermfg=133 guifg=#af5faf ctermbg=235 guibg=#262626
+    hi User1 ctermfg=White guifg=#eeeeee ctermbg=235 guibg=#262626
+    hi User2 ctermfg=DarkRed guifg=#d75757 ctermbg=235 guibg=#262626
+    hi User3 ctermfg=DarkGreen guifg=#87af5f ctermbg=235 guibg=#262626
+    hi User4 ctermfg=DarkBlue guifg=#0087ff ctermbg=235 guibg=#262626
+    hi User5 ctermfg=DarkYellow guifg=#ffd75f ctermbg=235 guibg=#262626
+    hi User6 ctermfg=DarkMagenta guifg=#af5faf ctermbg=235 guibg=#262626
 
 " Mappings {{{1
     " Mapping leader
