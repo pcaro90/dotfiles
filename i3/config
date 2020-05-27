@@ -274,6 +274,9 @@ gaps inner 5
 
 # Autostart
 
+# Start compositor
+exec picom
+
 # Turn on/off system beep
 exec xset b off
 
