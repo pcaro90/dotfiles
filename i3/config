@@ -217,6 +217,10 @@ assign [class="Exaile"] $10
 assign [class="KeePass2"] $8
 
 for_window [class="fontforge"] floating enable
+for_window [class="Microsoft Teams - Preview" window_type="notification"] floating enable
+for_window [class="java" title="Copy"] floating enable
+
+no_focus [class="Microsoft Teams - Preview"]
 
 # Layout configuration
 exec --no-startup-id $HOME/.i3/restore_layout.sh
