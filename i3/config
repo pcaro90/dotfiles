@@ -312,13 +312,11 @@ exec --no-startup-id redshift-gtk
 # NetworkManager applet
 exec --no-startup-id nm-applet
 
-
 # Thunar daemon (automount)
 exec "sleep 15s && thunar --daemon"
 
 # Start Nextcloud
 exec "sleep 20s && nextcloud"
-=======
 
 # Pnmixer (tray volume controller)
 exec --no-startup-id pnmixer
