@@ -43,6 +43,7 @@ alias ta='task add'
 alias ts='task start'
 alias td='task done'
 alias tm='task modify'
+alias ty='task sync'
 
 # TaskWarrior context
 alias tp='task context personal'
