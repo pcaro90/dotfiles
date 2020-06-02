@@ -200,7 +200,10 @@
     " YouCompleteMe - Code completion engine
     Plug 'ycm-core/YouCompleteMe'
 
-    " " LaTeX-BoX - Lightweight Toolbox for LaTeX
+    " EasyMotion - Vim motions on speed
+    Plug 'easymotion/vim-easymotion'
+
+    " LaTeX-BoX - Lightweight Toolbox for LaTeX
     Plug 'LaTeX-Box-Team/LaTeX-Box'
 
     " Jellybeans color scheme
@@ -336,12 +339,6 @@
     nmap <leader>cc gcc
     au FileType c,cpp set commentstring=//\ %s
 
-    " " delimitMate
-    " let delimitMate_expand_cr = 1
-    " if has("autocmd")
-    "     au FileType python let b:delimitMate_nesting_quotes = ['"']
-    " endif
-
     " TeX-PDF
     let g:tex_pdf_map_keys = 0
 
@@ -357,6 +354,9 @@
 
     " undotree
     nnoremap <F8> :UndotreeToggle<CR>:UndotreeFocus<CR>
+
+    " EasyMotion
+    let g:EasyMotion_keys = 'arsdheiqwfpgjluy;zxcvbkmtno'
 
     " UltiSnips
     let g:UltiSnipsExpandTrigger="<C-Space>"
