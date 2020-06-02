@@ -13,7 +13,7 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 
 # Vim alias
-alias v='vim'
+alias v='nvim'
 
 # Python aliases
 alias py='python'
