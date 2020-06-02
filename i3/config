@@ -304,6 +304,9 @@ gaps inner 5
 # Start compositor
 exec picom
 
+# Restore wallpaper
+exec "nitrogen --restore"
+
 # Turn on/off system beep
 exec xset b off
 
