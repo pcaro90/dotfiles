@@ -242,6 +242,7 @@ assign [title="Burp Suite Professional .*"] A
 for_window [class="fontforge"] floating enable
 for_window [class="Microsoft Teams - Preview" window_type="notification"] floating enable
 for_window [class="java" title="Copy"] floating enable
+for_window [class="burp-StartBurp" title="^ $"] floating enable
 
 no_focus [class="Microsoft Teams - Preview"]
 
