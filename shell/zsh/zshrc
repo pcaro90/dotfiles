@@ -56,6 +56,14 @@ if [ -f ~/.zsh_prompt ] ; then
     . ~/.zsh_prompt
 fi
 
+# Source fzf files
+if [ -f /usr/share/fzf/key-bindings.zsh ] ; then
+    . /usr/share/fzf/key-bindings.zsh
+fi
+if [ -f /usr/share/fzf/completion.zsh ] ; then
+    . /usr/share/fzf/completion.zsh
+fi
+
 # Bind special keys
 typeset -A key
 
