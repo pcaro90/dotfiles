@@ -29,6 +29,7 @@ bindkey -v
 
 # History options
 setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
 setopt EXTENDED_HISTORY
 setopt SHARE_HISTORY
 HISTSIZE=999999999
