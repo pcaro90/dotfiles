@@ -26,8 +26,8 @@ done
 
 ## task stop
 for (( i = 1; i < 100; i++ )); do
-    alias "tp${i}"=" task ${i} start"
-    alias "t${i}p"=" task ${i} start"
+    alias "tp${i}"=" task ${i} stop"
+    alias "t${i}p"=" task ${i} stop"
 done
 
 ## task modify
