@@ -14,6 +14,7 @@ alias ty=' task sync'
 alias tp=' task context personal'
 alias tn=' task context none'
 alias tw=' task context trabajo'
+alias ttr=' task context training'
 alias taw=' task add project:trabajo'
 
 # Dynamic aliases
@@ -21,6 +22,12 @@ alias taw=' task add project:trabajo'
 for (( i = 1; i < 100; i++ )); do
     alias "ts${i}"=" task ${i} start"
     alias "t${i}s"=" task ${i} start"
+done
+
+## task stop
+for (( i = 1; i < 100; i++ )); do
+    alias "tp${i}"=" task ${i} start"
+    alias "t${i}p"=" task ${i} start"
 done
 
 ## task modify
