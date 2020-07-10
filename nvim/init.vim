@@ -350,7 +350,7 @@
     let NERDTreeQuitOnOpen=1
 
     " Tagbar
-    nnoremap <F10> :TagbarToggle<CR>
+    nnoremap <F10> :TagbarOpenAutoClose<CR>
 
     " undotree
     nnoremap <F8> :UndotreeToggle<CR>:UndotreeFocus<CR>
