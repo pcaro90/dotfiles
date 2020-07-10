@@ -237,6 +237,9 @@ for_window [class="burp-StartBurp" title="^ $"] floating enable
 
 no_focus [class="Microsoft Teams - Preview"]
 
+# Titleless windows
+for_window [class="^.*"] border pixel 2
+
 # Start compositor
 exec picom
 
