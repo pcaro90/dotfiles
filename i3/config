@@ -63,7 +63,7 @@ bindsym $mod+q kill
 focus_on_window_activation urgent
 
 # Summon keyboard layout changer
-bindsym $mod+y exec fbxkb
+bindsym $mod+y exec gxkb
 
 # start dmenu (a program launcher)
 bindsym $mod+t exec dmenu_run -fn 'Hermit-10' -nb '#121212' -sb '#5f87ff' -h 26
@@ -73,7 +73,7 @@ bindsym $mod+t exec dmenu_run -fn 'Hermit-10' -nb '#121212' -sb '#5f87ff' -h 26
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
 # Mute Microsoft Teams
-bindsym --release $mod+m exec --no-startup-id "OLDFOCUS=$(xdotool getwindowfocus) ; xdotool windowfocus $(xdotool search --all --onlyvisible --class 'Microsoft Teams - Preview') key --clearmodifiers ctrl+shift+m ; xdotool windowfocus $OLDFOCUS"
+bindsym --release $mod+m exec --no-startup-id "OLDFOCUS=$(xdotool getwindowfocus) ; xdotool windowfocus $(xdotool search --all --onlyvisible --class 'Microsoft Teams - Preview' | tail -n 1) key --clearmodifiers ctrl+shift+m ; xdotool windowfocus $OLDFOCUS"
 
 # change focus
 bindsym $mod+h focus left
@@ -333,9 +333,6 @@ exec --no-startup-id parcellite --daemon
 
 # Start Bluetooth manager
 exec --no-startup-id "sleep 5s && blueberry-tray"
-
-# Thunar daemon (automount)
-exec --no-startup-id "sleep 15s && thunar --daemon"
 
 # Start Nextcloud
 exec --no-startup-id "sleep 20s && nextcloud"
