@@ -1,3 +1,7 @@
+# i3 local configuration
+i3/config
+i3/i3blocks/config
+
 *.swp
 bundle/
 tmp/
