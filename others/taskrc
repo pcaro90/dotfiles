@@ -128,4 +128,3 @@ taskd.key=\/home\/pcaro\/.task\/pcaro.key.pem
 taskd.server=taskserver.landofooo.net:53589
 taskd.credentials=users\/pcaro\/key
 
-context=trabajo
