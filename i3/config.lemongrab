@@ -1,0 +1,110 @@
+# ---------------------------------------------------
+# Copyright (c) 2020 Pablo Caro. All Rights Reserved.
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
+# config.lemongrab
+# ---------------------------------------------------
+
+# Workspaces configuration between screens
+workspace $1 output VGA1
+workspace $2 output VGA1
+workspace $3 output DP1
+workspace $4 output VGA1
+workspace $5 output VGA1
+workspace $6 output VGA1
+workspace $7 output DP1
+workspace $8 output DP1
+workspace $9 output DP1
+workspace $10 output DP1
+workspace A output HDMI2
+workspace B output HDMI2
+
+# i3bar configuration
+bar {
+    id bar-1
+    # status_command $HOME/.i3/conky-i3bar
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output eDP1
+    tray_output eDP1
+
+    colors {
+        background #151515
+        statusline #ffffff
+        separator #666666
+
+        focused_workspace  #87d7ff #5f87ff #ffffff
+        active_workspace   #333333 #666666 #ffffff
+        inactive_workspace #333333 #222222 #888888
+        urgent_workspace   #ffd75f #d75f5f #ffffff
+    }
+
+}
+
+bar {
+    id bar-2
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output VGA1
+    tray_output VGA1
+
+    colors {
+        background #151515
+        statusline #ffffff
+        separator #666666
+
+        focused_workspace  #87d7ff #5f87ff #ffffff
+        active_workspace   #333333 #666666 #ffffff
+        inactive_workspace #333333 #222222 #888888
+        urgent_workspace   #ffd75f #d75f5f #ffffff
+    }
+
+}
+
+bar {
+    id bar-3
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output DP1
+    tray_output none
+
+    colors {
+        background #151515
+        statusline #ffffff
+        separator #666666
+
+        focused_workspace  #87d7ff #5f87ff #ffffff
+        active_workspace   #333333 #666666 #ffffff
+        inactive_workspace #333333 #222222 #888888
+        urgent_workspace   #ffd75f #d75f5f #ffffff
+    }
+
+}
+
+bar {
+    id bar-4
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output HDMI2
+    tray_output none
+
+    colors {
+        background #151515
+        statusline #ffffff
+        separator #666666
+
+        focused_workspace  #87d7ff #5f87ff #ffffff
+        active_workspace   #333333 #666666 #ffffff
+        inactive_workspace #333333 #222222 #888888
+        urgent_workspace   #ffd75f #d75f5f #ffffff
+    }
+
+}
+
+# Autostart
+
+# Battery icon
+exec --no-startup-id cbatticon
