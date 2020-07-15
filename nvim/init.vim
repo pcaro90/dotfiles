@@ -148,6 +148,9 @@
     "     set undofile
     " endif
 
+    " Specify a Python 3 provider
+    let g:python3_host_prog = "/usr/bin/python3"
+
 " Plug configuration {{{1
 
     call plug#begin()
