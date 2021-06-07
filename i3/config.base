@@ -51,7 +51,7 @@ font pango:Hermit 10
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec termite
+bindsym $mod+Return exec kitty
 
 # start a file explorer
 bindsym $mod+backslash exec thunar
