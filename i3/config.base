@@ -72,9 +72,6 @@ bindsym $mod+t exec dmenu_run -fn 'Hermit-10' -nb '#121212' -sb '#5f87ff' -h 26
 # installed.
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
-# Mute Microsoft Teams
-bindsym --release $mod+m exec --no-startup-id "OLDFOCUS=$(xdotool getwindowfocus) ; xdotool windowfocus $(xdotool search --all --onlyvisible --class 'Microsoft Teams - Preview' | tail -n 1) key --clearmodifiers ctrl+shift+m ; xdotool windowfocus $OLDFOCUS"
-
 # change focus
 bindsym $mod+h focus left
 bindsym $mod+j focus down
