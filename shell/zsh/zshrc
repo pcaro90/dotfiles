@@ -7,11 +7,8 @@
 # If not running interactively, exit
 [[ $- != *i* ]] && return
 
-# Adjust Termite behavior
-if [[ $TERM == xterm-termite ]]; then
-    . /etc/profile.d/vte.sh
-    __vte_osc7
-
+# Adjust Kitty behavior
+if [[ $TERM == xterm-kitty ]]; then
     # DIRTY
     export TERM=xterm-256color
 fi
