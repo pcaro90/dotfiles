@@ -212,6 +212,9 @@
     " Jellybeans color scheme
     Plug 'nanotech/jellybeans.vim'
 
+    " Vim-Go - Go development plugin for Vim
+    Plug 'fatih/vim-go'
+
     " OLD
     " " TeX-PDF - Lightweight TeX-to-PDF development support
     " Plug 'TeX-PDF'
@@ -229,8 +232,6 @@
     " Plugin 'ShowTrailingWhitespace'
     " " DeleteTrailingWhitespace - Delete unwanted whitespace at the end of lines
     " Plugin 'DeleteTrailingWhitespace'
-    " " Vim-Go - Go development plugin for Vim
-    " Plugin 'fatih/vim-go'
 
     call plug#end()
 
@@ -368,6 +369,7 @@
     " YouCompleteMe
     let g:ycm_autoclose_preview_window_after_insertion = 1
     let g:ycm_key_invoke_completion = ''
+    let g:ycm_gopls_binary_path = '/home/pcaro/go/bin/gopls'
 
 " Extra functions {{{1
 
@@ -404,6 +406,9 @@
 
         " Python execute
         autocmd FileType python nnoremap <buffer> <F5> :!python %<CR>
+
+        " Go execute
+        autocmd FileType go nnoremap <buffer> <F5> :GoRun<CR>
 
         " OUT
         " " Latex build
