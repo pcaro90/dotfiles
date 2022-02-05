@@ -16,9 +16,8 @@
     bv = branch -v
 
     c = commit
-    ca = commit -a
     cm = commit -m
-    cam = commit -a -m
+    cam = commit --amend -m
 
     cl = clone
 
