@@ -43,13 +43,13 @@
                        "x": 960,
                        "y": 54
                     },
-                    "name": "Corebird - @pcaro90",
+                    "name": "Cawbird - @pcaro90",
                     "percent": 0.5,
                     "swallows": [
                        {
-                       "class": "^Corebird$",
-                       "instance": "^corebird$",
-                       "title": "^Corebird\\ \\-\\ \\@pcaro90$"
+                       "class": "^Cawbird$",
+                       "instance": "^cawbird$",
+                       "title": "^Cawbird\\ \\-\\ \\@pcaro90$"
                        }
                     ],
                     "type": "con"
@@ -64,13 +64,13 @@
                        "x": 540,
                        "y": 26
                     },
-                    "name": "Corebird - @joh1fw4k2",
+                    "name": "Cawbird - @joh1fw4k2",
                     "percent": 0.5,
                     "swallows": [
                        {
-                       "class": "^Corebird$",
-                       "instance": "^corebird$",
-                       "title": "^Corebird\\ \\-\\ \\@joh1fw4k2$"
+                       "class": "^Cawbird$",
+                       "instance": "^cawbird$",
+                       "title": "^Cawbird\\ \\-\\ \\@joh1fw4k2$"
                        }
                     ],
                     "type": "con"

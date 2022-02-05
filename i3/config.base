@@ -195,11 +195,11 @@ mode "resize" {
 # Quick open mode
 bindsym $mod+d mode "qopen"
 mode "qopen" {
-    bindsym f exec google-chrome-stable, mode "default"
+    bindsym f exec firefox, mode "default"
     bindsym s exec flameshot gui, mode "default"
     bindsym t exec thunderbird, mode "default"
 
-    bindsym a exec --no-startup-id corebird; exec --no-startup-id telegram-desktop; exec --no-startup-id google-chrome-stable; exec --no-startup-id thunderbird, mode "default"
+    bindsym a exec --no-startup-id cawbird; exec --no-startup-id cawbird; exec --no-startup-id telegram-desktop; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
 
     bindsym Return mode "default"
     bindsym Escape mode "default"
@@ -221,7 +221,7 @@ client.urgent           #2f343a #d75f5f #ffffff #d75f5f
 assign [class="Firefox"] $2
 assign [class="Google-chrome"] $2
 assign [class="Pidgin"] $3
-assign [class="Corebird"] $3
+assign [class="Cawbird"] $3
 assign [class="Thunderbird"] $9
 assign [class="Exaile"] $10
 assign [class="KeePass2"] $8
