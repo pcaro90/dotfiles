@@ -29,16 +29,24 @@ data.location=~/.task
 #include /usr/share/doc/task/rc/solarized-light-256.theme
 #include /usr/share/doc/task/rc/no-color.theme
 
+uda.priority.values=H,M,L,LL,
 urgency.uda.priority.H.coefficient=2.0
 urgency.uda.priority.M.coefficient=0.0
 urgency.uda.priority.L.coefficient=-0.5
+urgency.uda.priority.LL.coefficient=-5
 
 urgency.user.project.trabajo.coefficient=2.0
 urgency.user.project.leaks.coefficient=-0.5
 
-context.trabajo=project:trabajo
-context.personal=project.not:trabajo and project.not:training
-context.training=project:training
+# context.personal=project.not:trabajo and project.not:training
+# context.training=project:training
+
+# Context definition
+context.trabajo.read=project:trabajo
+context.trabajo.write=project:trabajo
+context.training.read=project:training
+context.training.write=project:training
+context.personal.read=project.not:trabajo and project.not:training
 
 search.case.sensitive=no
 
@@ -87,7 +95,7 @@ color.tag.none=
 color.tagged=
 
 # Due
-color.due=black on bright green
+color.due=black on green
 color.due.today=red on bright yellow
 color.overdue=white on bright red
 
