@@ -252,9 +252,6 @@ exec --no-startup-id redshift-gtk
 # NetworkManager applet
 exec --no-startup-id nm-applet
 
-# Start Nextcloud
-exec "sleep 20s && nextcloud"
-
 # Pnmixer (tray volume controller)
 exec --no-startup-id pnmixer
 
