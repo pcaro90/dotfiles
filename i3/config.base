@@ -65,12 +65,8 @@ focus_on_window_activation urgent
 # Summon keyboard layout changer
 bindsym $mod+y exec gxkb
 
-# start dmenu (a program launcher)
-bindsym $mod+t exec dmenu_run -fn 'Hermit-10' -nb '#121212' -sb '#5f87ff' -h 26
-# There also is the (new) i3-dmenu-desktop which only displays applications
-# shipping a .desktop file. It is a wrapper around dmenu, so you need that
-# installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+# Start rofi
+bindsym $mod+t exec rofi -show combi
 
 # change focus
 bindsym $mod+h focus left
