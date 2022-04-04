@@ -106,8 +106,8 @@
     " Status line in the last window
     set laststatus=2
 
-    " The width of the text is 79 characters maximum
-    set textwidth=79
+    " The width of the text is 88 characters maximum (because of Black)
+    set textwidth=88
 
     " Mark the column next to textwidth
     set colorcolumn=+1
@@ -214,6 +214,9 @@
 
     " Vim-Go - Go development plugin for Vim
     Plug 'fatih/vim-go'
+
+    " Black - The uncompromising Python code formatter
+    Plug 'psf/black', { 'branch': 'stable' }
 
     " OLD
     " " TeX-PDF - Lightweight TeX-to-PDF development support
@@ -328,12 +331,16 @@
     "     " let g:DeleteTrailingWhitespace_Action = 'ask'
     "     nnoremap <Leader>d :<C-u>%DeleteTrailingWhitespace<CR>
 
+    " Black
+    nnoremap <leader>f :Black<CR>
+
     " Syntastic
     nnoremap <F6> :SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
 
     let g:syntastic_check_on_open = 0
     let g:syntastic_check_on_wq = 0
     let g:syntastic_python_checkers = ['flake8', 'python', 'pep257']
+    let g:syntastic_python_flake8_args = "--extend-ignore=E203 --max-line-length=88"
     let g:syntastic_php_checkers = ['php', 'phpcs', 'phpmd']
 
     " commentary.vim
@@ -371,6 +378,7 @@
     let g:ycm_key_invoke_completion = ''
     let g:ycm_gopls_binary_path = '/home/pcaro/go/bin/gopls'
 
+
 " Extra functions {{{1
 
     " " If buffer modified, update any 'Last modified: ' in the first 20 lines.
@@ -404,8 +412,9 @@
         "   l - Long lines are not broken in insert mode
         autocmd FileType markdown,tex setlocal formatoptions+=t formatoptions-=l
 
-        " Python execute
+        " Python
         autocmd FileType python nnoremap <buffer> <F5> :!python %<CR>
+        " autocmd BufWritePre *.py execute ':Black'
 
         " Go execute
         autocmd FileType go nnoremap <buffer> <F5> :GoRun<CR>
