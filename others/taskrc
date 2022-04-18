@@ -135,6 +135,6 @@ color.undo.after=green
 taskd.ca=\/home\/pcaro\/.task\/ca.cert.pem
 taskd.certificate=\/home\/pcaro\/.task\/pcaro.cert.pem
 taskd.key=\/home\/pcaro\/.task\/pcaro.key.pem
-taskd.server=taskserver.landofooo.net:53589
+taskd.server=taskserver.landof.ooo:53589
 taskd.credentials=users\/pcaro\/key
 
