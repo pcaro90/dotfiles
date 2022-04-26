@@ -4,6 +4,7 @@
 # config
 # ---------------------------------------------------
 
+# Colors
 set $base00 #212121
 set $base01 #303030
 set $base02 #353535
@@ -24,9 +25,7 @@ set $base0F #FF5370
 # Super
 set $mod Mod4
 
-# Alt
-# set $mod Mod1
-
+# Workspaces
 set $1 1
 set $2 2:www
 set $3 3:IM
@@ -40,88 +39,56 @@ set $10 10:Music
 set $11 A
 set $12 B
 
-# Font for window titles. Will also be used by the bar unless a different font
-# is used in the bar {} block below. ISO 10646 = Unicode
-# font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
-# font pango:Inconsolata Medium 12
-# font pango:Terminus 10
-font pango:Hermit 10
-
-# Use Mouse+$mod to drag floating windows to their wanted position
-floating_modifier $mod
-
-# start a terminal
+# Apps launchers/control
 bindsym $mod+Return exec kitty
-
-# start a file explorer
 bindsym $mod+backslash exec thunar
-
-# kill focused window
-bindsym $mod+q kill
-
-# Never steal my focus
-focus_on_window_activation urgent
-
-# Summon keyboard layout changer
 bindsym $mod+y exec gxkb
-
-# Start rofi
 bindsym $mod+t exec rofi -show combi
 
-# change focus
+# General i3 behavior
+font pango:Hermit 10
+floating_modifier $mod  # Mouse+$mod to drag
+focus_on_window_activation urgent  # Never steal my focus
+bindsym $mod+q kill  # Close window
+bindsym $mod+Shift+C reload  # Reload config
+bindsym $mod+Shift+R restart  # Restart i3
+workspace_auto_back_and_forth yes  # Switch to last visited
+
+# Focus
 bindsym $mod+h focus left
-bindsym $mod+j focus down
-bindsym $mod+k focus up
-bindsym $mod+l focus right
-
-# alternatively, you can use the cursor keys:
 bindsym $mod+Left focus left
+bindsym $mod+j focus down
 bindsym $mod+Down focus down
+bindsym $mod+k focus up
 bindsym $mod+Up focus up
+bindsym $mod+l focus right
 bindsym $mod+Right focus right
+bindsym $mod+a focus parent
+bindsym $mod+o focus child
 
-# move focused window
+# Floating
+bindsym $mod+space floating toggle
+bindsym $mod+Shift+space focus mode_toggle
+
+# Window movement
 bindsym $mod+Shift+H move left
-bindsym $mod+Shift+J move down
-bindsym $mod+Shift+K move up
-bindsym $mod+Shift+L move right
-
-# alternatively, you can use the cursor keys:
 bindsym $mod+Shift+Left move left
 bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+J move down
+bindsym $mod+Shift+K move up
 bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+L move right
 bindsym $mod+Shift+Right move right
 
-# split in horizontal orientation (Vim standard)
-bindsym $mod+s split v
-
-# split in vertical orientation (Vim standard)
-bindsym $mod+v split h
-
-# enter fullscreen mode for the focused container
-bindsym $mod+f fullscreen
-
-# change container layout (stacked, tabbed, toggle split)
+# Layout and splits
 bindsym $mod+n layout stacking
 bindsym $mod+e layout tabbed
 bindsym $mod+i layout toggle split
+bindsym $mod+s split v
+bindsym $mod+v split h
+bindsym $mod+f fullscreen
 
-# toggle tiling / floating
-bindsym $mod+space floating toggle
-
-# change focus between tiling / floating windows
-bindsym $mod+Shift+space focus mode_toggle
-
-# focus the parent container
-bindsym $mod+a focus parent
-
-# focus the child container
-bindsym $mod+o focus child
-
-# Switch to the last visited workspace when switching to the current worspace
-workspace_auto_back_and_forth yes
-
-# switch to workspace
+# Switch to workspace
 bindsym $mod+1 workspace $1
 bindsym $mod+2 workspace $2
 bindsym $mod+3 workspace $3
@@ -135,7 +102,7 @@ bindsym $mod+0 workspace $10
 bindsym $mod+minus workspace $11
 bindsym $mod+equal workspace $12
 
-# move focused container to workspace
+# Move to workspace
 bindsym $mod+Shift+1 move container to workspace $1
 bindsym $mod+Shift+2 move container to workspace $2
 bindsym $mod+Shift+3 move container to workspace $3
@@ -148,12 +115,6 @@ bindsym $mod+Shift+9 move container to workspace $9
 bindsym $mod+Shift+0 move container to workspace $10
 bindsym $mod+Shift+minus move container to workspace $11
 bindsym $mod+Shift+equal move container to workspace $12
-
-# reload the configuration file
-bindsym $mod+Shift+C reload
-
-# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-bindsym $mod+Shift+R restart
 
 # Exit mode
 bindsym $mod+x mode "$mode_system"
@@ -214,13 +175,13 @@ client.unfocused        #333333 #666666 #ffffff #484e50
 client.urgent           #2f343a #d75f5f #ffffff #d75f5f
 
 # Specific window behaviour
-assign [class="Firefox"] $2
+assign [class="firefox"] $2
 assign [class="Google-chrome"] $2
 assign [class="Pidgin"] $3
 assign [class="Cawbird"] $3
 assign [class="Thunderbird"] $9
 assign [class="Exaile"] $10
-assign [class="KeePass2"] $8
+assign [class="KeePassXC"] $8
 assign [title="Burp Suite Professional .*"] A
 
 for_window [class="fontforge"] floating enable
