@@ -44,6 +44,7 @@ bindsym $mod+Return exec kitty
 bindsym $mod+backslash exec thunar
 bindsym $mod+y exec gxkb
 bindsym $mod+t exec rofi -show combi
+bindsym Control_L+space dunstctl close-all
 
 # General i3 behavior
 font pango:Hermit 10
