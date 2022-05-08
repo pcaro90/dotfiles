@@ -48,12 +48,18 @@ bindsym Control_L+space dunstctl close-all
 
 # General i3 behavior
 font pango:Hermit 10
-floating_modifier $mod  # Mouse+$mod to drag
-focus_on_window_activation urgent  # Never steal my focus
-bindsym $mod+q kill  # Close window
-bindsym $mod+Shift+C reload  # Reload config
-bindsym $mod+Shift+R restart  # Restart i3
-workspace_auto_back_and_forth yes  # Switch to last visited
+## Mouse+$mod to drag
+floating_modifier $mod
+## Never steal my focus
+focus_on_window_activation urgent
+## Close window
+bindsym $mod+q kill
+## Reload config
+bindsym $mod+Shift+C reload
+## Restart i3
+bindsym $mod+Shift+R restart
+## Switch to last visited
+workspace_auto_back_and_forth yes
 
 # Focus
 bindsym $mod+h focus left
