@@ -138,3 +138,5 @@ taskd.key=\/home\/pcaro\/.task\/pcaro.key.pem
 taskd.server=taskserver.landof.ooo:53589
 taskd.credentials=users\/pcaro\/key
 
+news.version=2.6.0
+context=personal
