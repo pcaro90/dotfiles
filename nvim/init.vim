@@ -131,6 +131,9 @@
     " Reduced timeout for mappings and key codes
     set timeoutlen=500
 
+    " Specify a Python 3 provider BEFORE syntax
+    let g:python3_host_prog = "/usr/bin/python3"
+
     " Syntax highlighting on
     syntax on
 
@@ -147,9 +150,6 @@
     "     set undodir=.stdpath('config')."undo"
     "     set undofile
     " endif
-
-    " Specify a Python 3 provider
-    let g:python3_host_prog = "/usr/bin/python3"
 
 " Plug configuration {{{1
 
