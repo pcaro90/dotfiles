@@ -23,6 +23,6 @@ xmodmap -e 'clear Lock'
 xmodmap -e 'keycode 66 = Escape'
 
 HOSTNAME=$(hostname -s)
-cat $HOME/dotfiles/i3/config.base > $HOME/.i3/config
-cat $HOME/dotfiles/i3/config.$HOSTNAME >> $HOME/.i3/config
-cat $HOME/dotfiles/i3/i3blocks/config.$HOSTNAME > $HOME/.i3/i3blocks/config
+cat $HOME/.dotfiles/i3/config.base > $HOME/.i3/config
+cat $HOME/.dotfiles/i3/config.$HOSTNAME >> $HOME/.i3/config
+cat $HOME/.dotfiles/i3/i3blocks/config.$HOSTNAME > $HOME/.i3/i3blocks/config
