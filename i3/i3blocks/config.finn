@@ -18,15 +18,8 @@ interval=2
 [bandwidth]
 interval=persist
 markup=pango
-label= 11
-INTERFACE=enp11s0
-USE_BITS=1
-
-[bandwidth]
-interval=persist
-markup=pango
-label= 13
-INTERFACES=enp13s0
+label= 
+INTERFACE=enp7s0
 USE_BITS=1
 
 [cpu]
