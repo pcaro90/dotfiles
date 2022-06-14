@@ -36,11 +36,6 @@ DIR=/
 interval=30
 
 [disk]
-label= 
-DIR=/home
-interval=30
-
-[disk]
 label= 
 DIR=/mnt/Storage
 interval=30
