@@ -186,7 +186,7 @@ assign [class="firefox"] $2
 assign [class="Google-chrome"] $2
 assign [class="Pidgin"] $3
 assign [class="Cawbird"] $3
-assign [class="Thunderbird"] $9
+assign [class="thunderbird"] $9
 assign [class="Exaile"] $10
 assign [class="KeePassXC"] $8
 assign [title="Burp Suite Professional .*"] A
@@ -201,11 +201,11 @@ no_focus [class="Microsoft Teams - Preview"]
 # Titleless windows
 for_window [class="^.*"] border pixel 2
 
-# Start compositor
-exec picom
-
 # Restore wallpaper
 exec "nitrogen --restore"
+
+# Start compositor
+exec picom
 
 # Turn on/off system beep
 exec xset b off
