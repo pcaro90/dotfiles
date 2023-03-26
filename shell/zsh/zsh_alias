@@ -62,6 +62,10 @@ alias pieb='perl -pi.bak -e'
 function my-calc { echo $* | bc -l }
 alias c='noglob my-calc'
 
+# Terminal copy/paste
+alias cpy='xclip -i -selection clipboard'
+alias pst='xclip -o -selection clipboard'
+
 # Custom locate
 function my-locate { rg $* $HOME/.locatedb}
 alias locate='noglob my-locate'
