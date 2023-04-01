@@ -42,11 +42,6 @@ label=
 DIR=/
 interval=30
 
-[disk]
-label= 
-DIR=/home
-interval=30
-
 [calendar]
 interval=1
 DATEFMT=+%Y-%m-%d %a %k:%M
