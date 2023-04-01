@@ -29,7 +29,7 @@ data.location=~/.task
 #include /usr/share/doc/task/rc/solarized-light-256.theme
 #include /usr/share/doc/task/rc/no-color.theme
 
-uda.priority.values=H,M,L,
+uda.priority.values=H,M,L
 urgency.uda.priority.H.coefficient=4.0
 urgency.uda.priority.M.coefficient=2.0
 urgency.uda.priority.L.coefficient=-5
