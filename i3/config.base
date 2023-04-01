@@ -217,8 +217,8 @@ exec --no-startup-id redshift-gtk
 # NetworkManager applet
 exec --no-startup-id nm-applet
 
-# Pnmixer (tray volume controller)
-exec --no-startup-id pnmixer
+# Volumeicon
+exec --no-startup-id volumeicon
 
 # Start clipboard manager
 exec --no-startup-id parcellite --daemon
