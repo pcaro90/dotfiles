@@ -40,9 +40,6 @@ alias yao='yaourt'
 # TaskWarrior
 . ~/.zsh_taskwarrior_alias
 
-# Connection speed test
-alias speedtest='wget --output-document=/dev/null http://speedtest.wdc01.softlayer.com/downloads/test500.zip'
-
 # Public IP
 alias iip='curl https://icanhazip.com'
 
