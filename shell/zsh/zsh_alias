@@ -49,15 +49,8 @@ alias gip='rg --pcre2 "(?<![\.\d])(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-
 # dd progress. dd prints the current speed and progress.
 alias ddp='sudo kill -USR1 `pgrep "^dd$"`'
 
-# Perl -pie regular expression substitution, without backup.
-alias pie='perl -pi -e'
-
-# Perl -pie regular expression substitution, with backup.
-alias pieb='perl -pi.bak -e'
-
-# Fast calculations
-function my-calc { echo $* | bc -l }
-alias c='noglob my-calc'
+# Proxychains
+alias pc='proxychains -q'
 
 # Terminal copy/paste
 alias cpy='xclip -i -selection clipboard'
