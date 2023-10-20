@@ -37,7 +37,7 @@ HISTFILE=~/.zhistory
 setopt EXTENDED_GLOB
 
 # set PATH so it includes user's private bin if it exists
-PATH="$HOME/bin:$HOME/utils:$HOME/tools:$HOME/.local/bin:$HOME/go/bin:/home/pcaro/.gem/ruby/3.0.0/bin:$PATH"
+PATH="$HOME/bin:$HOME/utils:$HOME/tools:$HOME/.local/bin:$HOME/go/bin:$HOME/.nimble/bin:$PATH"
 
 # Aliases
 if [ -f ~/.zsh_alias ] ; then
