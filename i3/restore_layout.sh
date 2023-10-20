@@ -5,4 +5,4 @@
 # restore_layout.sh
 # ----------------------------------------------------------------------
 
-i3-msg "workspace 3:IM; append_layout $HOME/.i3/workspace-3-telegram.json"
+i3-msg "workspace 3:IM; append_layout $HOME/.i3/workspace-3-tg-nativefier.json"

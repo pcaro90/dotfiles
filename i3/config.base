@@ -125,12 +125,11 @@ bindsym $mod+Shift+equal move container to workspace $12
 
 # Exit mode
 bindsym $mod+x mode "$mode_system"
-set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (x) shutdown
+set $mode_system System (l) lock, (e) logout, (s) suspend, (r) reboot, (x) shutdown
 mode "$mode_system" {
     bindsym l exec --no-startup-id ~/.i3/i3exit lock, mode "default"
     bindsym e exec --no-startup-id ~/.i3/i3exit logout, mode "default"
     bindsym s exec --no-startup-id ~/.i3/i3exit suspend, mode "default"
-    bindsym h exec --no-startup-id ~/.i3/i3exit hibernate, mode "default"
     bindsym r exec --no-startup-id ~/.i3/i3exit reboot, mode "default"
     bindsym x exec --no-startup-id ~/.i3/i3exit shutdown, mode "default"
 
@@ -164,7 +163,7 @@ mode "qopen" {
     bindsym t exec thunderbird, mode "default"
     bindsym o exec obsidian, mode "default"
 
-    bindsym a exec --no-startup-id cawbird; exec --no-startup-id cawbird; exec --no-startup-id telegram-desktop; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
+    bindsym a exec --no-startup-id /home/pcaro/nativefier-apps/twitter_pcaro90-linux-x64/twitter_pcaro90; exec --no-startup-id telegram-desktop; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
 
     bindsym Return mode "default"
     bindsym Escape mode "default"
