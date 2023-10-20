@@ -1,7 +1,6 @@
 [options]
 font = Hermit 10
 # font = Hermit 24
-allow_bold = false
 clickable_url = true
 browser = google-chrome-stable
 scrollback_lines = 20000
