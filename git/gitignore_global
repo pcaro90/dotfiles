@@ -24,7 +24,7 @@
 
 # Databases #
 ######################
-*.sql
+# *.sql
 *.sqlite
 
 # Logs #
