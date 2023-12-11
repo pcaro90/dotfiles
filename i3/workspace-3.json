@@ -2,105 +2,56 @@
     "border": "normal",
     "floating": "auto_off",
     "layout": "splitv",
+    "marks": [],
     "percent": 1,
     "type": "con",
     "nodes": [
         {
-            "border": "normal",
+            "border": "pixel",
+            "current_border_width": 2,
             "floating": "auto_off",
-            "layout": "splith",
+            "geometry": {
+               "height": 1388,
+               "width": 2556,
+               "x": 1082,
+               "y": 290
+            },
+            "marks": [],
+            "name": "Pablo Caro (7819)",
             "percent": 0.4,
-            "type": "con",
-            "nodes": [
-                {
-                    "border": "normal",
-                    "current_border_width": 2,
-                    "floating": "auto_off",
-                    "geometry": {
-                       "height": 921,
-                       "width": 320,
-                       "x": 0,
-                       "y": 50
-                    },
-                    "name": "Lista de amigos",
-                    "percent": 0.3,
-                    "swallows": [
-                       {
-                       "class": "^Pidgin$",
-                       "instance": "^Pidgin$",
-                       "window_role": "^buddy_list$"
-                       }
-                    ],
-                    "type": "con"
-                },
-                {
-                    "border": "normal",
-                    "current_border_width": 2,
-                    "floating": "auto_off",
-                    "geometry": {
-                       "height": 448,
-                       "width": 1076,
-                       "x": 0,
-                       "y": 0
-                    },
-                    "name": "Elena Flores Peña",
-                    "percent": 0.7,
-                    "swallows": [
-                       {
-                       "class": "^Pidgin$",
-                       "instance": "^Pidgin$",
-                       "window_role": "^conversation$"
-                       }
-                    ],
-                    "type": "con"
-                }
-            ]
+            "swallows": [
+               {
+               "class": "^TelegramDesktop$",
+               "instance": "^telegram\\-desktop$"
+               }
+            ],
+            "type": "con"
         },
         {
             "border": "normal",
             "floating": "auto_off",
             "layout": "splith",
+            "marks": [],
             "percent": 0.6,
             "type": "con",
             "nodes": [
                 {
-                    "border": "none",
+                    "border": "pixel",
                     "current_border_width": 2,
                     "floating": "auto_off",
                     "geometry": {
-                       "height": 1054,
-                       "width": 960,
-                       "x": 960,
-                       "y": 54
+                       "height": 1041,
+                       "width": 1066,
+                       "x": 7,
+                       "y": 872
                     },
-                    "name": "Corebird - @pcaro90",
-                    "percent": 0.5,
+                    "marks": [],
+                    "name": "Inicio / X",
+                    "percent": 1,
                     "swallows": [
                        {
-                       "class": "^Corebird$",
-                       "instance": "^corebird$",
-                       "title": "^Corebird\\ \\-\\ \\@pcaro90$"
-                       }
-                    ],
-                    "type": "con"
-                },
-                {
-                    "border": "none",
-                    "current_border_width": 2,
-                    "floating": "auto_off",
-                    "geometry": {
-                       "height": 1894,
-                       "width": 540,
-                       "x": 540,
-                       "y": 26
-                    },
-                    "name": "Corebird - @joh1fw4k2",
-                    "percent": 0.5,
-                    "swallows": [
-                       {
-                       "class": "^Corebird$",
-                       "instance": "^corebird$",
-                       "title": "^Corebird\\ \\-\\ \\@joh1fw4k2$"
+                       "instance": "^twitter.com$",
+                       "class": "^Chromium$"
                        }
                     ],
                     "type": "con"

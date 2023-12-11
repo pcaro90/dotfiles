@@ -163,7 +163,7 @@ mode "qopen" {
     bindsym t exec thunderbird, mode "default"
     bindsym o exec obsidian, mode "default"
 
-    bindsym a exec --no-startup-id /home/pcaro/nativefier-apps/twitter_pcaro90-linux-x64/twitter_pcaro90; exec --no-startup-id telegram-desktop; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
+    bindsym a exec --no-startup-id /home/pcaro/bin/twitter; exec --no-startup-id telegram-desktop; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
 
     bindsym Return mode "default"
     bindsym Escape mode "default"
