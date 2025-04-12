@@ -1,0 +1,27 @@
+format = '$hostname$directory$fill$all :\)$line_break$character'
+
+[hostname]
+ssh_only = false
+format = '\[[$hostname]($style)\] '
+style = "bold yellow"
+
+[directory]
+truncation_length = 0
+truncate_to_repo = false
+
+[git_branch]
+format = '\[ [$symbol$branch(:$remote_branch)]($style) '
+
+[git_status]
+untracked = 'U'
+up_to_date = ''
+format = '[$all_status$ahead_behind]($style)\]'
+
+[python]
+format = '\[[${symbol}${pyenv_prefix}(${version})]($style)([ \($virtualenv\)](red bold))\]'
+
+[rust]
+format = '\[[${symbol}${pyenv_prefix}(${version})]($style)([ \($virtualenv\)](red bold))\]'
+
+[package]
+format = '\[[$symbol$version]($style)\]'
