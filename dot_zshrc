@@ -1,0 +1,129 @@
+# ---------------------------------------------------
+# Copyright (c) 2013 Pablo Caro. All Rights Reserved.
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
+# zshrc
+# ---------------------------------------------------
+
+# If not running interactively, exit
+[[ $- != *i* ]] && return
+
+# Adjust Kitty behavior
+if [[ $TERM == xterm-kitty ]]; then
+    # DIRTY
+    export TERM=xterm-256color
+fi
+
+# Adjust Foot behavior
+if [[ $TERM == foot ]]; then
+    # Less dirty
+    alias ssh="TERM=xterm-256color ssh"
+    alias vagrant="TERM=xterm-256color vagrant"
+fi
+
+# Vim as system editor
+export EDITOR=vim
+
+# Set TERM var correctly WARNING
+if [ "$TERM" = "xterm" ] ; then
+    export TERM=xterm-256color
+fi
+
+# Vim mode
+bindkey -v
+
+# History options
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt EXTENDED_HISTORY
+setopt INC_APPEND_HISTORY_TIME
+HISTSIZE=999999999
+SAVEHIST=999999999
+HISTFILE=~/.zhistory
+
+# Extended patterns
+setopt EXTENDED_GLOB
+
+# set PATH so it includes user's private bin if it exists
+PATH="$HOME/bin:$HOME/utils:$HOME/tools:$HOME/.local/bin:$HOME/go/bin:$HOME/.nimble/bin:$PATH"
+
+# Aliases
+if [ -f ~/.zsh_alias ] ; then
+    . ~/.zsh_alias
+fi
+
+# Completion
+if [ -f ~/.zsh_completion ] ; then
+    . ~/.zsh_completion
+fi
+
+# Prompt
+if [ -f ~/.zsh_prompt ] ; then
+    . ~/.zsh_prompt
+fi
+eval "$(starship init zsh)"
+
+# Source fzf files
+if [ -f /usr/share/fzf/key-bindings.zsh ] ; then
+    . /usr/share/fzf/key-bindings.zsh
+fi
+if [ -f /usr/share/fzf/completion.zsh ] ; then
+    . /usr/share/fzf/completion.zsh
+fi
+
+# Source atuin config
+eval "$(atuin init zsh)"
+
+# Source zoxide config
+eval "$(zoxide init zsh)"
+
+# Bind special keys
+typeset -A key
+
+key[Home]=${terminfo[khome]}
+
+key[End]=${terminfo[kend]}
+key[Insert]=${terminfo[kich1]}
+key[Delete]=${terminfo[kdch1]}
+key[Up]=${terminfo[kcuu1]}
+key[Down]=${terminfo[kcud1]}
+key[Left]=${terminfo[kcub1]}
+key[Right]=${terminfo[kcuf1]}
+key[PageUp]=${terminfo[kpp]}
+key[PageDown]=${terminfo[knp]}
+
+# setup key accordingly
+[[ -n "${key[Home]}"     ]]  && bindkey  "${key[Home]}"     beginning-of-line
+[[ -n "${key[End]}"      ]]  && bindkey  "${key[End]}"      end-of-line
+[[ -n "${key[Insert]}"   ]]  && bindkey  "${key[Insert]}"   overwrite-mode
+[[ -n "${key[Delete]}"   ]]  && bindkey  "${key[Delete]}"   delete-char
+[[ -n "${key[Up]}"       ]]  && bindkey  "${key[Up]}"       history-beginning-search-backward
+[[ -n "${key[Down]}"     ]]  && bindkey  "${key[Down]}"     history-beginning-search-forward
+[[ -n "${key[Left]}"     ]]  && bindkey  "${key[Left]}"     backward-char
+[[ -n "${key[Right]}"    ]]  && bindkey  "${key[Right]}"    forward-char
+# [[ -n "${key[PageUp]}"   ]]  && bindkey  "${key[PageUp]}"   history-beginning-search-backward
+# [[ -n "${key[PageDown]}" ]]  && bindkey  "${key[PageDown]}" history-beginning-search-forward
+
+# Finally, make sure the terminal is in application mode, when zle is
+# active. Only then are the values from $terminfo valid.
+if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then
+    function zle-line-init () {
+        printf '%s' "${terminfo[smkx]}"
+    }
+    function zle-line-finish () {
+        printf '%s' "${terminfo[rmkx]}"
+    }
+    zle -N zle-line-init
+    zle -N zle-line-finish
+fi
+
+function osc7-pwd() {
+    emulate -L zsh # also sets localoptions for us
+    setopt extendedglob
+    local LC_ALL=C
+    printf '\e]7;file://%s%s\e\' $HOST ${PWD//(#m)([^@-Za-z&-;_~])/%${(l:2::0:)$(([##16]#MATCH))}}
+}
+
+function chpwd-osc7-pwd() {
+    (( ZSH_SUBSHELL )) || osc7-pwd
+}
+add-zsh-hook -Uz chpwd chpwd-osc7-pwd

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+mount_point=$1
+
+used=$(mpstat 1 1 | tail -1 | awk '{printf "%2.0f", 100 - $12}')
+
+# Full text
+echo "$used%"
+
+# Short text
+echo "$used%"
+
+if [ $used -ge 80 ] ; then
+    echo "#F07178"
+elif [ $used -ge 50 ] ; then
+    echo "#FFCB6B"
+else
+    echo "#C3E88D"
+fi

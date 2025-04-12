@@ -1,0 +1,131 @@
+# [Created by task 2.5.1 5/21/2020 17:39:22]
+# Taskwarrior program configuration file.
+# For more documentation, see http://taskwarrior.org or try 'man task', 'man task-color',
+# 'man task-sync' or 'man taskrc'
+
+# Here is an example of entries that use the default, override and blank values
+#   variable=foo   -- By specifying a value, this overrides the default
+#   variable=      -- By specifying no value, this means no default
+#   #variable=foo  -- By commenting out the line, or deleting it, this uses the default
+
+# Use the command 'task show' to see all defaults and overrides
+
+# Files
+data.location=~/.task
+
+# Color theme (uncomment one to use)
+#include /usr/share/doc/task/rc/light-16.theme
+#include /usr/share/doc/task/rc/light-256.theme
+#include /usr/share/doc/task/rc/dark-16.theme
+#include /usr/share/doc/task/rc/dark-256.theme
+#include /usr/share/doc/task/rc/dark-red-256.theme
+#include /usr/share/doc/task/rc/dark-green-256.theme
+#include /usr/share/doc/task/rc/dark-blue-256.theme
+#include /usr/share/doc/task/rc/dark-violets-256.theme
+#include /usr/share/doc/task/rc/dark-yellow-green.theme
+#include /usr/share/doc/task/rc/dark-gray-256.theme
+#include /usr/share/doc/task/rc/dark-gray-blue-256.theme
+#include /usr/share/doc/task/rc/solarized-dark-256.theme
+#include /usr/share/doc/task/rc/solarized-light-256.theme
+#include /usr/share/doc/task/rc/no-color.theme
+
+uda.priority.values=H,M,L
+urgency.uda.priority.H.coefficient=4.0
+urgency.uda.priority.M.coefficient=2.0
+urgency.uda.priority.L.coefficient=-5
+
+urgency.user.project.trabajo.coefficient=2.0
+
+# Context definition
+context.trabajo.read=project:trabajo
+context.trabajo.write=project:trabajo
+context.personal.read=project:personal
+context.personal.write=project:personal
+context.awct.read=pro:awct
+context.awct.write=pro:awct
+
+search.case.sensitive=no
+
+# Simple report for i3blocks
+report.i3blocks.description=Simple report for i3blocks
+report.i3blocks.filter=limit:1 status:pending
+report.i3blocks.columns=description.count,due.remaining
+report.i3blocks.sort=urgency-
+
+# Color
+
+rule.precedence.color=deleted,completed,active,keyword.,tag.,project.,overdue,scheduled,due.today,due,blocked,blocking,recurring,tagged,uda.
+
+# General decoration
+color.label=
+color.label.sort=
+color.alternate=
+color.header=bold white on bright black
+color.footnote=bold yellow on bright black
+color.warning=bold red
+color.error=white on red
+color.debug=blue
+
+# Task state
+color.completed=
+color.deleted=
+color.active=bold yellow on bright black
+color.recurring=
+color.scheduled=red on bright black
+color.until=
+color.blocking=red
+color.blocked=blue
+
+# Project
+color.project.none=
+
+# Priority
+color.uda.priority.H=
+color.uda.priority.M=
+#color.uda.priority.L=bright black
+color.uda.priority.L=color153
+
+# Tags
+color.tag.next=bold yellow on bright black
+color.tag.none=
+color.tagged=
+
+# Due
+color.due=black on green
+color.due.today=red on bright yellow
+color.overdue=white on bright red
+
+# Report: burndown
+color.burndown.pending=on bright red
+color.burndown.started=on bright yellow
+color.burndown.done=on green
+
+# Report: history
+color.history.add=black on bright red
+color.history.done=black on bright green
+color.history.delete=black on yellow
+
+# Report: summary
+color.summary.bar=on bright green
+color.summary.background=on white
+
+# Command: calendar
+color.calendar.due=on bright green
+color.calendar.due.today=blue on yellow
+color.calendar.holiday=on yellow
+color.calendar.overdue=on bright red
+color.calendar.today=blue
+color.calendar.weekend=on white
+color.calendar.weeknumber=blue
+
+# Command: sync
+color.sync.added=green
+color.sync.changed=yellow
+color.sync.rejected=red
+
+# Command: undo
+color.undo.before=yellow
+color.undo.after=green
+
+news.version=3.2.0
+context=trabajo

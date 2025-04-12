@@ -1,0 +1,53 @@
+[options]
+font = Hermit 10
+# font = Hermit 24
+clickable_url = true
+browser = google-chrome-stable
+scrollback_lines = 20000
+
+[colors]
+foreground          = #EEFFFF
+foreground_bold     = #EEFFFF
+cursor              = #EEFFFF
+cursor_foreground   = #212121
+background          = #212121
+# background = rgba(33, 33, 33, 0.9)
+
+# 16 color space
+# Black, Gray, Silver, White
+color0  = #212121
+color8  = #4A4A4A
+color7  = #EEFFFF
+color15 = #FFFFFF
+# Red
+color1  = #F07178
+color9  = #F07178
+# Green
+color2  = #C3E88D
+color10 = #C3E88D
+# Yellow
+color3  = #FFCB6B
+color11 = #FFCB6B
+# Blue
+color4  = #82AAFF
+color12 = #82AAFF
+# Purple
+color5  = #C792EA
+color13 = #C792EA
+# Teal
+color6  = #89DDFF
+color14 = #89DDFF
+
+# Extra colors
+# Nice light orange
+color209 = #F78C6C
+# Nice light red
+color204 = #FF5370
+# Grey
+color236 = #303030
+# Moar grey
+color237 = #353535
+# Blue silver
+color153 = #B2CCD6
+# Whitey
+color195 = #EEFFFF

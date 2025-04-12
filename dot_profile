@@ -1,0 +1,28 @@
+# ---------------------------------------------------
+# Copyright (c)  Pablo Caro. All Rights Reserved.
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
+# profile
+# ---------------------------------------------------
+
+# Start agents
+eval $(keychain --eval --agents ssh,gpg)
+
+# set PATH so it includes user's private bin if it exists
+PATH="$HOME/utils:$HOME/bin:$HOME/.local/bin:$PATH"
+
+# Python local path
+export PYTHONPATH=~/.local
+
+# # ZSHrc
+# if [ -f ~/.zshrc ] ; then
+#     . ~/.zshrc
+# fi
+
+# Use Caps Lock as another Esc
+xmodmap -e 'clear Lock'
+xmodmap -e 'keycode 66 = Escape'
+
+HOSTNAME=$(hostname -s)
+cat $HOME/.dotfiles/i3/config.base > $HOME/.i3/config
+cat $HOME/.dotfiles/i3/config.$HOSTNAME >> $HOME/.i3/config
+cat $HOME/.dotfiles/i3/i3blocks/config.$HOSTNAME > $HOME/.i3/i3blocks/config

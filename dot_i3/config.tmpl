@@ -1,0 +1,410 @@
+# ---------------------------------------------------
+# Copyright (c) 2025 Pablo Caro. All Rights Reserved.
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
+# config
+# ---------------------------------------------------
+
+# Colors
+set $base00 #212121
+set $base01 #303030
+set $base02 #353535
+set $base03 #4A4A4A
+set $base04 #B2CCD6
+set $base05 #EEFFFF
+set $base06 #EEFFFF
+set $base07 #FFFFFF
+set $base08 #F07178
+set $base09 #F78C6C
+set $base0A #FFCB6B
+set $base0B #C3E88D
+set $base0C #89DDFF
+set $base0D #82AAFF
+set $base0E #C792EA
+set $base0F #FF5370
+
+# Super
+set $mod Mod4
+
+# Workspaces
+set $1 1
+set $2 2:www
+set $3 3:IM
+set $4 4
+set $5 5
+set $6 6
+set $7 7
+set $8 8
+set $9 9:Email
+set $10 10:Music
+set $11 A
+set $12 B
+
+# Apps launchers/control
+bindsym $mod+Return exec kitty
+bindsym $mod+backslash exec thunar
+bindsym $mod+y exec gxkb
+bindsym $mod+t exec rofi -show combi
+bindsym $mod+grave exec dunstctl close-all
+
+# General i3 behavior
+font pango:Hermit 10
+## Mouse+$mod to drag
+floating_modifier $mod
+## Never steal my focus
+focus_on_window_activation urgent
+## Close window
+bindsym $mod+q kill
+## Reload config
+bindsym $mod+Shift+C reload
+## Restart i3
+bindsym $mod+Shift+R restart
+## Switch to last visited
+workspace_auto_back_and_forth yes
+
+# Focus
+bindsym $mod+h focus left
+bindsym $mod+Left focus left
+bindsym $mod+j focus down
+bindsym $mod+Down focus down
+bindsym $mod+k focus up
+bindsym $mod+Up focus up
+bindsym $mod+l focus right
+bindsym $mod+Right focus right
+bindsym $mod+a focus parent
+bindsym $mod+o focus child
+
+# Floating
+bindsym $mod+space floating toggle
+bindsym $mod+Shift+space focus mode_toggle
+
+# Window movement
+bindsym $mod+Shift+H move left
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+J move down
+bindsym $mod+Shift+K move up
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+L move right
+bindsym $mod+Shift+Right move right
+
+# Layout and splits
+bindsym $mod+n layout stacking
+bindsym $mod+e layout tabbed
+bindsym $mod+i layout toggle split
+bindsym $mod+s split v
+bindsym $mod+v split h
+bindsym $mod+f fullscreen
+
+# Switch to workspace
+bindsym $mod+1 workspace $1
+bindsym $mod+2 workspace $2
+bindsym $mod+3 workspace $3
+bindsym $mod+4 workspace $4
+bindsym $mod+5 workspace $5
+bindsym $mod+6 workspace $6
+bindsym $mod+7 workspace $7
+bindsym $mod+8 workspace $8
+bindsym $mod+9 workspace $9
+bindsym $mod+0 workspace $10
+bindsym $mod+minus workspace $11
+bindsym $mod+equal workspace $12
+
+# Move to workspace
+bindsym $mod+Shift+1 move container to workspace $1
+bindsym $mod+Shift+2 move container to workspace $2
+bindsym $mod+Shift+3 move container to workspace $3
+bindsym $mod+Shift+4 move container to workspace $4
+bindsym $mod+Shift+5 move container to workspace $5
+bindsym $mod+Shift+6 move container to workspace $6
+bindsym $mod+Shift+7 move container to workspace $7
+bindsym $mod+Shift+8 move container to workspace $8
+bindsym $mod+Shift+9 move container to workspace $9
+bindsym $mod+Shift+0 move container to workspace $10
+bindsym $mod+Shift+minus move container to workspace $11
+bindsym $mod+Shift+equal move container to workspace $12
+
+# Exit mode
+bindsym $mod+x mode "$mode_system"
+set $mode_system System (l) lock, (e) logout, (s) suspend, (r) reboot, (x) shutdown
+mode "$mode_system" {
+    bindsym l exec --no-startup-id ~/.i3/i3exit lock, mode "default"
+    bindsym e exec --no-startup-id ~/.i3/i3exit logout, mode "default"
+    bindsym s exec --no-startup-id ~/.i3/i3exit suspend, mode "default"
+    bindsym r exec --no-startup-id ~/.i3/i3exit reboot, mode "default"
+    bindsym x exec --no-startup-id ~/.i3/i3exit shutdown, mode "default"
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+# Resize mode
+bindsym $mod+r mode "resize"
+mode "resize" {
+    bindsym h resize shrink width 10 px or 10 ppt
+    bindsym j resize grow height 10 px or 10 ppt
+    bindsym k resize shrink height 10 px or 10 ppt
+    bindsym l resize grow width 10 px or 10 ppt
+
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or 10 ppt
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+# Quick open mode
+bindsym $mod+d mode "qopen"
+mode "qopen" {
+    bindsym f exec firefox, mode "default"
+    bindsym s exec flameshot gui, mode "default"
+    bindsym t exec thunderbird, mode "default"
+    bindsym o exec obsidian, mode "default"
+    bindsym c exec code, mode "default"
+
+    bindsym a exec --no-startup-id /home/pcaro/bin/twitter; exec --no-startup-id telegram-desktop; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+# Media keys
+bindsym XF86AudioMute exec amixer set Master toggle
+bindsym XF86AudioLowerVolume exec amixer set Master 3dB- unmute
+bindsym XF86AudioRaiseVolume exec amixer set Master 3dB+ unmute
+
+# Colors definition
+# class                 border  backgr. text    indicator
+client.focused          #444444 #222222 #ffffff #999999
+client.focused_inactive #333333 #666666 #ffffff #484e50
+client.unfocused        #333333 #666666 #ffffff #484e50
+client.urgent           #2f343a #d75f5f #ffffff #d75f5f
+
+# Specific window behaviour
+assign [class="firefox"] $2
+assign [class="Google-chrome"] $2
+assign [class="Pidgin"] $3
+assign [class="Cawbird"] $3
+assign [class="thunderbird"] $9
+assign [class="Exaile"] $10
+assign [class="KeePassXC"] $8
+assign [title="Burp Suite Professional .*"] A
+
+for_window [class="fontforge"] floating enable
+for_window [class="Microsoft Teams - Preview" window_type="notification"] floating enable
+for_window [class="java" title="Copy"] floating enable
+for_window [class="burp-StartBurp" title="^ $"] floating enable
+
+no_focus [class="Microsoft Teams - Preview"]
+
+# Titleless windows
+for_window [class="^.*"] border pixel 2
+
+# Restore wallpaper
+exec "nitrogen --restore"
+
+# Start compositor
+exec picom
+
+# Turn on/off system beep
+exec xset b off
+
+# Redshift
+exec --no-startup-id redshift-gtk
+
+# NetworkManager applet
+exec --no-startup-id nm-applet
+
+# Volumeicon
+exec --no-startup-id volumeicon
+
+# Start clipboard manager
+exec --no-startup-id parcellite --daemon
+
+# Start Bluetooth manager
+exec --no-startup-id "sleep 5s && blueberry-tray"
+
+# Start Nextcloud
+exec --no-startup-id "sleep 20s && nextcloud"
+
+{{ if eq .chezmoi.hostname "finn" }}
+
+# Workspaces configuration between screens
+workspace $1 output DP-4
+workspace $2 output DP-4
+workspace $3 output HDMI-0
+workspace $4 output DP-4
+workspace $5 output DP-4
+workspace $6 output DP-4
+workspace $7 output HDMI-0
+workspace $8 output HDMI-0
+workspace $9 output HDMI-0
+workspace $10 output HDMI-0
+
+# Layout configuration
+exec --no-startup-id $HOME/.i3/restore_layout.sh
+
+# i3bar configuration
+bar {
+    id bar-1
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output DP-4
+    tray_output DP-4
+
+    colors {
+        background $base00
+        separator $base01
+        statusline $base07
+
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
+    }
+
+}
+
+bar {
+    id bar-2
+    position top
+    font pango:Hermit 10
+    output HDMI-0
+    tray_output none
+
+    colors {
+        background $base00
+        separator $base01
+        statusline $base07
+
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
+    }
+
+}
+
+# Gaps configuration
+gaps inner 5
+{{ else if eq .chezmoi.hostname "lemongrab" }}
+
+# Workspaces configuration between screens
+workspace $1 output VGA1
+workspace $2 output VGA1
+workspace $3 output DP1
+workspace $4 output VGA1
+workspace $5 output VGA1
+workspace $6 output VGA1
+workspace $7 output DP1
+workspace $8 output DP1
+workspace $9 output DP1
+workspace $10 output DP1
+workspace A output HDMI2
+workspace B output HDMI2
+
+# i3bar configuration
+bar {
+    id bar-1
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output eDP1
+    tray_output eDP1
+
+    colors {
+        background $base00
+        separator $base01
+        statusline $base07
+
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
+    }
+
+}
+
+bar {
+    id bar-2
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output VGA1
+    tray_output VGA1
+
+    colors {
+        background $base00
+        separator $base01
+        statusline $base07
+
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
+    }
+
+}
+
+bar {
+    id bar-3
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output DP1
+    tray_output none
+
+    colors {
+        background $base00
+        separator $base01
+        statusline $base07
+
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
+    }
+
+}
+
+bar {
+    id bar-4
+    status_command i3blocks
+    position top
+    font pango:Hermit 10
+    output HDMI2
+    tray_output none
+
+    colors {
+        background $base00
+        separator $base01
+        statusline $base07
+
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
+    }
+
+}
+
+# Battery icon
+exec --no-startup-id cbatticon
+{{ else }}
+
+{{ end }}

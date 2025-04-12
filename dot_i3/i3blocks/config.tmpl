@@ -1,0 +1,56 @@
+# Global properties
+separator=true
+separator_block_width=15
+command=blocks/$BLOCK_NAME
+
+{{ if eq .chezmoi.hostname "finn" }}
+[bandwidth]
+interval=persist
+markup=pango
+label= 
+INTERFACE=enp7s0
+USE_BITS=1
+{{ else if eq .chezmoi.hostname "lemongrab" }}
+[bandwidth]
+interval=persist
+markup=pango
+label= 
+INTERFACE=enp0s25
+USE_BITS=1
+
+[bandwidth]
+interval=persist
+markup=pango
+label= 
+INTERFACES=wlo1
+USE_BITS=1
+{{ end }}
+
+[cpu]
+label= 
+interval=2
+
+[memory]
+label= 
+interval=5
+
+[disk]
+label= 
+DIR=/
+interval=30
+
+{{ if eq .chezmoi.hostname "finn" }}
+[disk]
+label= 
+DIR=/mnt/Storage
+interval=30
+
+[disk]
+label= 
+DIR=/mnt/windows
+interval=30
+{{ end }}
+
+[calendar]
+interval=1
+DATEFMT=+%Y-%m-%d %a %k:%M

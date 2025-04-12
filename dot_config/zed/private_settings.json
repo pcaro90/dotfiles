@@ -1,0 +1,71 @@
+{
+  // AI assistant settings
+  "assistant": {
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "claude-3-7-sonnet"
+    },
+    "version": "2"
+  },
+  "features": {
+    "edit_prediction_provider": "copilot"
+  },
+
+  // Keymap and Vim settings
+  "base_keymap": "VSCode",
+  "vim_mode": true,
+  "vim": {
+    "use_system_clipboard": "never"
+  },
+
+  // Disable telemetry
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+
+  // Font settings
+  "buffer_font_family": "Hermit",
+  "buffer_font_size": 14,
+  "buffer_font_weight": 200,
+  "buffer_line_height": {
+    "custom": 1.4
+  },
+
+  // Theme and icon settings
+  "theme": "One Dark",
+  "icon_theme": "Material Icon Theme",
+  "current_line_highlight": "gutter",
+
+  "experimental.theme_overrides": {
+    "background": "#1F1F1F",
+    "editor.background": "#1F1F1F",
+    "editor.gutter.background": "#1F1F1F",
+    "panel.background": "#181818",
+    "hint": "$ff0000",
+    "syntax": {
+      "comment": {
+        // "color": "#6A9955"
+      },
+      "punctuation.bracket": {
+        "color": "#FFD700"
+      },
+      "punctuation.delimiter": {
+        "color": "#CCCCCC"
+      }
+    }
+  },
+
+  // Language-specific settings
+  "languages": {
+    "Python": {
+      "language_servers": ["pyright", "ruff"],
+      "wrap_guides": [88]
+    }
+  },
+
+  // Misc settings
+  "collaboration_panel": {
+    "dock": "left"
+  }
+}

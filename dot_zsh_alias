@@ -1,0 +1,82 @@
+# ---------------------------------------------------
+# Copyright (c) 2020 Pablo Caro. All Rights Reserved.
+# Pablo Caro <me@pcaro.es> - http://pcaro.es/
+# zsh_alias
+# ---------------------------------------------------
+
+# Use ripgrep config
+alias rg='RIPGREP_CONFIG_PATH=/home/pcaro/.ripgreprc rg'
+
+# Faster movement to parent paths
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Frequently used applications
+alias v='nvim'
+alias g='git'
+alias d='docker'
+alias l='exa'
+alias la='exa -la'
+
+# Python aliases
+alias py='python'
+alias py2='python2'
+alias py3='python3'
+alias by='bpython'
+
+# Colors
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias tree='tree -C'
+
+# Arch aliases
+alias pac='pacman --color=auto'
+alias spac='sudo pacman --color=auto'
+alias yao='yaourt'
+
+# TaskWarrior
+. ~/.zsh_taskwarrior_alias
+
+# Public IP
+alias iip='curl https://icanhazip.com'
+
+# Grep IP (rg)
+alias gip='rg --pcre2 "(?<![\.\d])(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?![\.\d])"'
+
+# dd progress. dd prints the current speed and progress.
+alias ddp='sudo kill -USR1 `pgrep "^dd$"`'
+
+# Proxychains
+alias pc='proxychains -q'
+
+# Terminal copy/paste
+alias cpy='xclip -i -selection clipboard'
+alias pst='xclip -o -selection clipboard'
+
+# Custom locate
+function my-locate { rg $* $HOME/.locatedb}
+alias locate='noglob my-locate'
+alias updatedb="find / >$HOME/.locatedb 2>/dev/null"
+
+# Wait for a PID to finnish
+function waitfor(){
+    for PID in "$@"; do
+        while s=`ps -p $PID -o s=` && [[ "$s" && "$s" != 'Z' ]]; do
+            sleep 0.5
+        done
+    done
+}
+
+function b64(){
+    echo "$1" | base64 -d
+}
+
+function p(){
+    if [ -z "$1" ]; then
+        TARGET="8.8.8.8"
+    else
+        TARGET="$1"
+    fi
+    ping -a $TARGET
+}
