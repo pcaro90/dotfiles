@@ -1,6 +1,6 @@
 configuration {
 modi: "run,drun,combi";
-font: "Hermit 10";
+font: "Hermit 12";
 /*	location: 0;*/
 /*	yoffset: 0;*/
 /*	xoffset: 0;*/
