@@ -31,7 +31,6 @@
 "          <F3> : Show hidden characters and toggle conceal
 "          <F4> : Stop highlighting current search
 "          <F5> : Make/python
-"          <F6> : SyntasticCheck, show list and go to first
 
 "          <F8> : Toggle undotree
 "          <F9> : Toggle NERDtree
@@ -161,9 +160,6 @@
     " surround.vim - quoting/parenthesizing made simple
     Plug 'tpope/vim-surround'
 
-    " Syntastic - Syntax cheching through external syntax checkers
-    Plug 'scrooloose/syntastic'
-
     " unimpaired.vim - Pairs of handy bracket mappings
     Plug 'tpope/vim-unimpaired'
 
@@ -182,12 +178,6 @@
     " Highlight all trailing whitespace characters
     Plug 'ntpeters/vim-better-whitespace'
 
-    " UltiSnip - Implementation of TextMate's Snippets
-    Plug 'SirVer/ultisnips'
-
-    " Snippets
-    Plug 'honza/vim-snippets'
-
     " NERDtree - A tree explorer plugin
     Plug 'scrooloose/nerdtree'
 
@@ -199,9 +189,6 @@
 
     " Tagbar - Class outline viewer
     Plug 'majutsushi/tagbar'
-
-    " YouCompleteMe - Code completion engine
-    Plug 'ycm-core/YouCompleteMe'
 
     " EasyMotion - Vim motions on speed
     Plug 'easymotion/vim-easymotion'
@@ -215,29 +202,8 @@
     " Vim-Go - Go development plugin for Vim
     Plug 'fatih/vim-go'
 
-    " Black - The uncompromising Python code formatter
-    Plug 'psf/black', { 'branch': 'stable' }
-
     " Wakatime - Programming metrics
     Plug 'wakatime/vim-wakatime'
-
-    " OLD
-    " " TeX-PDF - Lightweight TeX-to-PDF development support
-    " Plug 'TeX-PDF'
-    " " delimitMate - Inserts matchend bracket, paren, brace or quote
-    " Plugin 'Raimondi/delimitMate'
-    " " python-syntax - Python syntax highlighting
-    " Plugin 'hdima/python-syntax'
-    " " jpythonfold.vim - Python fold script
-    " Plugin 'pcaro90/jpythonfold.vim'
-    " " ack.vim - Ack (better than grep!) replacement
-    " Plugin 'mileszs/ack.vim'
-    " " vim-markdown - Markdown syntax highlight for Vim editor
-    " Plugin 'hallison/vim-markdown'
-    " " ShowTrailingWhitespace - Detect unwanted whitespace at the end of lines
-    " Plugin 'ShowTrailingWhitespace'
-    " " DeleteTrailingWhitespace - Delete unwanted whitespace at the end of lines
-    " Plugin 'DeleteTrailingWhitespace'
 
     call plug#end()
 
@@ -268,7 +234,6 @@
     set statusline+=%4*%5r  " ReadOnly flag
     set statusline+=%5*\ %y  " File type
     set statusline+=%6*\ %m  " Modified flag
-    set statusline+=%7*%{SyntasticStatuslineFlag()}
 
     set statusline+=%=  " Separation
 
@@ -334,18 +299,6 @@
     "     " let g:DeleteTrailingWhitespace_Action = 'ask'
     "     nnoremap <Leader>d :<C-u>%DeleteTrailingWhitespace<CR>
 
-    " Black
-    nnoremap <leader>f :Black<CR>
-
-    " Syntastic
-    nnoremap <F6> :SyntasticCheck<CR>:Errors<CR>:lfirst<CR>
-
-    let g:syntastic_check_on_open = 0
-    let g:syntastic_check_on_wq = 0
-    let g:syntastic_python_checkers = ['flake8', 'python', 'pep257']
-    let g:syntastic_python_flake8_args = "--extend-ignore=E203 --max-line-length=88"
-    let g:syntastic_php_checkers = ['php', 'phpcs', 'phpmd']
-
     " commentary.vim
     " NOTE: These mappings HAVE to allow recursive mapping
     nmap <leader>c gc
@@ -371,20 +324,6 @@
 
     " EasyMotion
     let g:EasyMotion_keys = 'arsdheiqwfpgjluy;zxcvbkmtno'
-
-    " UltiSnips
-    let g:UltiSnipsExpandTrigger="<C-Space>"
-    let g:UltiSnipsJumpForwardTrigger="<C-Space>"
-
-    " YouCompleteMe
-    let g:ycm_autoclose_preview_window_after_insertion = 1
-    let g:ycm_key_invoke_completion = ''
-    let g:ycm_gopls_binary_path = '/home/pcaro/go/bin/gopls'
-
-    " Vimwiki
-    let g:vimwiki_list = [{'path': '~/vimwiki/', 'syntax': 'markdown', 'ext': 'md'}]
-    let g:vimwiki_global_ext = 0
-
 
 " Extra functions {{{1
 
