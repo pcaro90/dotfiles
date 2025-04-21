@@ -172,9 +172,6 @@
     " indentline - Display indention levels with vertical lines (conceal)
     Plug 'yggdroot/indentline'
 
-    " vim-polyglot - A collection of language packs
-    Plug 'sheerun/vim-polyglot'
-
     " Highlight all trailing whitespace characters
     Plug 'ntpeters/vim-better-whitespace'
 
