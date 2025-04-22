@@ -36,7 +36,11 @@
 window {
     location:           north;
     width:              100%;
+{{ if eq .chezmoi.hostname "finn" }}
+    height:             26px;
+{{ else }}
     height:             30px;
+{{ end }}
     background-color:   @color0;
     children:           [ mainbox,message ];
 }
