@@ -127,5 +127,5 @@ color.sync.rejected=red
 color.undo.before=yellow
 color.undo.after=green
 
-news.version=3.2.0
+news.version=3.4.1
 context=trabajo
