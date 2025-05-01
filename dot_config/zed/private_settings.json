@@ -33,28 +33,28 @@
   },
 
   // Theme and icon settings
-  "theme": "One Dark",
+  "theme": "Tokyo Night",
   "icon_theme": "Material Icon Theme",
   "current_line_highlight": "gutter",
 
-  "experimental.theme_overrides": {
-    "background": "#1F1F1F",
-    "editor.background": "#1F1F1F",
-    "editor.gutter.background": "#1F1F1F",
-    "panel.background": "#181818",
-    "hint": "$ff0000",
-    "syntax": {
-      "comment": {
-        // "color": "#6A9955"
-      },
-      "punctuation.bracket": {
-        "color": "#FFD700"
-      },
-      "punctuation.delimiter": {
-        "color": "#CCCCCC"
-      }
-    }
-  },
+  // "experimental.theme_overrides": {
+  //   "background": "#1F1F1F",
+  //   "editor.background": "#1F1F1F",
+  //   "editor.gutter.background": "#1F1F1F",
+  //   "panel.background": "#181818",
+  //   "hint": "$ff0000",
+  //   "syntax": {
+  //     "comment": {
+  //       // "color": "#6A9955"
+  //     },
+  //     "punctuation.bracket": {
+  //       "color": "#FFD700"
+  //     },
+  //     "punctuation.delimiter": {
+  //       "color": "#CCCCCC"
+  //     }
+  //   }
+  // },
 
   // Language-specific settings
   "languages": {
