@@ -21,7 +21,7 @@ if [[ $TERM == foot ]]; then
 fi
 
 # Vim as system editor
-export EDITOR=vim
+export EDITOR=nvim
 
 # Set TERM var correctly WARNING
 if [ "$TERM" = "xterm" ] ; then
