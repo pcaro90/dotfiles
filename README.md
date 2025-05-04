@@ -4,7 +4,7 @@ This repository contains my personal configuration files (dotfiles) for various 
 
 ## What to do with this
 
-I don't know, it's here just so I can sync it between computers. Feel free to use as you like.
+I don't know, it's here just so I can sync it between computers. Feel free to use it as you like.
 
 ## License
 
