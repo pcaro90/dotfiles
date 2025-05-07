@@ -102,7 +102,7 @@ local on_attach = function(client, bufnr)
   -- Inlay hints
   if client:supports_method(methods.textDocument_inlayHint) then
     vim.g.inlay_hints = false
-    map({ "n", "i" }, "<C-S-h>", function()
+    map({ "n", "i" }, "<C-5>", function()
       vim.g.inlay_hints = not vim.g.inlay_hints
 
       vim.notify(

@@ -3,6 +3,7 @@ local map = vim.keymap.set
 
 -- leader
 vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
 -- Open Lazy, the plugin manager
 map("n", "<leader>l", ":Lazy<CR>", { silent = true })
