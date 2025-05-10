@@ -2,7 +2,7 @@ local methods = vim.lsp.protocol.Methods
 
 vim.g.lsp_servers = {
   "lua_ls",
-  "pyright",
+  "basedpyright",
   "ruff",
   "rust_analyzer",
 }
