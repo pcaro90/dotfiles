@@ -33,17 +33,15 @@
     ds = diff --staged
     dl = diff HEAD~1
 
-    l = log
-    l1 = log -1 HEAD
-
     pl = pull
     ps = push
 
     r = remote -v
     s = status
 
-    lg = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
-    lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+    l  = log --graph --abbrev-commit --decorate --all --format=format:'%C(bold magenta)%h%Creset - %s %C(bold green)(%ar) %C(yellow)%d%Creset'
+    l2  = log --graph --abbrev-commit --decorate --all --format=format:'%C(bold magenta)%h%Creset - %C(cyan)%ai%Creset %C(bold green)(%ar) %C(yellow)%d%Creset%n    %s%Creset  - %C(bold blue)%an%Creset <%C(dim blue)%ae%Creset>'
+
 
 [color]
      ui = auto
