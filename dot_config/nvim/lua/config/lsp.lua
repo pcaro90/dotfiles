@@ -21,24 +21,17 @@ local on_attach = function(client, bufnr)
   -- Diagnostics
   -- NOTE: Method "textDocument_publishDiagnostics" is not recognized by lua_ls, for some reason
   -- if client:supports_method(methods.textDocument_diagnostic) then
-  map(
-    "n",
-    "<leader>dd",
-    vim.diagnostic.open_float,
-    { buffer = bufnr, desc = "Diag: Open floating diagnostic for current line" }
-  )
-  map(
-    "n",
-    "<leader>fd",
-    require("fzf-lua").lsp_document_diagnostics,
-    { buffer = bufnr, desc = "Diag: Open all diagnostics for current file" }
-  )
-  map(
-    "n",
-    "<leader>fD",
-    require("fzf-lua").lsp_workspace_diagnostics,
-    { buffer = bufnr, desc = "Diag: Open all diagnostics for current workspace" }
-  )
+  map("n", "<leader>dd", function()
+    vim.diagnostic.open_float({
+      source = true,
+    })
+  end, { buffer = bufnr, desc = "Diag: Open floating diagnostic for current line" })
+  map("n", "<leader>fd", function()
+    require("fzf-lua").lsp_document_diagnostics({ diag_source = true })
+  end, { buffer = bufnr, desc = "Diag: Open all diagnostics for current file" })
+  map("n", "<leader>fD", function()
+    require("fzf-lua").lsp_workspace_diagnostics({ diag_source = true })
+  end, { buffer = bufnr, desc = "Diag: Open all diagnostics for current workspace" })
 
   -- Definitions: Peek and go to (with fzf-lua)
   if client:supports_method(methods.textDocument_definition) then
