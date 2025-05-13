@@ -6,13 +6,14 @@ return {
       notify_on_error = true,
       format_on_save = false,
       formatters_by_ft = {
-        json = { "prettier", stop_on_first = true, name = "dprint", timeout_ms = 500 },
-        jsonc = { "prettier", stop_on_first = true, name = "dprint", timeout_ms = 500 },
+        json = { "prettier", stop_on_first = true, timeout_ms = 500 },
+        jsonc = { "prettier", stop_on_first = true, timeout_ms = 500 },
         lua = { "stylua" },
         markdown = { "prettier" },
         python = { "ruff_format", timeout_ms = 500 },
-        rust = { "rust_analyzer", timeout_ms = 500, lsp_format = "prefer" },
+        rust = { "rustfmt", timeout_ms = 500, lsp_format = "prefer" },
         sh = { "shfmt" },
+        toml = { "taplo"},
         yaml = { "prettier" },
 
         -- For filetypes without a formatter:
