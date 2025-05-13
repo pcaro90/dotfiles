@@ -95,7 +95,7 @@ local on_attach = function(client, bufnr)
   -- Inlay hints
   if client:supports_method(methods.textDocument_inlayHint) then
     vim.g.inlay_hints = false
-    map({ "n", "i" }, "<C-5>", function()
+    map({ "n", "i" }, "<C-S-H>", function()
       vim.g.inlay_hints = not vim.g.inlay_hints
 
       vim.notify(
@@ -117,12 +117,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     on_attach(lsp_client, args.buf)
   end,
 })
-
--- Enable every LSP in vim.g.lsp_servers
--- NOTE: Mason and mason-lspconfig need to be loaded before enabling servers
-for _, server in ipairs(vim.g.lsp_servers) do
-  vim.lsp.enable(server)
-end
 
 -- Diagnostics
 vim.diagnostic.config({
