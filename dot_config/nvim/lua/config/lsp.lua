@@ -1,8 +1,10 @@
 local methods = vim.lsp.protocol.Methods
 
 vim.g.lsp_servers = {
+  "clangd",
   "lua_ls",
   "basedpyright",
+  "nim_langserver",
   "ruff",
   "rust_analyzer",
 }
