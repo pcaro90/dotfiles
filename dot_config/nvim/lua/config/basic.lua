@@ -24,3 +24,6 @@ vim.o.updatetime = 200
 
 -- Define how many ms to wait to consider a mapped sequence is completed
 vim.o.timeoutlen = 500
+
+-- Show NVim title in terminal
+vim.o.title = true
