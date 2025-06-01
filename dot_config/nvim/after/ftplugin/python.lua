@@ -11,9 +11,11 @@ if venv and #venv > 0 then
 end
 
 -- Not found, try to find a poetry.lock
-local poetry_lock = vim.fs.find("poetry.lock", { upward = true, path = fname })
-if poetry_lock and #poetry_lock > 0 then
-  venv_path = vim.fn.trim(vim.fn.system("poetry env info -p"))
+if not venv_path or venv_path == "" then
+  local poetry_lock = vim.fs.find("poetry.lock", { upward = true, path = fname })
+  if poetry_lock and #poetry_lock > 0 then
+    venv_path = vim.fn.trim(vim.fn.system("poetry env info -p"))
+  end
 end
 
 -- Set the virtual environment for the current buffer
