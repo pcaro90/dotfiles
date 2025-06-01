@@ -2,7 +2,6 @@ local methods = vim.lsp.protocol.Methods
 
 -- This funcion will be called when a LSP client is attached
 local on_attach = function(client, bufnr)
-  print("Attached to LSP server: " .. client.name)
   local map = vim.keymap.set
 
   -- Common LSP keymaps
