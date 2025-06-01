@@ -12,11 +12,7 @@
   "grug-far.nvim": { "branch": "main", "commit": "7df08fff7da6ee08006fe8eaccc3407b89da368b" },
   "lazy.nvim": { "branch": "main", "commit": "6c3bda4aca61a13a9c63f1c1d1b16b9d3be90d7a" },
   "lualine.nvim": { "branch": "master", "commit": "15884cee63a8c205334ab13ab1c891cd4d27101a" },
-  "mason-conform.nvim": { "branch": "main", "commit": "1983f353b29d8716751665c18d57e1ac0473a59a" },
-  "mason-lspconfig.nvim": { "branch": "main", "commit": "2cb844268288ccc06b8d0f368ef3c2b195e8278c" },
-  "mason.nvim": { "branch": "main", "commit": "1aceba8bc158b5aaf90649077cad06744bc23ac4" },
   "mini.pairs": { "branch": "main", "commit": "69864a2efb36c030877421634487fd90db1e4298" },
-  "nvim-lspconfig": { "branch": "master", "commit": "ac1dfbe3b60e5e23a2cff90e3bd6a3bc88031a57" },
   "nvim-surround": { "branch": "main", "commit": "0e62500b98f4513feaaf7425c135472457ea5b7d" },
   "nvim-treesitter": { "branch": "master", "commit": "066fd6505377e3fd4aa219e61ce94c2b8bdb0b79" },
   "nvim-web-devicons": { "branch": "master", "commit": "1fb58cca9aebbc4fd32b086cb413548ce132c127" },
@@ -26,6 +22,5 @@
   "snacks.nvim": { "branch": "main", "commit": "bc0630e43be5699bb94dadc302c0d21615421d93" },
   "todo-comments.nvim": { "branch": "main", "commit": "304a8d204ee787d2544d8bc23cd38d2f929e7cc5" },
   "tokyonight.nvim": { "branch": "main", "commit": "057ef5d260c1931f1dffd0f052c685dcd14100a3" },
-  "vim-wakatime": { "branch": "master", "commit": "cb037fb53e718c4f0027a491782ad99efdcd789a" },
   "which-key.nvim": { "branch": "main", "commit": "370ec46f710e058c9c1646273e6b225acf47cbed" }
 }

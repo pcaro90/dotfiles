@@ -1,3 +1,8 @@
+-- Install: yay -S prettier stylua shfmt taplo-cli
+-- Install: nimble install nph
+-- Install: pipx install ruff
+-- Install: rustup component add rustfmt
+
 return {
   {
     "stevearc/conform.nvim",

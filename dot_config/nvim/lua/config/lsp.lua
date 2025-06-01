@@ -1,16 +1,8 @@
 local methods = vim.lsp.protocol.Methods
 
-vim.g.lsp_servers = {
-  "clangd",
-  "lua_ls",
-  "basedpyright",
-  "nim_langserver",
-  "ruff",
-  "rust_analyzer",
-}
-
 -- This funcion will be called when a LSP client is attached
 local on_attach = function(client, bufnr)
+  print("Attached to LSP server: " .. client.name)
   local map = vim.keymap.set
 
   -- Common LSP keymaps
@@ -135,6 +127,21 @@ vim.diagnostic.config({
   underline = true, -- Underline text
   update_in_insert = false, -- Do not update while editing
   severity_sort = true, -- Sort by severity
+})
+
+-- Set up LSP servers.
+vim.api.nvim_create_autocmd({ "BufReadPre", "BufNewFile" }, {
+  once = true,
+  callback = function()
+    local server_configs = vim
+      .iter(vim.api.nvim_get_runtime_file("lsp/*.lua", true))
+      :map(function(file)
+        return vim.fn.fnamemodify(file, ":t:r")
+      end)
+      :totable()
+    print(vim.inspect(server_configs))
+    vim.lsp.enable(server_configs)
+  end,
 })
 
 return {}
