@@ -28,16 +28,17 @@ return {
       },
       formatters = {
         stylua = {
-          args = {
+          prepend_args = {
             "--indent-type",
             "Spaces",
             "--indent-width",
             "2",
-            "--search-parent-directories",
-            "--respect-ignores",
-            "--stdin-filepath",
-            "$FILENAME",
-            "-",
+          },
+        },
+        prettier = {
+          prepend_args = {
+            "--prose-wrap",
+            "always",
           },
         },
       },
