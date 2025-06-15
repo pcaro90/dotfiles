@@ -16,6 +16,7 @@ return {
   },
   settings = {
     basedpyright = {
+      disableOrganizeImports = true,
       analysis = {
         autoSearchPaths = true,
         useLibraryCodeForTypes = true,
