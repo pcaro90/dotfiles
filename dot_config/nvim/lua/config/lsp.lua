@@ -111,6 +111,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
+-- Create a command to manually restart the LSP server for the current buffer
+vim.api.nvim_create_user_command("LspRestart", function()
+  vim.lsp.stop_client(vim.lsp.get_clients())
+  vim.cmd("edit") -- Reload the current buffer to trigger LSP re-attach
+end, {
+  desc = "Manually restart the LSP server for the current buffer",
+})
+
 -- Diagnostics
 vim.diagnostic.config({
   virtual_text = true, -- Show inline text (at the end of the line)
