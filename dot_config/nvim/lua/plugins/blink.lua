@@ -8,11 +8,32 @@ return {
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
-    keymap = { preset = "super-tab" },
+    keymap = {
+      preset = "none",
+
+      ["<C-Space>"] = { "show", "cancel", "fallback" },
+
+      ["<Up>"] = { "select_prev" },
+      ["<Down>"] = { "select_next" },
+
+      ["<C-CR>"] = { "accept", "fallback" },
+    },
     appearance = {
       nerd_font_variant = "normal",
     },
-    completion = { documentation = { auto_show = true } },
+    completion = {
+      documentation = { auto_show = true },
+      ghost_text = {
+        enabled = true,
+        show_with_menu = true,
+      },
+      list = {
+        selection = {
+          preselect = true,
+          auto_insert = false,
+        },
+      },
+    },
 
     sources = {
       per_filetype = {
@@ -32,17 +53,7 @@ return {
     fuzzy = { implementation = "prefer_rust_with_warning" },
   },
 
-  keys = {
-    {
-      "<C-CR>",
-      mode = { "i", "s" },
-      function()
-        require("blink.cmp").show()
-      end,
-      expr = true,
-      desc = "Blink: Show Completion",
-    },
-  },
+  keys = {},
 
   -- config = function(_, opts)
   -- 	require("blink.cmp").setup(opts)
