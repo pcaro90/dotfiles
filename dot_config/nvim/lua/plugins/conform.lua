@@ -17,7 +17,7 @@ return {
         lua = { "stylua" },
         markdown = { "prettier" },
         nim = { "nph" },
-        python = { "ruff_format", timeout_ms = 500 },
+        python = { "ruff_format", "ruff_organize_imports", timeout_ms = 500 },
         rust = { "rustfmt", timeout_ms = 500, lsp_format = "prefer" },
         sh = { "shfmt" },
         toml = { "taplo" },
