@@ -12,6 +12,9 @@ return {
     panel = {
       enabled = false,
     },
-    copilot_model = "gpt-4o-copilot",
+    filetypes = {
+      yaml = true,
+    },
+    -- copilot_model = "gpt-4o-copilot",
   },
 }
