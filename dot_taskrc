@@ -29,20 +29,27 @@ data.location=~/.task
 #include /usr/share/doc/task/rc/solarized-light-256.theme
 #include /usr/share/doc/task/rc/no-color.theme
 
+uda.caldav_uid.type=string
+uda.caldav_uid.label=CalDAV UID
+
 uda.priority.values=H,M,L
 urgency.uda.priority.H.coefficient=4.0
 urgency.uda.priority.M.coefficient=2.0
 urgency.uda.priority.L.coefficient=-5
 
 urgency.user.project.trabajo.coefficient=2.0
+urgency.user.project.telefonica.coefficient=2.0
+
+urgency.blocking.coefficient=4.0
+urgency.active.coefficient=100.0
 
 # Context definition
-context.trabajo.read=project:trabajo
-context.trabajo.write=project:trabajo
 context.personal.read=project:personal
 context.personal.write=project:personal
-context.awct.read=pro:awct
-context.awct.write=pro:awct
+context.telefonica.read=pro:telefonica
+context.telefonica.write=pro:telefonica
+context.trabajo.read=project:trabajo
+context.trabajo.write=project:trabajo
 
 search.case.sensitive=no
 
@@ -92,8 +99,8 @@ color.tagged=
 
 # Due
 color.due=black on green
-color.due.today=red on bright yellow
-color.overdue=white on bright red
+color.due.today=black on bright yellow
+color.overdue=black on bright red
 
 # Report: burndown
 color.burndown.pending=on bright red
