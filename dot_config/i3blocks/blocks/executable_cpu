@@ -17,3 +17,7 @@ elif [ $used -ge 50 ] ; then
 else
     echo "#C3E88D"
 fi
+
+if [ "$BLOCK_BUTTON" -eq 1 ]; then
+    sudo /home/pcaro/bin/reset_keyboard.sh
+fi
