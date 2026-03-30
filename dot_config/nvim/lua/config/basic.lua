@@ -11,6 +11,10 @@ vim.o.smartcase = true -- ...but change to case sensitive if uppercase is search
 vim.o.autoread = true -- Auto recharge changed files
 vim.o.scrolloff = 8 -- Scroll distance
 vim.o.signcolumn = "auto:2-4" -- Show sign column, min 2, max 4
+vim.o.formatoptions = "cqj" -- Format options
+
+vim.o.formatexpr = ""
+vim.b.formatexpr = "" -- Disable format on save
 
 -- Show whitespace.
 vim.opt.list = true
