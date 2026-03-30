@@ -2,7 +2,6 @@ return {
   "folke/snacks.nvim",
   ---@type snacks.Config
   opts = {
-    bufdelete = { enabled = true },
     dashboard = {
       enabled = true,
       preset = {
@@ -30,13 +29,10 @@ return {
         { section = "startup" },
       },
     },
-    explorer = { enabled = true, replace_netrw = true },
-    indent = { enabled = true, animate = { enabled = false } },
     input = { enabled = true },
     lazygit = { enabled = true },
     quickfile = { enabled = true },
     rename = { enabled = true },
-    scope = { enabled = true },
     statuscolumn = { enabled = true },
     terminal = { enabled = true },
   },
@@ -48,20 +44,6 @@ return {
         require("snacks").lazygit()
       end,
       desc = "Git: Open Lazygit",
-    },
-    {
-      "<leader>bd",
-      function()
-        require("snacks").bufdelete()
-      end,
-      desc = "Buffers: Delete current buffer",
-    },
-    {
-      "<C-1>",
-      function()
-        require("snacks").explorer()
-      end,
-      desc = "Explorer: Open file explorer",
     },
     {
       "<C-Esc>",
