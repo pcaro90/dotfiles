@@ -1,6 +1,6 @@
 -- Install: yay -S prettier stylua shfmt taplo-cli
 -- Install: nimble install nph
--- Install: pipx install ruff
+-- Install: pipx install ruff djlint
 -- Install: rustup component add rustfmt
 
 return {
@@ -12,6 +12,8 @@ return {
       format_on_save = false,
       formatters_by_ft = {
         c = { lsp_format = "prefer" },
+        jinja = { "djlint" },
+        htmldjango = { "djlint" },
         json = { "prettier", stop_on_first = true, timeout_ms = 500 },
         jsonc = { "prettier", stop_on_first = true, timeout_ms = 500 },
         lua = { "stylua" },
@@ -22,6 +24,7 @@ return {
         sh = { "shfmt" },
         toml = { "taplo" },
         yaml = { "prettier" },
+        zig = { "zigfmt" },
 
         -- For filetypes without a formatter:
         ["_"] = { "trim_whitespace", "trim_newlines" },
