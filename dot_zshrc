@@ -131,3 +131,11 @@ function chpwd-osc7-pwd() {
     (( ZSH_SUBSHELL )) || osc7-pwd
 }
 add-zsh-hook -Uz chpwd chpwd-osc7-pwd
+
+# pnpm
+export PNPM_HOME="/home/pcaro/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
