@@ -41,7 +41,7 @@ map("n", "<BS>", ":b#<CR>", { silent = true })
 map("n", "<leader>q", ":qa<CR>", { silent = true })
 
 -- Super <ESC>
-map({ "i", "s", "n" }, "<ESC>", function()
+map({ "s", "n" }, "<ESC>", function()
   -- Clear search highlight
   vim.cmd("noh")
 
