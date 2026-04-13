@@ -17,7 +17,8 @@
         xkb_layout us
     }
 
-## Output config
+{% if yadm.hostname == "finn" %}
+## Output config (Finn)
     output DP-3 {
         resolution 2560x1440@144Hz
         position 1080,235
@@ -30,6 +31,15 @@
         transform 270
         background /home/pcaro/Pictures/Wallpapers/s2.jpg fill
     }
+{% endif %}
+{% if yadm.hostname == "lemongrab" %}
+## Output config (Lemongrab)
+    output eDP-1 {
+        resolution 1920x1080@60,008Hz
+        position 0,0
+        background /home/pcaro/Pictures/wp1995162.png fill
+    }
+{% endif %}
 
 ## Windows config
 
@@ -47,7 +57,8 @@
     set $11 A
     set $12 B
 
-    ### Workspaces configuration between screens
+{% if yadm.hostname == "finn" %}
+    ### Workspaces configuration between screens (Finn)
     workspace $1 output DP-3
     workspace $2 output DP-3
     workspace $3 output HDMI-A-1
@@ -60,6 +71,7 @@
     workspace $10 output HDMI-A-1
     workspace $11 output HDMI-A-1
     workspace $12 output HDMI-A-1
+{% endif %}
 
     ### Specific window behaviour
     assign [app_id="firefox"] $2
@@ -72,19 +84,6 @@
     for_window [app_id="flameshot"] border pixel 0, floating enable, fullscreen disable, move absolute position 0 0
     for_window [title="Open .*Folder"] floating enable
     for_window [title="Open .*File"] floating enable
-
-    ### XWayland config
-    # assign [class="Pidgin"] $3
-    # assign [class="Cawbird"] $3
-    # assign [class="Exaile"] $10
-    # assign [class="KeePassXC"] $8
-    # assign [title="Burp Suite Professional .*"] A
-
-    # for_window [class="fontforge"] floating enable
-    # for_window [class="Microsoft Teams - Preview" window_type="notification"] floating enable
-    # for_window [class="java" title="Copy"] floating enable
-    # for_window [class="burp-StartBurp" title="^ $"] floating enable
-
 
 ## Colors definition
     ### class                 border  backgr. text    indicator
@@ -250,31 +249,18 @@
     }
 
 ########################################################################################
-# Status bars
+# Status bars (Finn)
 
+{% if yadm.hostname == "finn" %}
 bar {
     position top
     font pango:Hermit 10
     output DP-3
     tray_output DP-3
 
-    # When the status_command prints a new line to stdout, swaybar updates.
-    # The default just shows the current date and time.
-    # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
     status_command i3blocks
 
-    colors {
-        background $base00
-        separator $base01
-        statusline $base07
-
-        # State             Border  BG      Text
-        focused_workspace   $base05 $base0D $base00
-        active_workspace    $base05 $base01 $base05
-        inactive_workspace  $base03 $base01 $base05
-        urgent_workspace    $base08 $base08 $base00
-        binding_mode        $base00 $base0A $base00
-    }
+    include ~/.config/sway/bar_colors
 }
 
 bar {
@@ -283,20 +269,21 @@ bar {
     output HDMI-A-1
     tray_output none
 
-    colors {
-        background $base00
-        separator $base01
-        statusline $base07
-
-        # State             Border  BG      Text
-        focused_workspace   $base05 $base0D $base00
-        active_workspace    $base05 $base01 $base05
-        inactive_workspace  $base03 $base01 $base05
-        urgent_workspace    $base08 $base08 $base00
-        binding_mode        $base00 $base0A $base00
-    }
+    include ~/.config/sway/bar_colors
 }
+{% endif %}
+{% if yadm.hostname == "lemongrab" %}
+bar {
+    position top
+    font pango:Hermit 10
+    output eDP-1
+    tray_output none
 
+    status_command i3blocks
+
+    include ~/.config/sway/bar_colors
+}
+{% endif %}
 
 ########################################################################################
 # Exec
@@ -308,7 +295,6 @@ bar {
     #     && systemctl --user start pipewire wireplumber xdg-desktop-portal xdg-desktop-portal-wlr"
 
     ### Set WAYLAND_DISPLAY variables
-    # exec bash -c "dbus-update-activation-environment --systemd DISPLAY XAUTHORITY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway"
     exec dbus-update-activation-environment DISPLAY XAUTHORITY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
     ### Execute gnome-keyring-daemon
@@ -337,64 +323,5 @@ bar {
     exec_always "test -f ~/.cache/stream_pending && \
         swaymsg output HDMI-A-1 disable && \
         systemctl --user start sunshine"
-
-
-# Output
-
-### Output configuration
-#
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-# output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
-#
-# Example configuration:
-#
-#   output HDMI-A-1 resolution 1920x1080 position 1920,0
-#
-# You can get the names of your outputs by running: swaymsg -t get_outputs
-
-### Idle configuration
-#
-# Example configuration:
-#
-# exec swayidle -w \
-#          timeout 300 'swaylock -f -c 000000' \
-#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-#          before-sleep 'swaylock -f -c 000000'
-#
-# This will lock your screen after 300 seconds of inactivity, then turn off
-# your displays after another 300 seconds, and turn your screens back on when
-# resumed. It will also lock your screen before your computer goes to sleep.
-
-#
-# Scratchpad:
-#
-    # Sway has a "scratchpad", which is a bag of holding for windows.
-    # You can send windows there and get them back later.
-
-    # Move the currently focused window to the scratchpad
-    # bindsym $mod+Shift+minus move scratchpad
-
-    # Show the next scratchpad window or hide the focused scratchpad window.
-    # If there are multiple scratchpad windows, this command cycles through them.
-    # bindsym $mod+minus scratchpad show
-
-
-#
-# Status Bar:
-#
-# Read `man 5 sway-bar` for more information about this section.
-# bar {
-#     position top
-#
-#     # When the status_command prints a new line to stdout, swaybar updates.
-#     # The default just shows the current date and time.
-#     status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-#
-#     colors {
-#         statusline #ffffff
-#         background #323232
-#         inactive_workspace #32323200 #32323200 #5c5c5c
-#     }
-# }
 
 include /etc/sway/config.d/*
