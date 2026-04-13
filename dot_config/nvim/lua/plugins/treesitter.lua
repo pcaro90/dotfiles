@@ -1,10 +1,21 @@
 return {
   "nvim-treesitter/nvim-treesitter",
+  branch = "main",
   build = ":TSUpdate",
   event = { "BufReadPre", "BufNewFile" },
-  main = "nvim-treesitter.configs", -- Sets main module to use for opts
-  opts = {
-    ensure_installed = {
+  main = "nvim-treesitter",
+  init = function()
+    -- Set up an autocommand to enable treesitter and indentation when a file is opened
+    vim.api.nvim_create_autocmd("FileType", {
+      callback = function()
+        -- Enable treesitter highlighting and disable regex syntax
+        pcall(vim.treesitter.start)
+        -- Enable treesitter-based indentation
+        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      end,
+    })
+
+    local ensureInstalled = {
       "bash",
       "c",
       "cpp",
@@ -14,7 +25,6 @@ return {
       "html",
       "json",
       "json5",
-      "jsonc",
       "lua",
       "luadoc",
       "markdown",
@@ -29,13 +39,22 @@ return {
       "vimdoc",
       "yaml",
       "zig",
-    },
+    }
+    local alreadyInstalled = require("nvim-treesitter.config").get_installed()
+    local parsersToInstall = vim
+      .iter(ensureInstalled)
+      :filter(function(parser)
+        return not vim.tbl_contains(alreadyInstalled, parser)
+      end)
+      :totable()
+    require("nvim-treesitter").install(parsersToInstall)
+  end,
+  opts = {
     auto_install = true,
     highlight = {
-      enable = true,
       disable = { "csv" },
       additional_vim_regex_highlighting = { "ruby" },
     },
-    indent = { enable = true, disable = { "ruby" } },
+    indent = { disable = { "ruby" } },
   },
 }
