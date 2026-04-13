@@ -1,0 +1,400 @@
+########################################################################################
+# Configuration
+
+## General config
+    workspace_auto_back_and_forth yes
+    for_window [class="^.*"] border pixel 2
+    gaps inner 5
+    font pango:Hermit 10
+
+## Input config
+    input type:keyboard {
+        xkb_layout us
+        xkb_variant colemak
+    }
+
+    input "9011:26214:ydotoold_virtual_device" {
+        xkb_layout us
+    }
+
+## Output config
+    output DP-3 {
+        resolution 2560x1440@144Hz
+        position 1080,235
+        background /home/pcaro/Pictures/Wallpapers/s1.jpg fill
+    }
+
+    output HDMI-A-1 {
+        resolution 1920x1080
+        position 0,0
+        transform 270
+        background /home/pcaro/Pictures/Wallpapers/s2.jpg fill
+    }
+
+## Windows config
+
+    ### Workspaces
+    set $1 1
+    set $2 2:www
+    set $3 3:IM
+    set $4 4
+    set $5 5
+    set $6 6
+    set $7 7
+    set $8 8
+    set $9 9:Email
+    set $10 10:Music
+    set $11 A
+    set $12 B
+
+    ### Workspaces configuration between screens
+    workspace $1 output DP-3
+    workspace $2 output DP-3
+    workspace $3 output HDMI-A-1
+    workspace $4 output DP-3
+    workspace $5 output DP-3
+    workspace $6 output DP-3
+    workspace $7 output HDMI-A-1
+    workspace $8 output HDMI-A-1
+    workspace $9 output HDMI-A-1
+    workspace $10 output HDMI-A-1
+    workspace $11 output HDMI-A-1
+    workspace $12 output HDMI-A-1
+
+    ### Specific window behaviour
+    assign [app_id="firefox"] $2
+    assign [app_id="org.telegram.desktop"] $3
+    assign [app_id="chrome-twitter.com__-Twitter"] $3
+    assign [app_id="obsidian"] $7
+    assign [app_id="org.keepassxc.KeePassXC"] $8
+    assign [app_id="thunderbird"] $9
+
+    for_window [app_id="flameshot"] border pixel 0, floating enable, fullscreen disable, move absolute position 0 0
+    for_window [title="Open .*Folder"] floating enable
+    for_window [title="Open .*File"] floating enable
+
+    ### XWayland config
+    # assign [class="Pidgin"] $3
+    # assign [class="Cawbird"] $3
+    # assign [class="Exaile"] $10
+    # assign [class="KeePassXC"] $8
+    # assign [title="Burp Suite Professional .*"] A
+
+    # for_window [class="fontforge"] floating enable
+    # for_window [class="Microsoft Teams - Preview" window_type="notification"] floating enable
+    # for_window [class="java" title="Copy"] floating enable
+    # for_window [class="burp-StartBurp" title="^ $"] floating enable
+
+
+## Colors definition
+    ### class                 border  backgr. text    indicator
+    client.focused          #444444 #222222 #ffffff #999999
+    client.focused_inactive #333333 #666666 #ffffff #484e50
+    client.unfocused        #333333 #666666 #ffffff #484e50
+    client.urgent           #2f343a #d75f5f #ffffff #d75f5f
+
+    ### Base colors
+    set $base00 #212121
+    set $base01 #303030
+    set $base02 #353535
+    set $base03 #4A4A4A
+    set $base04 #B2CCD6
+    set $base05 #EEFFFF
+    set $base06 #EEFFFF
+    set $base07 #FFFFFF
+    set $base08 #F07178
+    set $base09 #F78C6C
+    set $base0A #FFCB6B
+    set $base0B #C3E88D
+    set $base0C #89DDFF
+    set $base0D #82AAFF
+    set $base0E #C792EA
+    set $base0F #FF5370
+
+########################################################################################
+# Keybindings
+
+## Variables
+    ### Use super
+    set $mod Mod4
+
+    ### Vim-like arrows
+    set $left h
+    set $down j
+    set $up k
+    set $right l
+
+    ### Set programs
+    set $term foot
+    set $menu rofi -show combi
+
+    ### Workspaces
+    # CLIPBOARD PENDING
+
+## Apps launchers
+    bindsym $mod+Return exec $term
+    bindsym $mod+t exec $menu
+    bindsym $mod+backslash exec thunar
+    ### Clipboard menu
+    bindsym $mod+p exec bash -c 'O=$(cliphist list | wofi -d -k /dev/null) && echo -n $O | sed "s/ /\t/" | cliphist decode | wl-copy'
+
+## Sway Control
+    bindsym $mod+q kill
+    bindsym $mod+Shift+c reload
+
+    ### Floating windows
+    floating_modifier $mod normal
+    bindsym $mod+space floating toggle
+    bindsym $mod+Shift+space focus mode_toggle
+
+    ### Window focus
+    bindsym $mod+$left focus left
+    bindsym $mod+$down focus down
+    bindsym $mod+$up focus up
+    bindsym $mod+$right focus right
+    bindsym $mod+Left focus left
+    bindsym $mod+Down focus down
+    bindsym $mod+Up focus up
+    bindsym $mod+Right focus right
+    bindsym $mod+a focus parent
+    bindsym $mod+o focus child
+
+    ### Window movement
+    bindsym $mod+Shift+$left move left
+    bindsym $mod+Shift+$down move down
+    bindsym $mod+Shift+$up move up
+    bindsym $mod+Shift+$right move right
+    bindsym $mod+Shift+Left move left
+    bindsym $mod+Shift+Down move down
+    bindsym $mod+Shift+Up move up
+    bindsym $mod+Shift+Right move right
+
+    ### Switch to workspace
+    bindsym $mod+1 workspace $1
+    bindsym $mod+2 workspace $2
+    bindsym $mod+3 workspace $3
+    bindsym $mod+4 workspace $4
+    bindsym $mod+5 workspace $5
+    bindsym $mod+6 workspace $6
+    bindsym $mod+7 workspace $7
+    bindsym $mod+8 workspace $8
+    bindsym $mod+9 workspace $9
+    bindsym $mod+0 workspace $10
+    bindsym $mod+minus workspace $11
+    bindsym $mod+equal workspace $12
+
+    ### Move focused container to workspace
+    bindsym $mod+Shift+1 move container to workspace $1
+    bindsym $mod+Shift+2 move container to workspace $2
+    bindsym $mod+Shift+3 move container to workspace $3
+    bindsym $mod+Shift+4 move container to workspace $4
+    bindsym $mod+Shift+5 move container to workspace $5
+    bindsym $mod+Shift+6 move container to workspace $6
+    bindsym $mod+Shift+7 move container to workspace $7
+    bindsym $mod+Shift+8 move container to workspace $8
+    bindsym $mod+Shift+9 move container to workspace $9
+    bindsym $mod+Shift+0 move container to workspace $10
+    bindsym $mod+Shift+minus move container to workspace $11
+    bindsym $mod+Shift+equal move container to workspace $12
+
+    ### Layout
+    bindsym $mod+n layout stacking
+    bindsym $mod+e layout tabbed
+    bindsym $mod+i layout toggle split
+    bindsym $mod+s splitv
+    bindsym $mod+v splith
+    bindsym $mod+f fullscreen
+
+    ### Resize mode
+    bindsym $mod+r mode "resize"
+    mode "resize" {
+        bindsym $left resize shrink width 10px or 10 ppt
+        bindsym $down resize grow height 10px or 10 ppt
+        bindsym $up resize shrink height 10px or 10 ppt
+        bindsym $right resize grow width 10px or 10 ppt
+
+        bindsym Left resize shrink width 10px or 10 ppt
+        bindsym Down resize grow height 10px or 10 ppt
+        bindsym Up resize shrink height 10px or 10 ppt
+        bindsym Right resize grow width 10px or 10 ppt
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+    }
+
+    ### Exit mode
+    bindsym $mod+x mode "$exit_mode"
+    set $exit_mode System (e) exit sway, (r) reboot, (x) shutdown
+    mode "$exit_mode" {
+        bindsym e exec swaymsg exit
+        bindsym r exec systemctl reboot
+        bindsym x exec systemctl poweroff
+        bindsym l exec swaylock -c 000000 , mode "default"
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+    }
+
+    ### Quick open mode
+    bindsym $mod+d mode "qopen"
+    mode "qopen" {
+        bindsym f exec firefox, mode "default"
+        bindsym s exec "flameshot gui", mode "default"
+        bindsym t exec thunderbird, mode "default"
+        bindsym o exec obsidian, mode "default"
+
+        bindsym a exec --no-startup-id /home/pcaro/bin/twitter; exec --no-startup-id Telegram; exec --no-startup-id firefox; exec --no-startup-id thunderbird, mode "default"
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+    }
+
+########################################################################################
+# Status bars
+
+bar {
+    position top
+    font pango:Hermit 10
+    output DP-3
+    tray_output DP-3
+
+    # When the status_command prints a new line to stdout, swaybar updates.
+    # The default just shows the current date and time.
+    # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
+    status_command i3blocks
+
+    colors {
+        background $base00
+        separator $base01
+        statusline $base07
+
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
+    }
+}
+
+bar {
+    position top
+    font pango:Hermit 10
+    output HDMI-A-1
+    tray_output none
+
+    colors {
+        background $base00
+        separator $base01
+        statusline $base07
+
+        # State             Border  BG      Text
+        focused_workspace   $base05 $base0D $base00
+        active_workspace    $base05 $base01 $base05
+        inactive_workspace  $base03 $base01 $base05
+        urgent_workspace    $base08 $base08 $base00
+        binding_mode        $base00 $base0A $base00
+    }
+}
+
+
+########################################################################################
+# Exec
+
+    # ### Set WAYLAND_DISPLAY variables
+    # exec bash -c "\
+    #     dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway \
+    #     && systemctl --user stop pipewire wireplumber xdg-desktop-portal xdg-desktop-portal-wlr \
+    #     && systemctl --user start pipewire wireplumber xdg-desktop-portal xdg-desktop-portal-wlr"
+
+    ### Set WAYLAND_DISPLAY variables
+    # exec bash -c "dbus-update-activation-environment --systemd DISPLAY XAUTHORITY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway"
+    exec dbus-update-activation-environment DISPLAY XAUTHORITY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+
+    ### Execute gnome-keyring-daemon
+    # exec gnome-keyring-daemon --start --components=secrets
+
+    ### Execute keyring
+    # exec "eval $(keychain --eval --agents ssh,gpg)"
+
+    ### Store clipboard
+    exec wl-paste --watch cliphist store
+
+    exec sleep 20 & nextcloud
+
+    ### Idle
+    exec swayidle -w \
+    timeout 120 'touch /tmp/idle' \
+        resume 'rm -rf /tmp/idle' \
+    timeout 800 'swaylock -f -c 000000' \
+    timeout 810 'swaymsg "output * power off"' \
+        resume 'swaymsg "output * power on"' \
+    timeout 5 'if pgrep -x swaylock; then swaymsg "output * power off"; fi' \
+        resume 'swaymsg "output * power on"' \
+    before-sleep 'swaylock -f -c 000000'
+
+    ### Auto-stream mode
+    exec_always "test -f ~/.cache/stream_pending && \
+        swaymsg output HDMI-A-1 disable && \
+        systemctl --user start sunshine"
+
+
+# Output
+
+### Output configuration
+#
+# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
+# output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+#
+# Example configuration:
+#
+#   output HDMI-A-1 resolution 1920x1080 position 1920,0
+#
+# You can get the names of your outputs by running: swaymsg -t get_outputs
+
+### Idle configuration
+#
+# Example configuration:
+#
+# exec swayidle -w \
+#          timeout 300 'swaylock -f -c 000000' \
+#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+#          before-sleep 'swaylock -f -c 000000'
+#
+# This will lock your screen after 300 seconds of inactivity, then turn off
+# your displays after another 300 seconds, and turn your screens back on when
+# resumed. It will also lock your screen before your computer goes to sleep.
+
+#
+# Scratchpad:
+#
+    # Sway has a "scratchpad", which is a bag of holding for windows.
+    # You can send windows there and get them back later.
+
+    # Move the currently focused window to the scratchpad
+    # bindsym $mod+Shift+minus move scratchpad
+
+    # Show the next scratchpad window or hide the focused scratchpad window.
+    # If there are multiple scratchpad windows, this command cycles through them.
+    # bindsym $mod+minus scratchpad show
+
+
+#
+# Status Bar:
+#
+# Read `man 5 sway-bar` for more information about this section.
+# bar {
+#     position top
+#
+#     # When the status_command prints a new line to stdout, swaybar updates.
+#     # The default just shows the current date and time.
+#     status_command while date +'%Y-%m-%d %X'; do sleep 1; done
+#
+#     colors {
+#         statusline #ffffff
+#         background #323232
+#         inactive_workspace #32323200 #32323200 #5c5c5c
+#     }
+# }
+
+include /etc/sway/config.d/*
