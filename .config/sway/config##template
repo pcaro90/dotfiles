@@ -39,7 +39,7 @@
     output eDP-1 {
         resolution 1920x1080@60Hz
         position 0,0
-        background /home/pcaro/Pictures/wp1995162.png fill
+        background /home/pcaro/Pictures/wp1995162.png center
     }
 {% endif %}
 
