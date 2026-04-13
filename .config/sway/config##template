@@ -127,19 +127,17 @@
     set $term foot
     set $menu rofi -show combi
 
-    ### Workspaces
-    # CLIPBOARD PENDING
-
 ## Apps launchers
     bindsym $mod+Return exec $term
     bindsym $mod+t exec $menu
     bindsym $mod+backslash exec thunar
+
     ### Clipboard menu
     bindsym $mod+p exec bash -c 'O=$(cliphist list | wofi -d -k /dev/null) && echo -n $O | sed "s/ /\t/" | cliphist decode | wl-copy'
 
 ## Sway Control
     bindsym $mod+q kill
-    bindsym $mod+Shift+c reload
+    bindsym $mod+Shift+r reload
 
     ### Floating windows
     floating_modifier $mod normal
