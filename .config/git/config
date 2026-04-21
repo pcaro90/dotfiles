@@ -37,10 +37,6 @@
     l  = log --graph --abbrev-commit --decorate --all --format=format:'%C(bold magenta)%h%Creset - %s %C(bold green)(%ar) %C(yellow)%d%Creset'
     l2  = log --graph --abbrev-commit --decorate --all --format=format:'%C(bold magenta)%h%Creset - %C(cyan)%ai%Creset %C(bold green)(%ar) %C(yellow)%d%Creset%n    %s%Creset  - %C(bold blue)%an%Creset <%C(dim blue)%ae%Creset>'
 
-
-[color]
-     ui = auto
-
 [core]
     compression = 9
     whitespace = error
