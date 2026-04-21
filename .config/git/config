@@ -1,6 +1,6 @@
 [user]
-	name = Pablo Caro
-	email = me@pcaro.es
+    name = Pablo Caro
+    email = me@pcaro.es
 
 [alias]
     a = add
@@ -45,17 +45,17 @@
     compression = 9
     whitespace = error
     preloadindex = true
-	excludesfile = ~/.config/git/gitignore_global
+    excludesfile = ~/.config/git/gitignore_global
 
 [init]
     defaultBranch = main
 
 [push]
-	default = simple
-	autoSetupRemote = true
+    default = simple
+    autoSetupRemote = true
 
 [filter "lfs"]
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
