@@ -42,6 +42,9 @@
      ui = auto
 
 [core]
+    compression = 9
+    whitespace = error
+    preloadindex = true
 	excludesfile = ~/.config/git/gitignore_global
 
 [init]
