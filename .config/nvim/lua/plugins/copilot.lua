@@ -3,10 +3,10 @@ return {
   event = { "InsertEnter" },
   opts = {
     suggestion = {
-      enabled = true,
+      enabled = false,
       auto_trigger = true,
       keymap = {
-        accept = "<C-CR>",
+        accept = false, -- handled by blink.cmp
       },
     },
     panel = {
@@ -15,6 +15,5 @@ return {
     filetypes = {
       yaml = true,
     },
-    -- copilot_model = "gpt-4o-copilot",
   },
 }
