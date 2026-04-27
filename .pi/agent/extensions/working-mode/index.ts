@@ -44,6 +44,14 @@ export type WorkingMode = "readonly" | "normal" | "berserker";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
+// Shared inter-extension contract with ssh.ts:
+// - ssh.ts emits "ssh:state" with { remote, remoteCwd } when SSH is active
+// - ssh.ts emits null when SSH is inactive
+// working-mode listens to this so it can hide local-only tools (grep/find/ls)
+// while the session is operating against a remote machine.
+const SSH_STATE_EVENT = "ssh:state";
+const SSH_UNSUPPORTED_TOOLS = new Set(["grep", "find", "ls"]);
+
 const READONLY_TOOLS = ["read", "bash", "grep", "find", "ls", "questionnaire"];
 const FULL_TOOLS = ["read", "bash", "edit", "write", "grep", "find", "ls", "questionnaire"];
 
@@ -61,12 +69,18 @@ const MODE_STATUS: Record<WorkingMode, { label: string; color: ThemeColor }> = {
 
 export default function workingModeExtension(pi: ExtensionAPI): void {
 	let currentMode: WorkingMode = "normal";
+	let sshActive = false;
 
 	/**
 	 * Commands (and/or patterns) accepted by the user for the whole session.
 	 * Populated dynamically when the user chooses "Allow for session".
 	 */
 	const sessionAcceptedPatterns: string[] = [];
+
+	pi.events.on(SSH_STATE_EVENT, (state: { remote: string; remoteCwd: string } | null) => {
+		sshActive = state !== null;
+		applyModeTools(currentMode);
+	});
 
 	// ── CLI flag ────────────────────────────────────────────────────────────
 
@@ -79,7 +93,9 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 	// ── Helpers ─────────────────────────────────────────────────────────────
 
 	function applyModeTools(mode: WorkingMode): void {
-		pi.setActiveTools(mode === "readonly" ? READONLY_TOOLS : FULL_TOOLS);
+		const baseTools = mode === "readonly" ? READONLY_TOOLS : FULL_TOOLS;
+		const effectiveTools = sshActive ? baseTools.filter((tool) => !SSH_UNSUPPORTED_TOOLS.has(tool)) : baseTools;
+		pi.setActiveTools(effectiveTools);
 	}
 
 	function updateStatus(ctx: ExtensionContext): void {
