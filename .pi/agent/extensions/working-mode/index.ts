@@ -10,7 +10,7 @@
  *   💀 berserker — no restrictions; everything is allowed without confirmation
  *
  * Features:
- *   • Ctrl+Tab        cycle modes  (readonly → normal → berserker → …)
+ *   • Tab             cycle modes  (readonly → normal → berserker → …)
  *   • /wmode          show selector or set mode directly  (/wmode readonly)
  *   • --wmode flag    set default mode at startup  (pi --wmode readonly)
  *   • Session memory  remember accepted commands for the whole session,
@@ -20,6 +20,10 @@
  *   • Pipe-aware      each sub-command in |, ||, &&, ; chains is checked
  *                     individually; any non-allowed one triggers the gate
  *   • Status bar      always shows the active mode in the footer
+ *
+ *   NOTE: Default keybinding (Tab) conflicts with a default keybinding in Pi
+ *   (autocomplete). But I don't really use autocomplete, so I just replaced it
+ *   with the working mode cycle.
  *
  */
 
@@ -130,7 +134,7 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 
 	// ── Shortcut ─────────────────────────────────────────────────────────────
 
-	pi.registerShortcut(Key.ctrl("Tab"), {
+	pi.registerShortcut(Key.tab, {
 		description: "Cycle working mode (readonly → normal → berserker → …)",
 		handler: async (ctx) => cycleMode(ctx),
 	});
