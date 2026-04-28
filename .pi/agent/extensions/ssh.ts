@@ -17,10 +17,10 @@ import { spawn } from "node:child_process";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import {
 	type BashOperations,
-	createBashTool,
-	createEditTool,
-	createReadTool,
-	createWriteTool,
+	createBashToolDefinition,
+	createEditToolDefinition,
+	createReadToolDefinition,
+	createWriteToolDefinition,
 	type EditOperations,
 	type ReadOperations,
 	type WriteOperations,
@@ -121,10 +121,10 @@ export default function (pi: ExtensionAPI) {
 	pi.registerFlag("ssh", { description: "SSH remote: user@host or user@host:/path", type: "string" });
 
 	const localCwd = process.cwd();
-	const localRead = createReadTool(localCwd);
-	const localWrite = createWriteTool(localCwd);
-	const localEdit = createEditTool(localCwd);
-	const localBash = createBashTool(localCwd);
+	const localRead = createReadToolDefinition(localCwd);
+	const localWrite = createWriteToolDefinition(localCwd);
+	const localEdit = createEditToolDefinition(localCwd);
+	const localBash = createBashToolDefinition(localCwd);
 
 	// Resolved lazily on session_start (CLI flags not available during factory)
 	let resolvedSsh: { remote: string; remoteCwd: string } | null = null;
@@ -133,57 +133,57 @@ export default function (pi: ExtensionAPI) {
 
 	pi.registerTool({
 		...localRead,
-		async execute(id, params, signal, onUpdate, _ctx) {
+		async execute(id, params, signal, onUpdate, ctx) {
 			const ssh = getSsh();
 			if (ssh) {
-				const tool = createReadTool(localCwd, {
+				const tool = createReadToolDefinition(localCwd, {
 					operations: createRemoteReadOps(ssh.remote, ssh.remoteCwd, localCwd),
 				});
-				return tool.execute(id, params, signal, onUpdate);
+				return tool.execute(id, params, signal, onUpdate, ctx);
 			}
-			return localRead.execute(id, params, signal, onUpdate);
+			return localRead.execute(id, params, signal, onUpdate, ctx);
 		},
 	});
 
 	pi.registerTool({
 		...localWrite,
-		async execute(id, params, signal, onUpdate, _ctx) {
+		async execute(id, params, signal, onUpdate, ctx) {
 			const ssh = getSsh();
 			if (ssh) {
-				const tool = createWriteTool(localCwd, {
+				const tool = createWriteToolDefinition(localCwd, {
 					operations: createRemoteWriteOps(ssh.remote, ssh.remoteCwd, localCwd),
 				});
-				return tool.execute(id, params, signal, onUpdate);
+				return tool.execute(id, params, signal, onUpdate, ctx);
 			}
-			return localWrite.execute(id, params, signal, onUpdate);
+			return localWrite.execute(id, params, signal, onUpdate, ctx);
 		},
 	});
 
 	pi.registerTool({
 		...localEdit,
-		async execute(id, params, signal, onUpdate, _ctx) {
+		async execute(id, params, signal, onUpdate, ctx) {
 			const ssh = getSsh();
 			if (ssh) {
-				const tool = createEditTool(localCwd, {
+				const tool = createEditToolDefinition(localCwd, {
 					operations: createRemoteEditOps(ssh.remote, ssh.remoteCwd, localCwd),
 				});
-				return tool.execute(id, params, signal, onUpdate);
+				return tool.execute(id, params, signal, onUpdate, ctx);
 			}
-			return localEdit.execute(id, params, signal, onUpdate);
+			return localEdit.execute(id, params, signal, onUpdate, ctx);
 		},
 	});
 
 	pi.registerTool({
 		...localBash,
-		async execute(id, params, signal, onUpdate, _ctx) {
+		async execute(id, params, signal, onUpdate, ctx) {
 			const ssh = getSsh();
 			if (ssh) {
-				const tool = createBashTool(localCwd, {
+				const tool = createBashToolDefinition(localCwd, {
 					operations: createRemoteBashOps(ssh.remote, ssh.remoteCwd, localCwd),
 				});
-				return tool.execute(id, params, signal, onUpdate);
+				return tool.execute(id, params, signal, onUpdate, ctx);
 			}
-			return localBash.execute(id, params, signal, onUpdate);
+			return localBash.execute(id, params, signal, onUpdate, ctx);
 		},
 	});
 
