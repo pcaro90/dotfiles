@@ -200,6 +200,13 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 	// ── Tool call gate ───────────────────────────────────────────────────────
 
 	pi.on("tool_call", async (event, ctx) => {
+		// Safety gate: Pi resolves tools against a snapshot taken at turn start,
+		// so setActiveTools() mid-stream won't be seen by the agent loop.
+		// We check the live active set here to close that gap.
+		if (!pi.getActiveTools().includes(event.toolName)) {
+			return { block: true, reason: `Tool "${event.toolName}" is not active in ${currentMode} mode` };
+		}
+
 		if (event.toolName !== "bash") return undefined;
 
 		const rawCommand = event.input.command as string;
