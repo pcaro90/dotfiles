@@ -231,6 +231,11 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*man\b/,
 	/^\s*tldr\b/,
 	/^\s*help\b/,
+
+    // Just commands
+	/^\s*just\s+fix\b/,
+	/^\s*just\s+check\b/,
+	/^\s*just\s+test\b/,
 ];
 
 /**
