@@ -12,6 +12,7 @@ return {
       format_on_save = false,
       formatters_by_ft = {
         c = { lsp_format = "prefer" },
+        fish = { "fish_indent" },
         jinja = { "djlint" },
         htmldjango = { "djlint" },
         json = { "prettier", stop_on_first = true, timeout_ms = 500 },
