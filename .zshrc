@@ -108,8 +108,8 @@ for mode in viins vicmd; do
 done
 
 #***************************************************************************************
-#   # Completion system
-autoload -Uz compinit && compinit -i
+# Completion system
+autoload -Uz compinit && compinit -i -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/.zcompdump" 
 
 setopt COMPLETE_IN_WORD     # Complete from both ends of a word
 setopt ALWAYS_TO_END        # Move cursor to end of completed word
