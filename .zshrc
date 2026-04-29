@@ -23,9 +23,9 @@ done
 
 # Tools
 eval "$(starship init zsh)"
+eval "$(fzf --zsh)"
 eval "$(atuin init zsh --disable-up-arrow)"
 eval "$(zoxide init zsh)"
-eval "$(fzf --zsh)"
 export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 
 #***************************************************************************************
