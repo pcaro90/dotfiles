@@ -1,4 +1,11 @@
-format = '$hostname$directory$fill$all$line_break$character'
+format = '$shell$hostname$directory$fill$all$line_break$character'
+
+[shell]
+format = '$indicator'
+fish_indicator = '\[[󰈺 ]($style)\]'
+zsh_indicator = ''
+style = 'cyan bold'
+disabled = false
 
 [cmd_duration]
 format = '\[[⏱ $duration]($style)\]'
