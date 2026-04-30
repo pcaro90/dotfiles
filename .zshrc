@@ -28,6 +28,12 @@ eval "$(atuin init zsh --disable-up-arrow)"
 eval "$(zoxide init zsh)"
 export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 
+# OSC 7 — announce CWD to foot so Ctrl+Shift+N opens in the same directory
+_osc7_cwd() { printf '\e]7;file://%s%s\e\\' "$HOST" "$PWD"; }
+autoload -Uz add-zsh-hook
+add-zsh-hook chpwd _osc7_cwd
+_osc7_cwd
+
 #***************************************************************************************
 # Aliases
 
