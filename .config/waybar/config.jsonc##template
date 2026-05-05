@@ -1,7 +1,12 @@
 [
   {
     "layer": "top",
-    "output": "DP-3", // Finn
+{% if yadm.hostname == "finn" %}
+    "output": "DP-3",
+{% endif %}
+{% if yadm.hostname == "lemongrab" %}
+    "output": "eDP-1",
+{% endif %}
     "modules-left": ["sway/workspaces", "sway/mode"],
     "modules-center": [],
     "modules-right": [
