@@ -1,0 +1,7 @@
+# This file contains fish universal variable definitions.
+# VERSION: 3.0
+SETUVAR --export EDITOR:nvim
+SETUVAR --export PNPM_HOME:/home/pcaro/\x2elocal/share/pnpm
+SETUVAR __fish_initialized:4300
+SETUVAR fish_greeting:\x1d
+SETUVAR fish_user_paths:/home/pcaro/\x2elocal/share/pnpm\x1e/home/pcaro/\x2ezvm/bin\x1e/home/pcaro/\x2enimble/bin\x1e/home/pcaro/go/bin\x1e/home/pcaro/\x2elocal/bin\x1e/home/pcaro/bin
