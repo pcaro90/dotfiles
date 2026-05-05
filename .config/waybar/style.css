@@ -1,0 +1,281 @@
+/* =============================================================================
+ * Waybar — TokyoNight Moon
+ * =============================================================================
+ * Palette from tokyonight.nvim/lua/tokyonight/colors/moon.lua
+ * ============================================================================= */
+
+/* ── TokyoNight Moon — paleta completa ── */
+@define-color tn-bg             #222436;
+@define-color tn-bg-dark        #1e2030;
+@define-color tn-bg-dark1       #191B29;
+@define-color tn-bg-highlight   #2f334d;
+@define-color tn-blue           #82aaff;
+@define-color tn-blue0          #3e68d7;
+@define-color tn-blue1          #65bcff;
+@define-color tn-blue2          #0db9d7;
+@define-color tn-blue5          #89ddff;
+@define-color tn-blue6          #b4f9f8;
+@define-color tn-blue7          #394b70;
+@define-color tn-comment        #636da6;
+@define-color tn-cyan           #86e1fc;
+@define-color tn-dark3          #545c7e;
+@define-color tn-dark5          #737aa2;
+@define-color tn-fg             #c8d3f5;
+@define-color tn-fg-dark        #828bb8;
+@define-color tn-fg-gutter      #3b4261;
+@define-color tn-green          #c3e88d;
+@define-color tn-green1         #4fd6be;
+@define-color tn-green2         #41a6b5;
+@define-color tn-magenta        #c099ff;
+@define-color tn-magenta2       #ff007c;
+@define-color tn-orange         #ff966c;
+@define-color tn-purple         #fca7ea;
+@define-color tn-red            #ff757f;
+@define-color tn-red1           #c53b53;
+@define-color tn-teal           #4fd6be;
+@define-color tn-terminal-black #444a73;
+@define-color tn-yellow         #ffc777;
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "Hurmit Nerd Font", monospace;
+    font-size: 13px;
+    min-height: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Bar
+   ═══════════════════════════════════════════════════════════ */
+
+window#waybar {
+    background-color: alpha(@tn-bg-dark, 0.85);
+    border-bottom: 2px solid @tn-fg-gutter;
+    color: @tn-fg;
+    transition-property: background-color;
+    transition-duration: 0.3s;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Tooltips
+   ═══════════════════════════════════════════════════════════ */
+
+tooltip {
+    background-color: @tn-bg-dark;
+    border: 1px solid @tn-fg-gutter;
+    border-radius: 4px;
+}
+
+tooltip label {
+    color: @tn-fg;
+    padding: 2px 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Button base reset
+   ═══════════════════════════════════════════════════════════ */
+
+button {
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Workspaces — botones cuadrados
+   ═══════════════════════════════════════════════════════════ */
+
+#workspaces {
+    margin: 0;
+    padding: 0 2px;
+}
+
+#workspaces button {
+    min-width: 26px;
+    min-height: 26px;
+    padding: 0 8px;
+    margin: 2px 2px;
+    background-color: @tn-bg-highlight;
+    color: @tn-comment;
+    border-radius: 2px;
+    font-size: 13px;
+    box-shadow: inset 0 -3px transparent;
+    transition-duration: 0.15s;
+    transition-property: background-color, color, box-shadow;
+}
+
+#workspaces button:hover {
+    background-color: @tn-blue7;
+    color: @tn-fg;
+    box-shadow: inset 0 -3px @tn-dark5;
+}
+
+#workspaces button.focused,
+#workspaces button.active {
+    background-color: @tn-blue7;
+    color: @tn-blue;
+    box-shadow: inset 0 -3px @tn-blue;
+    font-weight: bold;
+}
+
+#workspaces button.urgent {
+    background-color: @tn-red1;
+    color: @tn-fg;
+    box-shadow: inset 0 -3px @tn-red;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Sway mode (resize, insert, etc.)
+   ═══════════════════════════════════════════════════════════ */
+
+#mode {
+    background-color: @tn-orange;
+    color: @tn-bg-dark;
+    padding: 0 12px;
+    margin: 2px 0 2px 6px;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Padding base — módulos activos
+   ═══════════════════════════════════════════════════════════ */
+
+#clock,
+#network,
+#cpu,
+#memory,
+#disk {
+    padding: 0 8px;
+    color: @tn-fg;
+    background-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Hover — módulos de la derecha
+   ═══════════════════════════════════════════════════════════ */
+
+#clock:hover,
+#network:hover,
+#cpu:hover,
+#memory:hover,
+#disk:hover {
+    background-color: alpha(@tn-bg-highlight, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Anchura fija — evitar layout shifts
+   ═══════════════════════════════════════════════════════════ */
+
+#network {
+    min-width: 150px;
+}
+
+#cpu,
+#memory,
+#disk {
+    min-width: 40px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Network
+   ═══════════════════════════════════════════════════════════ */
+
+#network {
+    color: @tn-blue1;
+    box-shadow: inset 0 -2px @tn-blue1;
+}
+
+#network.disconnected {
+    color: @tn-red;
+    box-shadow: inset 0 -2px @tn-red;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CPU — estados low / medium / high
+   ═══════════════════════════════════════════════════════════ */
+
+#cpu.low {
+    color: @tn-green;
+    box-shadow: inset 0 -2px @tn-green;
+}
+
+#cpu.medium {
+    color: @tn-yellow;
+    box-shadow: inset 0 -2px @tn-yellow;
+}
+
+#cpu.high {
+    color: @tn-red;
+    box-shadow: inset 0 -2px @tn-red;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Memory — estados low / medium / high
+   ═══════════════════════════════════════════════════════════ */
+
+#memory.low {
+    color: @tn-green;
+    box-shadow: inset 0 -2px @tn-green;
+}
+
+#memory.medium {
+    color: @tn-yellow;
+    box-shadow: inset 0 -2px @tn-yellow;
+}
+
+#memory.high {
+    color: @tn-red;
+    box-shadow: inset 0 -2px @tn-red;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Disk — estados low / medium / high
+   ═══════════════════════════════════════════════════════════ */
+
+#disk.low {
+    color: @tn-green;
+    box-shadow: inset 0 -2px @tn-green;
+}
+
+#disk.medium {
+    color: @tn-yellow;
+    box-shadow: inset 0 -2px @tn-yellow;
+}
+
+#disk.high {
+    color: @tn-red;
+    box-shadow: inset 0 -2px @tn-red;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Clock
+   ═══════════════════════════════════════════════════════════ */
+
+#clock {
+    color: @tn-cyan;
+    font-weight: bold;
+    box-shadow: inset 0 -2px @tn-cyan;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Tray
+   ═══════════════════════════════════════════════════════════ */
+
+#tray {
+    padding: 0 6px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background-color: alpha(@tn-red1, 0.4);
+}
