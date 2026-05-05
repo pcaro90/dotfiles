@@ -1,0 +1,79 @@
+{
+  "sway/workspaces": {
+    "disable-scroll-wraparound": true,
+    "enable-bar-scroll": true,
+  },
+  "network": {
+    "format-ethernet": "󰈀   ↑{bandwidthUpBits} ↓{bandwidthDownBits}",
+    "format-wifi": "󰖩   ↑{bandwidthUpBits} ↓{bandwidthDownBits}",
+    "interval": 1,
+  },
+  "cpu": {
+    "format": " {usage:3}%",
+    "interval": 1,
+    "states": {
+      "low": 0,
+      "medium": 50,
+      "high": 80,
+    },
+  },
+  "memory": {
+    "format": " {percentage:3}%",
+    "states": {
+      "low": 0,
+      "medium": 50,
+      "high": 80,
+    },
+    "interval": 1,
+  },
+  "disk#root": {
+    "path": "/",
+    "format": " {percentage_used:3}%",
+    "interval": 30,
+    "states": {
+      "low": 0,
+      "medium": 50,
+      "high": 80,
+    },
+  },
+  "disk#storage": {
+    "path": "/mnt/Storage",
+    "format": " {percentage_used:3}%",
+    "interval": 30,
+    "states": {
+      "low": 0,
+      "medium": 50,
+      "high": 80,
+    },
+  },
+  "disk#windows": {
+    "path": "/mnt/windows",
+    "format": " {percentage_used:3}%",
+    "interval": 30,
+    "states": {
+      "low": 0,
+      "medium": 50,
+      "high": 80,
+    },
+  },
+  "clock": {
+    "format": "{:%F %a %H:%M}",
+  },
+  "tray": {
+    "icon-size": 20,
+    "spacing": 5,
+  },
+  "battery": {
+    "interval": 60,
+    "states": {
+      "low": 50,
+      "medium": 30,
+      "high": 15,
+    },
+    "format": "{icon} {capacity:3}%",
+    "format-icons": {
+      "default": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+      "charging": ["󰢟", "󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
+    },
+  },
+}
