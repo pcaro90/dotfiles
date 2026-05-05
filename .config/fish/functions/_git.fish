@@ -13,7 +13,7 @@ function _git -d "Super-abbr function to git/yadm"
         case gds
             set cmd diff --staged
         case gcm
-            set cmd commit --message
+            set cmd "commit --message '%'"
         case gcl
             set cmd clone
         case gco

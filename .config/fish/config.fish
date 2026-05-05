@@ -51,4 +51,4 @@ abbr -a pc -- proxychains -q
 abbr -a psg -- 'ps aux | rg'
 
 # Git super-abbr
-abbr -a git --regex 'g.*' --function _git
+abbr -a git --regex 'g.*' --set-cursor --function _git
