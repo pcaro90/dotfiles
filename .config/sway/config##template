@@ -249,77 +249,6 @@
     }
 
 ########################################################################################
-{% if yadm.hostname == "finn" %}
-# Status bars (Finn)
-bar {
-    position top
-    font pango:Hermit 10
-    output DP-3
-    tray_output DP-3
-
-    status_command i3blocks
-
-    colors {
-        background $base00
-        separator $base01
-        statusline $base07
-
-        # State             Border  BG      Text
-        focused_workspace   $base05 $base0D $base00
-        active_workspace    $base05 $base01 $base05
-        inactive_workspace  $base03 $base01 $base05
-        urgent_workspace    $base08 $base08 $base00
-        binding_mode        $base00 $base0A $base00
-    }
-
-}
-
-bar {
-    position top
-    font pango:Hermit 10
-    output HDMI-A-1
-    tray_output none
-
-    colors {
-        background $base00
-        separator $base01
-        statusline $base07
-
-        # State             Border  BG      Text
-        focused_workspace   $base05 $base0D $base00
-        active_workspace    $base05 $base01 $base05
-        inactive_workspace  $base03 $base01 $base05
-        urgent_workspace    $base08 $base08 $base00
-        binding_mode        $base00 $base0A $base00
-    }
-}
-{% endif %}
-{% if yadm.hostname == "lemongrab" %}
-# Status bars (Lemongrab)
-bar {
-    position top
-    font pango:Hermit 10
-    output eDP-1
-    tray_output eDP-1
-
-    status_command i3blocks
-
-    colors {
-        background $base00
-        separator $base01
-        statusline $base07
-
-        # State             Border  BG      Text
-        focused_workspace   $base05 $base0D $base00
-        active_workspace    $base05 $base01 $base05
-        inactive_workspace  $base03 $base01 $base05
-        urgent_workspace    $base08 $base08 $base00
-        binding_mode        $base00 $base0A $base00
-    }
-}
-{% endif %}
-
-########################################################################################
 # Exec
 
     # ### Set WAYLAND_DISPLAY variables
@@ -339,6 +268,9 @@ bar {
 
     ### Store clipboard
     exec wl-paste --watch cliphist store
+
+    ### Waybar
+    exec waybar
 
     ### Start applications
     exec --no-startup-id swaync
