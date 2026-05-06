@@ -14,15 +14,16 @@
       "clock",
       "tray",
     ],
-    "spacing": 15,
+    "spacing": 2,
     "include": ["~/.config/waybar/modules.jsonc"],
   },
   {
     "layer": "top",
+    "output": "!DP-3",
     "modules-left": ["sway/workspaces", "sway/mode"],
     "modules-center": [],
     "modules-right": [],
-    "spacing": 15,
+    "spacing": 2,
     "include": ["~/.config/waybar/modules.jsonc"],
   },
 ]
