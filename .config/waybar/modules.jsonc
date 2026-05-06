@@ -9,7 +9,7 @@
     "interval": 1,
   },
   "cpu": {
-    "format": " {usage:3}%",
+    "format": " {usage:3}%",
     "interval": 1,
     "states": {
       "low": 0,
@@ -18,7 +18,7 @@
     },
   },
   "memory": {
-    "format": " {percentage:3}%",
+    "format": " {percentage:3}%",
     "states": {
       "low": 0,
       "medium": 50,
@@ -28,7 +28,7 @@
   },
   "disk#root": {
     "path": "/",
-    "format": " {percentage_used:3}%",
+    "format": " {percentage_used:3}%",
     "interval": 30,
     "states": {
       "low": 0,
@@ -38,7 +38,7 @@
   },
   "disk#storage": {
     "path": "/mnt/Storage",
-    "format": " {percentage_used:3}%",
+    "format": " {percentage_used:3}%",
     "interval": 30,
     "states": {
       "low": 0,
@@ -48,7 +48,7 @@
   },
   "disk#windows": {
     "path": "/mnt/windows",
-    "format": " {percentage_used:3}%",
+    "format": "󰨡 {percentage_used:3}%",
     "interval": 30,
     "states": {
       "low": 0,
