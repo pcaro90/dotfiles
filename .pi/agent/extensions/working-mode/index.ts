@@ -21,10 +21,6 @@
  *                     individually; any non-allowed one triggers the gate
  *   • Status bar      always shows the active mode in the footer
  *
- *   NOTE: Default keybinding (Tab) conflicts with a default keybinding in Pi
- *   (autocomplete). But I don't really use autocomplete, so I just replaced it
- *   with the working mode cycle.
- *
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
@@ -150,7 +146,7 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 
 	// ── Shortcut ─────────────────────────────────────────────────────────────
 
-	pi.registerShortcut(Key.tab, {
+	pi.registerShortcut(Key.ctrl("tab"), {
 		description: "Cycle working mode (readonly → normal → berserker → …)",
 		handler: async (ctx) => cycleMode(ctx),
 	});
