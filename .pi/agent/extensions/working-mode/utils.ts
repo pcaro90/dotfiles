@@ -136,6 +136,7 @@ const READONLY_PATTERNS: RegExp[] = [
 
 	// Text processing (read-only operations)
 	/^\s*wc\b/,
+	/^\s*nl\b/,
 	/^\s*sort\b/,
 	/^\s*uniq\b/,
 	/^\s*cut\b/,
