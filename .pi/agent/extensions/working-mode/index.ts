@@ -257,9 +257,18 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 			["✅  Allow once", "📌  Allow for session…", "🚫  Block"],
 		);
 
-		// Escape or Block
-		if (!choice || choice.startsWith("🚫")) {
+		// Escape
+		if (!choice) {
 			return { block: true, reason: "Blocked by user (working mode)" };
+		}
+
+		// Block with optional reason
+		if (choice.startsWith("🚫")) {
+			const reason = await ctx.ui.input("Reason (optional):", "type a reason (or just Enter to skip)");
+			return {
+				block: true,
+				reason: reason?.trim() ? `Blocked by user: ${reason.trim()}` : "Blocked by user (working mode)",
+			};
 		}
 
 		// Allow once
