@@ -250,6 +250,88 @@ button {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   Bluetooth
+   ═══════════════════════════════════════════════════════════ */
+
+#bluetooth {
+    padding: 0 8px;
+    min-width: 26px;
+    color: @tn-blue;
+    box-shadow: inset 0 -2px @tn-blue;
+}
+
+#bluetooth:hover {
+    background-color: alpha(@tn-bg-highlight, 0.5);
+}
+
+#bluetooth.connected {
+    color: @tn-blue1;
+    box-shadow: inset 0 -2px @tn-blue1;
+}
+
+#bluetooth.off,
+#bluetooth.disabled {
+    color: @tn-comment;
+    box-shadow: inset 0 -2px @tn-comment;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PulseAudio
+   ═══════════════════════════════════════════════════════════ */
+
+#pulseaudio {
+    padding: 0 8px;
+    min-width: 26px;
+    color: @tn-magenta;
+    box-shadow: inset 0 -2px @tn-magenta;
+}
+
+#pulseaudio:hover {
+    background-color: alpha(@tn-bg-highlight, 0.5);
+}
+
+#pulseaudio.muted {
+    color: @tn-comment;
+    box-shadow: inset 0 -2px @tn-comment;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Battery
+   ═══════════════════════════════════════════════════════════ */
+
+#battery {
+    padding: 0 8px;
+    min-width: 26px;
+    color: @tn-blue;
+    box-shadow: inset 0 -2px @tn-blue;
+}
+
+#battery:hover {
+    background-color: alpha(@tn-bg-highlight, 0.5);
+}
+
+/* Estados ordenados de menor a mayor gravedad: el más grave siempre gana */
+#battery.good {
+    color: @tn-green;
+    box-shadow: inset 0 -2px @tn-green;
+}
+
+#battery.warning {
+    color: @tn-yellow;
+    box-shadow: inset 0 -2px @tn-yellow;
+}
+
+#battery.critical {
+    color: @tn-red;
+    box-shadow: inset 0 -2px @tn-red;
+}
+
+#battery.charging {
+    color: @tn-teal;
+    box-shadow: inset 0 -2px @tn-teal;
+}
+
+/* ═══════════════════════════════════════════════════════════
    Tray
    ═══════════════════════════════════════════════════════════ */
 

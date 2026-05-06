@@ -13,6 +13,7 @@
       "disk#windows",
       "clock",
       "pulseaudio",
+      "bluetooth",
       "battery",
       "tray",
     ],

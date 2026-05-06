@@ -11,6 +11,7 @@
   "cpu": {
     "format": " {usage:3}%",
     "interval": 1,
+    "on-click": "sudo /home/pcaro/bin/reset_keyboard.sh",
     "states": {
       "low": 0,
       "medium": 50,
@@ -66,14 +67,44 @@
   "battery": {
     "interval": 60,
     "states": {
-      "low": 50,
-      "medium": 30,
-      "high": 15,
+      "critical": 15,
+      "warning": 45,
+      "good": 75,
     },
-    "format": "{icon} {capacity:3}%",
+    "format": "{icon}",
+    "format-charging": "{icon}",
+    "tooltip-format": "{capacity}%",
     "format-icons": {
       "default": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
       "charging": ["󰢟", "󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
     },
+  },
+  "bluetooth": {
+    "format": "󰂯",
+    "format-off": "󰂲",
+    "format-disabled": "󰂲",
+    "format-connected": "󰂱",
+    "format-no-controller": "󰂲",
+    "on-click": "rfkill toggle bluetooth",
+    "on-click-right": "blueberry",
+    "tooltip-format": "Bluetooth {status}",
+    "tooltip-format-connected": "{device_enumerate}",
+    "tooltip-format-enumerate-connected": "  {device_alias}",
+    "tooltip-format-enumerate-connected-battery": "  {device_alias}  {device_battery_percentage}%",
+  },
+  "pulseaudio": {
+    "format": "{icon}",
+    "format-muted": "{icon}",
+    "format-icons": {
+      "mute": "",
+      "default": ["", "", "", ""],
+    },
+    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "on-click-right": "pavucontrol",
+    "tooltip-format": "{volume}% — {desc}",
+    "scroll-step": 5,
+  },
+  "pulseaudio/slider": {
+    "orientation": "vertical",
   },
 }
