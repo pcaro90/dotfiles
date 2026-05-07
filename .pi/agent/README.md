@@ -10,6 +10,7 @@
 |---|---|
 | [binary-reversing](skills/binary-reversing/) | Reverse engineering of compiled binaries (ELF, PE, Mach-O). Expertise in radare2, Ghidra decompilation, control flow analysis, vulnerability identification, and CTF challenges. |
 | [frontend-design](skills/frontend-design/) | Guides creation of distinctive, production-grade frontend interfaces that avoid generic AI aesthetics. Sourced from [Anthropic's skills](https://github.com/anthropics/skills/tree/main/skills/frontend-design) with small changes. |
+| [skill-reviewer](skills/skill-reviewer/) | Review, critique, and create AI agent SKILL.md files. Checks frontmatter, structure, tone, conciseness, success criteria, progressive disclosure, behavioral rules, edge cases, and directory layout against best practices. |
 | [web-browser](skills/web-browser/) | Remote control of Chrome/Chromium via the Chrome DevTools Protocol (CDP). Scripts for navigation, screenshots, JS evaluation, element picking, cookie dismissal, device emulation, and network logging. Sourced from [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff/tree/main/skills/web-browser) with changes. |
 
 ## Prompt Templates
