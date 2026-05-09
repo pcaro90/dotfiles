@@ -237,6 +237,9 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*just\s+fix\b/,
 	/^\s*just\s+check\b/,
 	/^\s*just\s+test\b/,
+	// Skill scripts — portable across machines (node prefix optional)
+	/^\s*(?:node\s+)?\/home\/.*\/\.pi\/agent\/skills\/web-search\/scripts\/.*\.js\b/,
+	/^\s*(?:node\s+)?\/home\/.*\/\.pi\/agent\/skills\/web-browser\/scripts\/.*\.js\b/,
 ];
 
 /**
