@@ -41,10 +41,12 @@ return {
           },
         },
         prettier = {
-          prepend_args = {
-            "--prose-wrap",
-            "always",
-          },
+          prepend_args = function(_, ctx)
+            if ctx.filename:match("SKILL%.md$") then
+              return { "--prose-wrap", "never" }
+            end
+            return { "--prose-wrap", "always" }
+          end,
         },
       },
     },
