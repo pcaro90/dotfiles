@@ -1,6 +1,6 @@
 ---
 name: web-browser
-description: "Use when interacting with web pages that require JavaScript execution, clicking, form filling, navigation, screenshots, cookie-dialog handling, mobile/device emulation, console/error inspection, or network debugging. Prefer bash and curl for static pages, simple HTTP requests, downloads, or APIs that do not require browser behavior."
+description: "Use when interacting with web pages that require real browser behavior: JavaScript execution, clicking, form filling, navigation, screenshots, cookie-dialog handling, authenticated browser sessions, mobile/device emulation, console/error inspection, or network debugging. Do not use for ordinary web search, static/public URL fetching, simple HTTP requests, downloads, or APIs; use web-search or direct HTTP tools instead."
 compatibility:
   - Chrome or Chromium installed
   - Node.js available
@@ -8,13 +8,14 @@ allowed-tools:
   - bash
   - read
 ---
+
 # Web Browser Skill
 
 Use the bundled Chrome DevTools Protocol (CDP) scripts for interactive or JavaScript-dependent web browsing.
 
 Run commands from this skill directory. If your current working directory is elsewhere, use the absolute path to the relevant script.
 
-Prefer direct HTTP tools for static pages, simple downloads, and non-interactive API calls. Use this skill when browser behavior matters: JavaScript rendering, cookies, authenticated browser state, forms, clicks, screenshots, mobile emulation, console logs, or network inspection.
+Prefer `web-search` or direct HTTP tools for ordinary web search, static/public URL fetching, simple downloads, and non-interactive API calls. Use this skill when browser behavior matters: JavaScript rendering, cookies, authenticated browser state, forms, clicks, screenshots, mobile emulation, console logs, or network inspection.
 
 Success criteria: The browsing task uses the simplest reliable tool, and browser scripts are used only when browser behavior is required.
 
@@ -33,6 +34,7 @@ Start a managed Chrome or Chromium instance with remote debugging enabled:
 Use the default debugging port `:9222` unless you need a different endpoint.
 
 Profile behavior:
+
 - Default mode uses: `~/.cache/agent-web/browser/fresh-profile`
 - `--profile` mode uses: `~/.cache/agent-web/browser/profile-copy`
 - The skill does not attach to a live Chrome profile directly.
