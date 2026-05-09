@@ -1,0 +1,11 @@
+configuration {
+  modes: "run,ssh,window";
+  combi-modes: "run,ssh,window";
+  font: "Hermit 11";
+  terminal: "foot";
+  ssh-command: "{terminal} -e fish -C '{ssh-client} {host} [-p {port}]'";
+  disable-history: true;
+  sorting-method: "fzf";
+}
+
+@theme "tokyonight"

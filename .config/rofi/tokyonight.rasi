@@ -1,0 +1,191 @@
+/**
+ * Tokyonight Moon — Rofi Theme
+ *
+ * Palette : https://github.com/folke/tokyonight.nvim  (moon variant)
+ * Layout  : Centered floating window
+ * Accent  : Blue (#82aaff)
+ */
+
+/* ── Color palette ──────────────────────────────────────────────────────── */
+
+* {
+    tn-bg:           #222436;   /* main background                           */
+    tn-bg-dark:      #1e2030;   /* darker background (inputbar)              */
+    tn-bg-highlight: #2f334d;   /* selected element background               */
+    tn-fg:           #c8d3f5;   /* main foreground                           */
+    tn-fg-dark:      #828bb8;   /* secondary / unselected text               */
+    tn-fg-gutter:    #3b4261;   /* separators, subtle borders                */
+    tn-comment:      #636da6;   /* placeholder, hint, case-indicator         */
+    tn-blue:         #82aaff;   /* main accent                               */
+    tn-red:          #ff757f;   /* urgent / error                            */
+    tn-green:        #c3e88d;   /* active                                    */
+
+    /* rofi requires background-color and text-color to be set in * */
+    background-color: transparent;
+    text-color:       @tn-fg;
+}
+
+/* ── Window ─────────────────────────────────────────────────────────────── */
+
+window {
+    transparency:     "real";
+    location:         center;
+    anchor:           center;
+
+    background-color: @tn-bg;
+    border:           1px;
+    border-color:     @tn-fg-gutter;
+    border-radius:    8px;
+
+    width:            800px;
+    padding:          0px;
+}
+
+mainbox {
+    background-color: transparent;
+    children:         [ inputbar, listview, mode-switcher, message ];
+    spacing:          0px;
+    padding:          0px;
+}
+
+/* ── Search bar ─────────────────────────────────────────────────────────── */
+
+inputbar {
+    background-color: @tn-bg-dark;
+    border:           0px 0px 1px 0px;
+    border-color:     @tn-fg-gutter;
+    border-radius:    8px 8px 0px 0px;
+
+    padding:          14px 18px;
+    spacing:          10px;
+    children:         [ prompt, entry, case-indicator ];
+}
+
+prompt {
+    background-color: transparent;
+    text-color:       @tn-blue;
+    vertical-align:   0.5;
+}
+
+entry {
+    background-color:  transparent;
+    text-color:        @tn-fg;
+    placeholder-color: @tn-comment;
+    placeholder:       "Find...";
+    cursor-color:      @tn-blue;
+    vertical-align:    0.5;
+}
+
+case-indicator {
+    background-color: transparent;
+    text-color:       @tn-comment;
+    spacing:          0px;
+}
+
+/* ── Results list ───────────────────────────────────────────────────────── */
+
+listview {
+    background-color: transparent;
+    padding:          8px;
+    spacing:          2px;
+    scrollbar:        false;
+    lines:            8;
+    fixed-height:     true;
+    border:           0px;
+}
+
+element {
+    background-color: transparent;
+    text-color:       @tn-fg-dark;
+    padding:          9px 10px;
+    border-radius:    6px;
+    spacing:          0px;
+    orientation:      horizontal;
+    children:         [ element-text ];
+    cursor:           pointer;
+}
+
+element-text {
+    background-color: inherit;
+    text-color:       inherit;
+    vertical-align:   0.5;
+    highlight:        @tn-blue;
+}
+
+/* – Normal state ── */
+element normal.normal,
+element alternate.normal {
+    background-color: transparent;
+    text-color:       @tn-fg-dark;
+}
+element selected.normal {
+    background-color: @tn-bg-highlight;
+    text-color:       @tn-fg;
+}
+
+/* – Urgent state ── */
+element normal.urgent,
+element alternate.urgent {
+    background-color: transparent;
+    text-color:       @tn-red;
+}
+element selected.urgent {
+    background-color: @tn-bg-highlight;
+    text-color:       @tn-red;
+}
+
+/* – Active state ── */
+element normal.active,
+element alternate.active {
+    background-color: transparent;
+    text-color:       @tn-green;
+}
+element selected.active {
+    background-color: @tn-bg-highlight;
+    text-color:       @tn-green;
+}
+
+/* ── Mode switcher (combi) ──────────────────────────────────────────────── */
+
+mode-switcher {
+    background-color: @tn-bg-dark;
+    border:           1px 0px 0px 0px;
+    border-color:     @tn-fg-gutter;
+    padding:          6px 8px;
+    spacing:          6px;
+}
+
+button {
+    background-color: transparent;
+    text-color:       @tn-fg-dark;
+    padding:          6px 12px;
+    border-radius:    6px;
+    cursor:           pointer;
+}
+
+button.selected {
+    background-color: @tn-bg-highlight;
+    text-color:       @tn-blue;
+}
+
+/* ── Messages ───────────────────────────────────────────────────────────── */
+
+message {
+    background-color: @tn-bg-dark;
+    border:           1px 0px 0px 0px;
+    border-color:     @tn-fg-gutter;
+    padding:          10px 18px;
+}
+
+textbox {
+    background-color: transparent;
+    text-color:       @tn-fg;
+}
+
+error-message {
+    background-color: @tn-bg-dark;
+    border:           1px 0px 0px 0px;
+    border-color:     @tn-red;
+    padding:          10px 18px;
+    text-color:       @tn-red;
+}
