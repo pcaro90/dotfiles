@@ -87,30 +87,23 @@
     for_window [title="Open .*Folder"] floating enable
     for_window [title="Open .*File"] floating enable
 
-## Colors definition
-    ### class                 border  backgr. text    indicator
-    client.focused          #444444 #222222 #ffffff #999999
-    client.focused_inactive #333333 #666666 #ffffff #484e50
-    client.unfocused        #333333 #666666 #ffffff #484e50
-    client.urgent           #2f343a #d75f5f #ffffff #d75f5f
+## Colors (TokyoNight Moon)
+    set $tn_bg_dark      #1e2030
+    set $tn_bg           #222436
+    set $tn_bg_highlight #2f334d
+    set $tn_fg_gutter    #3b4261
+    set $tn_comment      #636da6
+    set $tn_fg_dark      #828bb8
+    set $tn_fg           #c8d3f5
+    set $tn_blue         #82aaff
+    set $tn_red          #ff757f
+    set $tn_red1         #c53b53
 
-    ### Base colors
-    set $base00 #212121
-    set $base01 #303030
-    set $base02 #353535
-    set $base03 #4A4A4A
-    set $base04 #B2CCD6
-    set $base05 #EEFFFF
-    set $base06 #EEFFFF
-    set $base07 #FFFFFF
-    set $base08 #F07178
-    set $base09 #F78C6C
-    set $base0A #FFCB6B
-    set $base0B #C3E88D
-    set $base0C #89DDFF
-    set $base0D #82AAFF
-    set $base0E #C792EA
-    set $base0F #FF5370
+    ### class                 border           backgr.          text         indicator     child_border
+    client.focused          $tn_blue         $tn_bg_highlight $tn_fg       $tn_blue      $tn_blue
+    client.focused_inactive $tn_fg_gutter    $tn_bg           $tn_fg_dark  $tn_fg_gutter $tn_fg_gutter
+    client.unfocused        $tn_bg           $tn_bg_dark      $tn_comment  $tn_bg        $tn_bg
+    client.urgent           $tn_red          $tn_red1         $tn_fg       $tn_red       $tn_red
 
 ########################################################################################
 # Keybindings
