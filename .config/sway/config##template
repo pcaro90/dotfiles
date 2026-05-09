@@ -128,7 +128,7 @@
     bindsym $mod+backslash exec thunar
 
     ### Clipboard menu
-    bindsym $mod+p exec bash -c 'O=$(cliphist list | wofi -d -k /dev/null) && echo -n $O | sed "s/ /\t/" | cliphist decode | wl-copy'
+    bindsym $mod+p exec bash -c 'cliphist list | rofi -dmenu -disable-history | cliphist decode | wl-copy'
 
 ## Sway Control
     bindsym $mod+q kill
