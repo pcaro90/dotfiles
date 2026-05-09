@@ -173,8 +173,7 @@ button {
    ═══════════════════════════════════════════════════════════ */
 
 #network {
-    color: @tn-blue1;
-    box-shadow: inset 0 -2px @tn-blue1;
+    color: @tn-fg;
 }
 
 #network.disconnected {
@@ -244,9 +243,7 @@ button {
    ═══════════════════════════════════════════════════════════ */
 
 #clock {
-    color: @tn-cyan;
-    font-weight: bold;
-    box-shadow: inset 0 -2px @tn-cyan;
+    color: @tn-fg;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -282,8 +279,7 @@ button {
 #pulseaudio {
     padding: 0 8px;
     min-width: 26px;
-    color: @tn-magenta;
-    box-shadow: inset 0 -2px @tn-magenta;
+    color: @tn-fg;
 }
 
 #pulseaudio:hover {
