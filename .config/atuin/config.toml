@@ -1,0 +1,19 @@
+auto_sync = true
+sync_address = "https://atuin.landof.ooo"
+search_mode = "daemon-fuzzy"
+style = "auto"
+ctrl_n_shortcuts = true
+show_tabs = false
+secrets_filter = true
+enter_accept = false
+prefers_reduced_motion = true
+
+[sync]
+records = true
+
+[daemon]
+enabled = true
+autostart = true
+
+[ai]
+enabled = false
