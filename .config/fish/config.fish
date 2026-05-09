@@ -13,8 +13,10 @@ set -U fish_greeting
 
 # Set Vi mode
 fish_vi_key_bindings
-bind --mode insert up expand-abbr history-prefix-search-backward
-bind --mode insert down expand-abbr history-prefix-search-forward
+
+# Expand abbreviations before prefix-history search with arrow keys
+bind up __custom_up_or_search
+bind -M insert up __custom_up_or_search
 
 # PATH additions (only if they exist)
 for dir in ~/bin ~/.local/bin ~/go/bin ~/.nimble/bin ~/.zvm/bin ~/.local/share/pnpm
