@@ -237,6 +237,12 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*just\s+fix\b/,
 	/^\s*just\s+check\b/,
 	/^\s*just\s+test\b/,
+
+    // uv checking commands
+	/^\s*uv\s+run\s+ruff\s+format\b/,
+	/^\s*uv\s+run\s+ruff\s+check\b/,
+	/^\s*uv\s+run\s+ty\s+check\b/,
+
 	// Skill scripts — portable across machines (node prefix optional)
 	/^\s*(?:node\s+)?\/home\/.*\/\.pi\/agent\/skills\/web-search\/scripts\/.*\.js\b/,
 	/^\s*(?:node\s+)?\/home\/.*\/\.pi\/agent\/skills\/web-browser\/scripts\/.*\.js\b/,
