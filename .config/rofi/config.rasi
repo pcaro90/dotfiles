@@ -6,6 +6,7 @@ configuration {
   ssh-command: "{terminal} -e fish -C '{ssh-client} {host} [-p {port}]'";
   disable-history: true;
   sorting-method: "fzf";
+  matching: "normal,fuzzy";
 }
 
 @theme "tokyonight"
