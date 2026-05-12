@@ -48,9 +48,10 @@ abbr -a d -- docker
 abbr -a j -- just
 abbr -a py -- python
 abbr -a t -- task
-abbr -a s -c '' -c proxychains -- ssh
+abbr -a s -c proxychains -- ssh
 abbr -a pc -- proxychains -q
 abbr -a psg -- 'ps aux | rg'
+abbr -a s -r -s -c pi -- --ssh
 
 # Git super-abbr
 abbr -a git --regex 'g.*' --set-cursor --function _git
