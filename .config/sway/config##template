@@ -81,7 +81,7 @@
     assign [app_id="chrome-twitter.com__-Twitter"] $3
     assign [app_id="obsidian"] $7
     assign [app_id="org.keepassxc.KeePassXC"] $8
-    assign [app_id="thunderbird"] $9
+    assign [app_id="org.mozilla.Thunderbird"] $9
 
     for_window [app_id="flameshot"] border pixel 0, floating enable, fullscreen disable, move absolute position 0 0
     for_window [title="Open .*Folder"] floating enable
