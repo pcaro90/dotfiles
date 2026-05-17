@@ -259,6 +259,9 @@
     ### Execute keyring
     # exec "eval $(keychain --eval --agents ssh,gpg)"
 
+    # Execute Polkit authentication agent
+    exec /usr/bin/lxpolkit
+
     ### Store clipboard
     exec wl-paste --watch cliphist store
 
