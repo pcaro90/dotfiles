@@ -161,6 +161,40 @@ Reload after setting mobile emulation so the page receives the mobile user agent
 
 Success criteria: The page is loaded under the selected mobile emulation, blocking cookie dialogs are handled, and a full-page screenshot is available for review.
 
+## Request Recording for Login/API Curl Reconstruction
+
+Use `record.js` when you need to capture full request details for a short flow such as submitting a login form. Unlike background logging, request recording is explicit and captures sensitive request data such as headers, cookies, and POST bodies.
+
+```bash
+./scripts/record.js --timeout 30
+./scripts/record.js --timeout 60 --output /tmp/login-record.jsonl
+```
+
+Typical flow:
+
+```bash
+./scripts/start.js
+./scripts/nav.js https://example.com/login
+./scripts/record.js --timeout 20 --output /tmp/login-record.jsonl &
+REC_PID=$!
+./scripts/eval.js 'document.querySelector("input[name=email]").value = "demo@example.com"'
+./scripts/eval.js 'document.querySelector("input[name=password]").value = "demo-password"'
+./scripts/eval.js 'document.querySelector("button[type=submit]").click()'
+wait "$REC_PID"
+```
+
+Search recorded requests by string:
+
+```bash
+./scripts/search-recorded-request.js login
+./scripts/search-recorded-request.js password --file /tmp/login-record.jsonl
+./scripts/search-recorded-request.js auth --json
+```
+
+Use the recorded request details to reconstruct a `curl` command. Prefer asking the model to identify the login request and produce the curl from the recorded headers, cookies, URL, method, and body.
+
+Success criteria: Recording is started only for the short flow being inspected, the likely login/auth request is visible in the record output or search results, and the captured data is sufficient to build an equivalent `curl` request.
+
 ## Background Logging (Console + Errors + Network)
 
 Use background logs to inspect console output, page errors, and network activity. Logging starts automatically with `start.js` and writes JSONL files to:
