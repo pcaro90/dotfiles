@@ -19,7 +19,7 @@ bind up __custom_up_or_search
 bind -M insert up __custom_up_or_search
 
 # PATH additions (only if they exist)
-for dir in ~/bin ~/.local/bin ~/go/bin ~/.nimble/bin ~/.zvm/bin ~/.local/share/pnpm
+for dir in ~/bin ~/.local/bin ~/go/bin ~/.nimble/bin ~/.zvm/bin ~/.local/share/pnpm/bin
     if test -d "$dir"
         fish_add_path $dir
     end
