@@ -53,6 +53,7 @@ abbr -a s -c proxychains -- ssh
 abbr -a pc -- proxychains -q
 abbr -a psg -- 'ps aux | rg'
 abbr -a s -r -s -c pi -- --ssh
+abbr -a zb -- zig build
 
 # Git super-abbr
 abbr -a git --regex 'g.*' --set-cursor --function _git
