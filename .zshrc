@@ -17,7 +17,7 @@ setopt EXTENDED_HISTORY        # Save timestamps and duration for each command
 setopt INC_APPEND_HISTORY_TIME # Write to history immediately, with timestamps
 
 # PATH additions (only if they exist)
-for dir in ~/bin ~/.local/bin ~/go/bin ~/.nimble/bin ~/.zvm/bin ~/.local/share/pnpm; do
+for dir in ~/bin ~/.local/bin ~/go/bin ~/.nimble/bin ~/.zvm/bin ~/.local/share/pnpm/bin; do
     [[ -d $dir ]] && path+=($dir)
 done
 export PNPM_HOME="/home/pcaro/.local/share/pnpm"
