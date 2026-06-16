@@ -194,11 +194,11 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*rustc\s+--version\b/i,
 	/^\s*cargo\s+--version\b/i,
 
-	// git — read-only operations
-	/^\s*git\s+(?:status|log|diff|show|branch|remote|fetch|describe|shortlog|blame|tag|check-ignore|rev-parse|rev-list)\b/i,
-	/^\s*git\s+ls-/i,
-	/^\s*git\s+stash\s+list\b/i,
-	/^\s*git\s+config\s+--(?:get|list)\b/i,
+	// git — read-only operations (`git -C PATH ...` supported)
+	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?(?:status|log|diff|show|branch|remote|fetch|describe|shortlog|blame|tag|check-ignore|rev-parse|rev-list)\b/i,
+	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?ls-/i,
+	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?stash\s+list\b/i,
+	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?config\s+--(?:get|list)\b/i,
 
 	// npm / yarn / pnpm — listing / querying only
 	/^\s*npm\s+(?:list|ls|view|info|search|outdated|audit)\b/i,
