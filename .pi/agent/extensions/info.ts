@@ -16,13 +16,13 @@ import type {
   ToolInfo,
   SlashCommandInfo,
   Theme,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import {
   matchesKey,
   Key,
   truncateToWidth,
   wrapTextWithAnsi,
-} from "@mariozechner/pi-tui";
+} from "@earendil-works/pi-tui";
 import { existsSync } from "node:fs";
 
 /* ------------------------------------------------------------------ */
