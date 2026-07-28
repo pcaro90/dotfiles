@@ -47,6 +47,7 @@ type NormalizedRateLimitSnapshot = {
 type NormalizedRateLimitWindow = {
 	usedPercent: number;
 	resetAt?: number;
+	windowDurationMs?: number;
 };
 
 type CachedReport = {
@@ -337,6 +338,9 @@ function normalizeBackendWindow(value: unknown, capturedAt: number): NormalizedR
 		ends_at?: unknown;
 		expires_at?: unknown;
 		reset_after_seconds?: unknown;
+		limit_window_seconds?: unknown;
+		window_seconds?: unknown;
+		window_minutes?: unknown;
 	};
 	const usedPercent = asNumber(window.used_percent);
 	if (usedPercent === undefined) return undefined;
@@ -348,7 +352,12 @@ function normalizeBackendWindow(value: unknown, capturedAt: number): NormalizedR
 		window.ends_at,
 		window.expires_at,
 	], window.reset_after_seconds, capturedAt);
-	return resetAt === undefined ? { usedPercent } : { usedPercent, resetAt };
+	const windowDurationMs = asDurationMs(window.limit_window_seconds, window.window_seconds, window.window_minutes);
+	return {
+		usedPercent,
+		...(resetAt === undefined ? {} : { resetAt }),
+		...(windowDurationMs === undefined ? {} : { windowDurationMs }),
+	};
 }
 
 function normalizedUsageKey(value: unknown): string | undefined {
@@ -365,7 +374,7 @@ export function formatCodexUsageStatusValue(report: CodexUsageReport, modelOrNow
 	const snapshot = selectUsageSnapshot(report, USAGE_LIMIT_ID);
 	if (!snapshot?.primary && !snapshot?.secondary) return undefined;
 	const effectiveNow = typeof modelOrNow === "number" ? modelOrNow : now;
-	const bar = formatDualLimitBar(snapshot.primary, snapshot.secondary);
+	const bar = formatSnapshotBar(snapshot);
 
 	if (snapshot.primary && isWindowExhausted(snapshot.primary) && snapshot.primary.resetAt !== undefined) {
 		const primaryCountdown = formatResetCountdown(snapshot.primary.resetAt, effectiveNow);
@@ -373,8 +382,9 @@ export function formatCodexUsageStatusValue(report: CodexUsageReport, modelOrNow
 		return secondaryCountdown ? `${bar} ${primaryCountdown}/${secondaryCountdown}` : `${bar} ${primaryCountdown}`;
 	}
 
-	if (!isWindowExhausted(snapshot.primary) && snapshot.secondary?.resetAt !== undefined) {
-		return `${bar} ${formatResetCountdown(snapshot.secondary.resetAt, effectiveNow)}`;
+	const longWindow = selectLongWindow(snapshot);
+	if (!isWindowExhausted(snapshot.primary) && longWindow?.resetAt !== undefined) {
+		return `${bar} ${formatResetCountdown(longWindow.resetAt, effectiveNow)}`;
 	}
 	return bar;
 }
@@ -382,7 +392,8 @@ export function formatCodexUsageStatusValue(report: CodexUsageReport, modelOrNow
 export function formatWeeklyResetCountdown(report: CodexUsageReport, modelOrNow?: CodexUsageModel | number, now = Date.now()): string | undefined {
 	const snapshot = selectUsageSnapshot(report, USAGE_LIMIT_ID);
 	const effectiveNow = typeof modelOrNow === "number" ? modelOrNow : now;
-	return snapshot?.secondary?.resetAt === undefined ? undefined : formatResetCountdown(snapshot.secondary.resetAt, effectiveNow);
+	const longWindow = snapshot ? selectLongWindow(snapshot) : undefined;
+	return longWindow?.resetAt === undefined ? undefined : formatResetCountdown(longWindow.resetAt, effectiveNow);
 }
 
 export function formatCodexUsageBar(report: CodexUsageReport): string | undefined {
@@ -392,7 +403,26 @@ export function formatCodexUsageBar(report: CodexUsageReport): string | undefine
 function formatReportBar(report: CodexUsageReport): string | undefined {
 	const snapshot = selectUsageSnapshot(report, USAGE_LIMIT_ID);
 	if (!snapshot?.primary && !snapshot?.secondary) return undefined;
-	return formatDualLimitBar(snapshot.primary, snapshot.secondary);
+	return formatSnapshotBar(snapshot);
+}
+
+function formatSnapshotBar(snapshot: NormalizedRateLimitSnapshot): string {
+	// OpenAI can return a single window (currently a weekly primary window).
+	// Mirror it into both halves so a valid limit does not look like a half-empty bar.
+	const primary = snapshot.primary ?? snapshot.secondary;
+	const secondary = snapshot.secondary ?? snapshot.primary;
+	return formatDualLimitBar(primary, secondary);
+}
+
+function selectLongWindow(snapshot: NormalizedRateLimitSnapshot): NormalizedRateLimitWindow | undefined {
+	const { primary, secondary } = snapshot;
+	if (!primary) return secondary;
+	if (!secondary) return primary;
+	if (primary.windowDurationMs !== undefined && secondary.windowDurationMs !== undefined) {
+		return primary.windowDurationMs > secondary.windowDurationMs ? primary : secondary;
+	}
+	// Preserve the historical API convention when duration metadata is absent.
+	return secondary;
 }
 
 function formatDualLimitBar(primary?: NormalizedRateLimitWindow, secondary?: NormalizedRateLimitWindow): string {
@@ -485,8 +515,9 @@ function formatTenths(value: number): string {
 export function nextResetCountdownDelayMs(report: CodexUsageReport, now = Date.now(), _model?: CodexUsageModel): number | undefined {
 	const snapshot = selectUsageSnapshot(report, USAGE_LIMIT_ID);
 	if (!snapshot) return undefined;
-	const resetTimes = [snapshot.secondary?.resetAt];
-	if (isWindowExhausted(snapshot.primary)) resetTimes.push(snapshot.primary?.resetAt);
+	const longWindow = selectLongWindow(snapshot);
+	const resetTimes = [longWindow?.resetAt];
+	if (isWindowExhausted(snapshot.primary) && snapshot.primary !== longWindow) resetTimes.push(snapshot.primary?.resetAt);
 	const delays = resetTimes
 		.map((resetAt) => resetAt === undefined ? undefined : nextResetCountdownDelayForRemainingMs(resetAt - now))
 		.filter((delay): delay is number => delay !== undefined);
@@ -564,6 +595,13 @@ function asResetTime(absoluteValues: unknown[], relativeSeconds: unknown, captur
 	}
 	const seconds = asNumber(relativeSeconds);
 	return seconds === undefined || seconds < 0 ? undefined : capturedAt + seconds * SECOND_MS;
+}
+
+function asDurationMs(secondsValue: unknown, fallbackSecondsValue: unknown, minutesValue: unknown): number | undefined {
+	const seconds = asNumber(secondsValue) ?? asNumber(fallbackSecondsValue);
+	const minutes = asNumber(minutesValue);
+	const durationMs = seconds !== undefined ? seconds * SECOND_MS : minutes === undefined ? undefined : minutes * MINUTE_MS;
+	return durationMs === undefined || durationMs < 0 || !Number.isFinite(durationMs) ? undefined : durationMs;
 }
 
 function asTimestampMs(value: unknown): number | undefined {
