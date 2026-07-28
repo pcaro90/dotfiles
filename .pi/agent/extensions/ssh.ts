@@ -2,7 +2,8 @@
  * SSH Remote Execution Example
  *
  * Demonstrates delegating tool operations to a remote machine via SSH.
- * When --ssh is provided, read/write/edit/bash run on the remote.
+ * When --ssh is provided, read/write/edit/bash run on the remote, except
+ * reads and bash commands that target a loaded local skill.
  *
  * Usage:
  *   pi -e ./ssh.ts --ssh user@host
@@ -14,7 +15,8 @@
  */
 
 import { spawn } from "node:child_process";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { isAbsolute, relative, resolve } from "node:path";
+import type { ExtensionAPI, Skill } from "@earendil-works/pi-coding-agent";
 import {
 	type BashOperations,
 	createBashToolDefinition,
@@ -111,6 +113,31 @@ function createRemoteBashOps(remote: string, remoteCwd: string, localCwd: string
 	};
 }
 
+function isPathInside(path: string, parent: string): boolean {
+	const rel = relative(parent, path);
+	return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+}
+
+function resolveToolPath(path: string, cwd: string): string {
+	// Built-in file tools accept the display-oriented @/path form too.
+	const normalized = path.startsWith("@") ? path.slice(1) : path;
+	return resolve(cwd, normalized);
+}
+
+function commandReferencesPath(command: string, path: string): boolean {
+	let index = command.indexOf(path);
+	while (index !== -1) {
+		const before = index === 0 ? "" : command[index - 1];
+		const end = index + path.length;
+		const after = end === command.length ? "" : command[end];
+		const validBefore = before === "" || /[\s'"`=$({[;|&]/.test(before);
+		const validAfter = after === "" || /[\\/\s'"`$)}\];|&]/.test(after);
+		if (validBefore && validAfter) return true;
+		index = command.indexOf(path, index + 1);
+	}
+	return false;
+}
+
 export default function (pi: ExtensionAPI) {
 	// Shared inter-extension contract:
 	// - emits "ssh:state" with { remote, remoteCwd } when SSH is active
@@ -128,14 +155,24 @@ export default function (pi: ExtensionAPI) {
 
 	// Resolved lazily on session_start (CLI flags not available during factory)
 	let resolvedSsh: { remote: string; remoteCwd: string } | null = null;
+	let localSkillRoots: string[] = [];
 
 	const getSsh = () => resolvedSsh;
+	const updateLocalSkills = (skills: Skill[] | undefined) => {
+		localSkillRoots = [...new Set((skills ?? []).map((skill) => resolve(skill.baseDir)))];
+	};
+	const isLocalSkillPath = (path: string) => {
+		const absolutePath = resolveToolPath(path, localCwd);
+		return localSkillRoots.some((root) => isPathInside(absolutePath, root));
+	};
+	const isLocalSkillCommand = (command: string) =>
+		localSkillRoots.some((root) => commandReferencesPath(command, root));
 
 	pi.registerTool({
 		...localRead,
 		async execute(id, params, signal, onUpdate, ctx) {
 			const ssh = getSsh();
-			if (ssh) {
+			if (ssh && !isLocalSkillPath(params.path)) {
 				const tool = createReadToolDefinition(localCwd, {
 					operations: createRemoteReadOps(ssh.remote, ssh.remoteCwd, localCwd),
 				});
@@ -177,7 +214,7 @@ export default function (pi: ExtensionAPI) {
 		...localBash,
 		async execute(id, params, signal, onUpdate, ctx) {
 			const ssh = getSsh();
-			if (ssh) {
+			if (ssh && !isLocalSkillCommand(params.command)) {
 				const tool = createBashToolDefinition(localCwd, {
 					operations: createRemoteBashOps(ssh.remote, ssh.remoteCwd, localCwd),
 				});
@@ -216,8 +253,10 @@ export default function (pi: ExtensionAPI) {
 		return { operations: createRemoteBashOps(ssh.remote, ssh.remoteCwd, localCwd) };
 	});
 
-	// Replace local cwd with remote cwd in system prompt
+	// Keep loaded skills local even while the project tools target the SSH host.
 	pi.on("before_agent_start", async (event) => {
+		updateLocalSkills(event.systemPromptOptions.skills);
+
 		const ssh = getSsh();
 		if (ssh) {
 			const modified = event.systemPrompt.replace(
