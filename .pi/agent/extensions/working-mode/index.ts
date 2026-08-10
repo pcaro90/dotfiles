@@ -344,15 +344,7 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 					"Do NOT attempt to create, modify, or delete files.",
 			};
 		}
-		if (currentMode === "berserker") {
-			return {
-				systemPrompt:
-					event.systemPrompt +
-					"\n\n[WORKING MODE: berserker]\n" +
-					"All commands and tools are enabled without restriction.",
-			};
-		}
-		// normal mode — no extra injection needed
+		// Normal and berserker modes share the same prompt to preserve the model cache.
 		return undefined;
 	});
 
