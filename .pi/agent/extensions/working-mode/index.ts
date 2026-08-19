@@ -224,12 +224,13 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 			return {
 				block: true,
 				reason: [
-					"Working mode [read-only]: command blocked.",
+					"Command blocked by the user's working mode: read-only.",
+					"",
+					"The user has set the working session to read-only, so commands that can potentially write files are blocked.",
+					"This command cannot be executed regardless of how you ask; only the user can change the working mode.",
 					"",
 					"Blocked sub-command(s):",
 					...nonAllowed.map((c) => `  • ${c}`),
-					"",
-					"Switch to normal or berserker mode with /wmode or Ctrl+Tab.",
 				].join("\n"),
 			};
 		}
