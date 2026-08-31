@@ -99,13 +99,16 @@ export function splitIntoSubcommands(command: string): ShellSubcommand[] {
  */
 const TRANSPARENT_PREFIX_RE = /^(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*)\s+|time\s+)*/;
 
+const SAFE_DEV_NULL_REDIRECT = /(^|\s)(?:\d*>>?|&>)\s*\/dev\/null(?=\s|$)/g;
+
 /** Shell constructs that must never bypass the command gate implicitly. */
 export function hasUnsafeShellSyntax(command: string): boolean {
+	const sanitized = command.replace(SAFE_DEV_NULL_REDIRECT, "$1");
 	let quote: "'" | '"' | undefined;
 
-	for (let i = 0; i < command.length; i++) {
-		const ch = command[i];
-		const next = command[i + 1];
+	for (let i = 0; i < sanitized.length; i++) {
+		const ch = sanitized[i];
+		const next = sanitized[i + 1];
 		if (ch === "\\" && quote !== "'" && next) {
 			i++;
 			continue;
@@ -135,11 +138,13 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*(?:diff|colordiff|delta)\b/,
 	/^\s*(?:pwd|echo|printf|printenv|uname|whoami|id|date|cal|uptime|which|whereis|type|file|stat)\b/,
 	/^\s*env\s*$/,
+	/^\s*command\s+-v(?:\s+\S+)+\s*$/,
 	/^\s*hostname(?:\s+(?:-f|--fqdn|-s|--short|-d|--domain|-i|--ip-address))*\s*$/,
 	/^\s*(?:du|df|ps|top|htop|btop|free|lsof|lscpu|lsblk)\b/,
 
 	// Exact version checks: don't allow `node script.js --version`.
 	/^\s*(?:node|python[23]?|ruby|rustc|cargo)\s+(?:--version|-v|-V)\s*$/i,
+	/^\s*pi\s+--version\s*$/,
 	/^\s*go\s+version\s*$/i,
 
 	// git — read-only operations (`git -C PATH ...` supported)
