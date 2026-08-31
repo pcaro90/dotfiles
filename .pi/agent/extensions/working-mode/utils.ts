@@ -99,11 +99,19 @@ export function splitIntoSubcommands(command: string): ShellSubcommand[] {
  */
 const TRANSPARENT_PREFIX_RE = /^(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*)\s+|time\s+)*/;
 
-const SAFE_DEV_NULL_REDIRECT = /(^|\s)(?:\d*>>?|&>)\s*\/dev\/null(?=\s|$)/g;
+// These redirections cannot create or modify files:
+//   >/dev/null, 2>/dev/null, &>/dev/null, 2>&1, >&2
+// Descriptor duplication is safe by itself; a separate redirect to a real file
+// remains in the command and is still rejected below.
+const SAFE_OUTPUT_REDIRECT = /(^|\s)(?:(?:\d*>>?|&>)\s*\/dev\/null|\d*>&\d+)(?=\s|$)/g;
+
+function stripSafeOutputRedirects(command: string): string {
+	return command.replace(SAFE_OUTPUT_REDIRECT, "$1");
+}
 
 /** Shell constructs that must never bypass the command gate implicitly. */
 export function hasUnsafeShellSyntax(command: string): boolean {
-	const sanitized = command.replace(SAFE_DEV_NULL_REDIRECT, "$1");
+	const sanitized = stripSafeOutputRedirects(command);
 	let quote: "'" | '"' | undefined;
 
 	for (let i = 0; i < sanitized.length; i++) {
@@ -134,7 +142,7 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*(?:grep|rg|ripgrep|fgrep|egrep|fd|find)\b/,
 	/^\s*(?:ls|eza|exa|lsd|tree)\b/,
 	/^\s*(?:wc|nl|sort|cut|tr|paste|column|jq|yq)\b/,
-	/^\s*sed\s+-n\b/i,
+	/^\s*sed\b(?=.*\s--sandbox(?:\s|$))/,
 	/^\s*(?:diff|colordiff|delta)\b/,
 	/^\s*(?:pwd|echo|printf|printenv|uname|whoami|id|date|cal|uptime|which|whereis|type|file|stat)\b/,
 	/^\s*env\s*$/,
@@ -145,7 +153,8 @@ const READONLY_PATTERNS: RegExp[] = [
 	// Exact version checks: don't allow `node script.js --version`.
 	/^\s*(?:node|python[23]?|ruby|rustc|cargo)\s+(?:--version|-v|-V)\s*$/i,
 	/^\s*pi\s+--version\s*$/,
-	/^\s*go\s+version\s*$/i,
+	/^\s*(?:go|caddy)\s+version\s*$/i,
+	/^\s*docker\s+version(?:\s+(?:-f|--format)(?:=|\s+)(?:"[^"]*"|'[^']*'|\S+))?\s*$/i,
 
 	// git — read-only operations (`git -C PATH ...` supported)
 	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?(?:status|log|diff|show|describe|shortlog|blame|check-ignore|rev-parse|rev-list)\b/i,
@@ -169,7 +178,7 @@ const READONLY_DENY_PATTERNS: RegExp[] = [
 	/^find\b.*\s-(?:delete|exec|execdir|ok|okdir|fprint|fprintf|fls)\b/i,
 	/^fd\b.*\s(?:-x|-X|--exec(?:-batch)?)(?:=|\s|$)/i,
 	/^sort\b.*\s(?:-o\S*|--output(?:=|\s)|--compress-program(?:=|\s))/i,
-	/^sed\b.*\s(?:-i\b|--in-place\b)/i,
+	/^sed\b.*\s(?:-[^-]*[fi]|--(?:file|in-place)(?:=|\s))/i,
 	/^yq\b.*\s(?:-i\b|--inplace\b)/i,
 	/^tree\b.*\s(?:-o\b|--output\b)/i,
 	/^date\b.*\s(?:-s\b|--set(?:=|\s))/i,
@@ -206,7 +215,7 @@ const NORMAL_AUTO_PATTERNS: RegExp[] = [
  * Transparent prefixes (environment assignments and `time`) are stripped first.
  */
 function matchesPatterns(cmd: string, allowed: RegExp[], denied: RegExp[] = []): boolean {
-	const stripped = cmd.trim().replace(TRANSPARENT_PREFIX_RE, "");
+	const stripped = stripSafeOutputRedirects(cmd.trim().replace(TRANSPARENT_PREFIX_RE, "")).trim();
 	return (
 		!hasUnsafeShellSyntax(stripped) &&
 		!denied.some((pattern) => pattern.test(stripped)) &&
@@ -220,7 +229,7 @@ export function isReadonlyCommand(cmd: string): boolean {
 
 /** Returns true for commands trusted without confirmation only in normal mode. */
 export function isNormalAutoAllowedCommand(cmd: string): boolean {
-	return matchesPatterns(cmd, NORMAL_AUTO_PATTERNS);
+	return isSafeSedCommand(cmd) || matchesPatterns(cmd, NORMAL_AUTO_PATTERNS);
 }
 
 // ─── Skill scripts ──────────────────────────────────────────────────────────
@@ -260,6 +269,31 @@ function shellWords(command: string): string[] {
 	}
 	if (current) words.push(current);
 	return words;
+}
+
+/** Sed is safe for automatic use unless it can load a script or edit files in place. */
+export function isSafeSedCommand(command: string): boolean {
+	if (hasUnsafeShellSyntax(command)) return false;
+	const args = shellWords(command.trim().replace(TRANSPARENT_PREFIX_RE, ""));
+	return (
+		args[0] === "sed" &&
+		!args.slice(1).some((arg) =>
+			arg === "--file" ||
+			arg.startsWith("--file=") ||
+			arg === "--in-place" ||
+			arg.startsWith("--in-place=") ||
+			/^-[^-]*[fi]/.test(arg),
+		)
+	);
+}
+
+/** Add GNU sed's sandbox flag while preserving transparent command prefixes. */
+export function sandboxSedCommand(command: string): string {
+	if (!isSafeSedCommand(command) || shellWords(command).includes("--sandbox")) return command;
+	return command.replace(
+		/^(\s*(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*|time)\s+)*)sed\b/,
+		"$1sed --sandbox",
+	);
 }
 
 function realPath(path: string): string | undefined {

@@ -32,10 +32,12 @@ import {
 	isNormalAutoAllowedCommand,
 	isPathInsideSkill,
 	isReadonlyCommand,
+	isSafeSedCommand,
 	isSkillScriptCommand,
 	isVarAssignment,
 	matchesSessionPattern,
 	resolveCdTarget,
+	sandboxSedCommand,
 	splitIntoSubcommands,
 	suggestPattern,
 } from "./utils.js";
@@ -231,9 +233,15 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 		const subCommands = splitIntoSubcommands(rawCommand);
 		const nonAllowed: string[] = [];
 		let effectiveCwd = cwd;
+		let commandChanged = false;
 
 		for (let i = 0; i < subCommands.length; i++) {
 			const subCommand = subCommands[i];
+			if (currentMode === "readonly" && isSafeSedCommand(subCommand.command)) {
+				const sandboxed = sandboxSedCommand(subCommand.command);
+				commandChanged ||= sandboxed !== subCommand.command;
+				subCommand.command = sandboxed;
+			}
 			if (!isAutoAllowed(subCommand.command, effectiveCwd)) nonAllowed.push(subCommand.command);
 
 			const cdTarget = resolveCdTarget(subCommand.command, effectiveCwd);
@@ -242,8 +250,15 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 			if (cdTarget && !cdRunsInPipeline && nextOperator !== "||") effectiveCwd = cdTarget;
 		}
 
-		// All sub-commands are auto-allowed
-		if (nonAllowed.length === 0) return undefined;
+		// All sub-commands are auto-allowed. Preserve their operators if sed was rewritten.
+		if (nonAllowed.length === 0) {
+			if (commandChanged) {
+				event.input.command = subCommands
+					.map(({ command, operatorBefore }) => operatorBefore ? `${operatorBefore} ${command}` : command)
+					.join(" ");
+			}
+			return undefined;
+		}
 
 		// ── Read-only mode: hard block ────────────────────────────────────
 
