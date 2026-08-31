@@ -105,139 +105,57 @@ const TRANSPARENT_PREFIX_RE = /^(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*)\s+|time\s+|
  * Patterns are matched against the command after stripping transparent prefixes.
  */
 const READONLY_PATTERNS: RegExp[] = [
-	// Basic file/text reading
-	/^\s*cat\b/,
-	/^\s*head\b/,
-	/^\s*tail\b/,
-	/^\s*less\b/,
-	/^\s*more\b/,
-	/^\s*bat\b/,
-
-	// Search
-	/^\s*grep\b/,
-	/^\s*rg\b/,
-	/^\s*ripgrep\b/,
-	/^\s*fgrep\b/,
-	/^\s*egrep\b/,
-	/^\s*fd\b/,
-	/^\s*find\b/,
-
-	// Directory listing
-	/^\s*ls\b/,
-	/^\s*eza\b/,
-	/^\s*exa\b/,
-	/^\s*lsd\b/,
-	/^\s*tree\b/,
-
-	// Text processing (read-only operations)
-	/^\s*wc\b/,
-	/^\s*nl\b/,
-	/^\s*sort\b/,
-	/^\s*uniq\b/,
-	/^\s*cut\b/,
-	/^\s*tr\b/,
-	/^\s*paste\b/,
-	/^\s*column\b/,
-	/^\s*awk\b/,
-	/^\s*jq\b/,
-	/^\s*yq\b/,
-	/^\s*xargs\b/,
-	// sed -n is read-only; sed without -n may modify files
+	/^\s*(?:cat|head|tail|less|more|bat)\b/,
+	/^\s*(?:grep|rg|ripgrep|fgrep|egrep|fd|find)\b/,
+	/^\s*(?:ls|eza|exa|lsd|tree)\b/,
+	/^\s*(?:wc|nl|sort|uniq|cut|tr|paste|column|awk|jq|yq|xargs)\b/,
 	/^\s*sed\s+-n\b/i,
+	/^\s*(?:diff|colordiff|delta)\b/,
+	/^\s*(?:pwd|echo|printf|env|printenv|uname|whoami|id|date|cal|uptime|hostname|which|whereis|type|file|stat)\b/,
+	/^\s*(?:du|df|ps|top|htop|btop|free|lsof|lscpu|lsblk)\b/,
 
-	// Diff / comparison
-	/^\s*diff\b/,
-	/^\s*colordiff\b/,
-	/^\s*delta\b/,
-
-	// Shell / system info
-	/^\s*pwd\b/,
-	/^\s*echo\b/,
-	/^\s*printf\b/,
-	/^\s*env\b/,
-	/^\s*printenv\b/,
-	/^\s*uname\b/,
-	/^\s*whoami\b/,
-	/^\s*id\b/,
-	/^\s*date\b/,
-	/^\s*cal\b/,
-	/^\s*uptime\b/,
-	/^\s*hostname\b/,
-	/^\s*which\b/,
-	/^\s*whereis\b/,
-	/^\s*type\b/,
-	/^\s*file\b/,
-	/^\s*stat\b/,
-
-	// Disk / process info
-	/^\s*du\b/,
-	/^\s*df\b/,
-	/^\s*ps\b/,
-	/^\s*top\b/,
-	/^\s*htop\b/,
-	/^\s*btop\b/,
-	/^\s*free\b/,
-	/^\s*lsof\b/,
-	/^\s*lscpu\b/,
-	/^\s*lsblk\b/,
-
-	// Version checks
-	/^\s*node\b.*--version\b/i,
-	/^\s*python[23]?\s+--version\b/i,
-	/^\s*ruby\s+--version\b/i,
-	/^\s*go\s+version\b/i,
-	/^\s*rustc\s+--version\b/i,
-	/^\s*cargo\s+--version\b/i,
+	// Exact version checks: don't allow `node script.js --version`.
+	/^\s*(?:node|python[23]?|ruby|rustc|cargo)\s+(?:--version|-v|-V)\s*$/i,
+	/^\s*go\s+version\s*$/i,
 
 	// git — read-only operations (`git -C PATH ...` supported)
-	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?(?:status|log|diff|show|branch|remote|fetch|describe|shortlog|blame|tag|check-ignore|rev-parse|rev-list)\b/i,
+	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?(?:status|log|diff|show|describe|shortlog|blame|check-ignore|rev-parse|rev-list)\b/i,
 	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?ls-/i,
 	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?stash\s+list\b/i,
 	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?config\s+--(?:get|list)\b/i,
 
-	// npm / yarn / pnpm — listing / querying only
-	/^\s*npm\s+(?:list|ls|view|info|search|outdated|audit)\b/i,
-	/^\s*npm\s+(?:test|run\s+test)\b/i,
-	/^\s*yarn\s+(?:list|info|why|audit|test)\b/i,
-	/^\s*pnpm\s+(?:list|ls|info|audit|test)\b/i,
+	// Package metadata queries. Mutating --fix variants are excluded.
+	/^\s*npm\s+(?!.*--fix\b)(?:list|ls|view|info|search|outdated|audit)\b/i,
+	/^\s*yarn\s+(?!.*--fix\b)(?:list|info|why|audit)\b/i,
+	/^\s*pnpm\s+(?!.*--fix\b)(?:list|ls|info|audit)\b/i,
 
-	// Test runners
-	/^\s*pytest\b/,
-	/^\s*python[23]?\s+-m\s+pytest\b/i,
-	/^\s*cargo\s+test\b/i,
-	/^\s*cargo\s+check\b/i,
-	/^\s*cargo\s+clippy\b/i,
-	/^\s*go\s+test\b/i,
-	/^\s*go\s+vet\b/i,
-	/^\s*make\s+test\b/i,
-
-	// Network (read-only fetching)
-	/^\s*curl\b/,
-	/^\s*wget\b/,
-	/^\s*http\b/, // httpie
-
-	// Shell flow utilities (no side effects)
-	/^\s*true\b/,
-	/^\s*false\b/,
+	/^\s*(?:true|false|sleep|man|tldr|help)\b/,
 	/^\s*test\s/,
 	/^\s*\[\s/,
-	/^\s*sleep\b/,
+];
 
-	// Documentation
-	/^\s*man\b/,
-	/^\s*tldr\b/,
-	/^\s*help\b/,
+/** Commands trusted in normal mode even though they may have side effects. */
+const NORMAL_AUTO_PATTERNS: RegExp[] = [
+	// Repository updates
+	/^\s*git\s+(?:-C\s+(?:"[^"]+"|'[^']+'|\S+)\s+)?fetch\b/i,
 
-    // Just commands
-	/^\s*just\s+fix\b/,
-	/^\s*just\s+check\b/,
-	/^\s*just\s+test\b/,
+	// Test and check commands
+	/^\s*npm\s+(?:test|run\s+test)\b/i,
+	/^\s*yarn\s+test\b/i,
+	/^\s*pnpm\s+test\b/i,
+	/^\s*pytest\b/,
+	/^\s*python[23]?\s+-m\s+pytest\b/i,
+	/^\s*cargo\s+(?:test|check|clippy)\b/i,
+	/^\s*go\s+(?:test|vet)\b/i,
+	/^\s*make\s+test\b/i,
 
-    // uv checking commands
-	/^\s*uv\s+run\s+ruff\s+format\b/,
-	/^\s*uv\s+run\s+ruff\s+check\b/,
+	// Network commands can write files or mutate remote state depending on flags.
+	/^\s*(?:curl|wget|http)\b/,
+
+	// Explicitly trusted project workflows
+	/^\s*just\s+(?:fix|check|test)\b/,
+	/^\s*uv\s+run\s+ruff\s+(?:format|check)\b/,
 	/^\s*uv\s+run\s+ty\s+check\b/,
-
 ];
 
 /**
@@ -247,6 +165,12 @@ const READONLY_PATTERNS: RegExp[] = [
 export function isReadonlyCommand(cmd: string): boolean {
 	const stripped = cmd.trim().replace(TRANSPARENT_PREFIX_RE, "");
 	return READONLY_PATTERNS.some((p) => p.test(stripped));
+}
+
+/** Returns true for commands trusted without confirmation only in normal mode. */
+export function isNormalAutoAllowedCommand(cmd: string): boolean {
+	const stripped = cmd.trim().replace(TRANSPARENT_PREFIX_RE, "");
+	return NORMAL_AUTO_PATTERNS.some((p) => p.test(stripped));
 }
 
 // ─── Skill scripts ──────────────────────────────────────────────────────────

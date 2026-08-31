@@ -3,9 +3,10 @@
  *
  * Controls what bash commands the AI can execute, with three safety levels:
  *
- *   🔒 readonly  — only read-only commands (git status, grep, rg, find, pytest…)
+ *   🔒 readonly  — only read-only commands (git status, grep, rg, find…)
  *                  edit + write tools are disabled
- *   ⚡ normal    — read-only commands auto-allowed; anything else asks the user
+ *   ⚡ normal    — read-only and trusted workflow commands are auto-allowed;
+ *                  anything else asks the user
  *                  (with per-session "always allow" memory)
  *   💀 berserker — no restrictions; everything is allowed without confirmation
  *
@@ -27,6 +28,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { Key } from "@earendil-works/pi-tui";
 import {
 	isCdToSubdirOrSame,
+	isNormalAutoAllowedCommand,
 	isPathInsideSkill,
 	isReadonlyCommand,
 	isSkillScriptCommand,
@@ -145,8 +147,11 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 			}
 		}
 
-		// Standard read-only commands
+		// Read-only commands are allowed in both restricted modes.
 		if (isReadonlyCommand(subCmd)) return true;
+
+		// Trusted workflows may have side effects, so only auto-allow them in normal mode.
+		if (currentMode === "normal" && isNormalAutoAllowedCommand(subCmd)) return true;
 
 		// Commands previously accepted by the user for this session
 		if (sessionAcceptedPatterns.some((p) => matchesSessionPattern(subCmd, p))) return true;
@@ -185,7 +190,7 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 					`Current working mode: ${currentMode}\n\nSelect mode:`,
 					[
 						"🔒 readonly  — only read-only commands allowed",
-						"⚡ normal    — read-only auto-allowed; confirm others",
+						"⚡ normal    — read-only and trusted workflows auto-allowed",
 						"💀 berserker — no restrictions",
 					],
 				);
@@ -369,7 +374,7 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 					event.systemPrompt +
 					"\n\n[WORKING MODE: read-only]\n" +
 					"You may only use read-only bash commands (grep, rg, find, cat, ls, git status, git log, " +
-					"git diff, pytest, curl, etc.).  The edit and write tools are disabled.\n" +
+					"git diff, etc.).  The edit and write tools are disabled.\n" +
 					"Do NOT attempt to create, modify, or delete files.",
 			};
 		}
