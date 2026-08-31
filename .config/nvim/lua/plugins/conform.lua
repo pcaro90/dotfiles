@@ -42,10 +42,14 @@ return {
         },
         prettier = {
           prepend_args = function(_, ctx)
+            -- ignore .gitignore/.prettierignore files on manual formatting
+            local args = { "--ignore-path", "/dev/null" }
             if ctx.filename:match("[^/]+$") == "SKILL.md" then
-              return { "--prose-wrap", "never" }
+              vim.list_extend(args, { "--prose-wrap", "never" })
+            else
+              vim.list_extend(args, { "--prose-wrap", "always" })
             end
-            return { "--prose-wrap", "always" }
+            return args
           end,
         },
       },
