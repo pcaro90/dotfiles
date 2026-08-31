@@ -94,11 +94,33 @@ export function splitIntoSubcommands(command: string): ShellSubcommand[] {
  * Strip transparent command prefixes before the real command name.
  * Handles:
  *   - environment variable assignments  (FOO=bar cmd)
- *   - `time`  prefix  (time cmd)
- *   - `nohup` prefix  (nohup cmd)
- * Does NOT strip `sudo` (that's deliberately non-transparent).
+ *   - `time` prefix  (time cmd)
+ * Does NOT strip `sudo` or `nohup` (they are deliberately non-transparent).
  */
-const TRANSPARENT_PREFIX_RE = /^(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*)\s+|time\s+|nohup\s+)*/;
+const TRANSPARENT_PREFIX_RE = /^(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*)\s+|time\s+)*/;
+
+/** Shell constructs that must never bypass the command gate implicitly. */
+export function hasUnsafeShellSyntax(command: string): boolean {
+	let quote: "'" | '"' | undefined;
+
+	for (let i = 0; i < command.length; i++) {
+		const ch = command[i];
+		const next = command[i + 1];
+		if (ch === "\\" && quote !== "'" && next) {
+			i++;
+			continue;
+		}
+		if ((ch === "'" || ch === '"') && (!quote || quote === ch)) {
+			quote = quote ? undefined : ch;
+			continue;
+		}
+		if (quote !== "'" && (ch === "`" || (ch === "$" && next === "("))) return true;
+		if (!quote && (ch === ">" || ch === "&" || (ch === "<" && (next === "<" || next === "(")))) {
+			return true;
+		}
+	}
+	return false;
+}
 
 /**
  * Read-only commands that are unconditionally safe in any mode.
@@ -108,10 +130,12 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*(?:cat|head|tail|less|more|bat)\b/,
 	/^\s*(?:grep|rg|ripgrep|fgrep|egrep|fd|find)\b/,
 	/^\s*(?:ls|eza|exa|lsd|tree)\b/,
-	/^\s*(?:wc|nl|sort|uniq|cut|tr|paste|column|awk|jq|yq|xargs)\b/,
+	/^\s*(?:wc|nl|sort|cut|tr|paste|column|jq|yq)\b/,
 	/^\s*sed\s+-n\b/i,
 	/^\s*(?:diff|colordiff|delta)\b/,
-	/^\s*(?:pwd|echo|printf|env|printenv|uname|whoami|id|date|cal|uptime|hostname|which|whereis|type|file|stat)\b/,
+	/^\s*(?:pwd|echo|printf|printenv|uname|whoami|id|date|cal|uptime|which|whereis|type|file|stat)\b/,
+	/^\s*env\s*$/,
+	/^\s*hostname(?:\s+(?:-f|--fqdn|-s|--short|-d|--domain|-i|--ip-address))*\s*$/,
 	/^\s*(?:du|df|ps|top|htop|btop|free|lsof|lscpu|lsblk)\b/,
 
 	// Exact version checks: don't allow `node script.js --version`.
@@ -132,6 +156,20 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*(?:true|false|sleep|man|tldr|help)\b/,
 	/^\s*test\s/,
 	/^\s*\[\s/,
+];
+
+/** Known mutating forms of otherwise read-only commands. */
+const READONLY_DENY_PATTERNS: RegExp[] = [
+	/^(?:rg|ripgrep)\b.*\s--pre(?:=|\s)/i,
+	/^find\b.*\s-(?:delete|exec|execdir|ok|okdir|fprint|fprintf|fls)\b/i,
+	/^fd\b.*\s(?:-x|-X|--exec(?:-batch)?)(?:=|\s|$)/i,
+	/^sort\b.*\s(?:-o\S*|--output(?:=|\s)|--compress-program(?:=|\s))/i,
+	/^sed\b.*\s(?:-i\b|--in-place\b)/i,
+	/^yq\b.*\s(?:-i\b|--inplace\b)/i,
+	/^tree\b.*\s(?:-o\b|--output\b)/i,
+	/^date\b.*\s(?:-s\b|--set(?:=|\s))/i,
+	/^git\b.*\s--output(?:=|\s)/i,
+	/^git\b.*\bconfig\b.*\s--(?:add|unset|unset-all|replace-all|remove-section|rename-section|edit)\b/i,
 ];
 
 /** Commands trusted in normal mode even though they may have side effects. */
@@ -160,17 +198,24 @@ const NORMAL_AUTO_PATTERNS: RegExp[] = [
 
 /**
  * Returns true if `cmd` matches any read-only pattern.
- * Transparent prefixes (env vars, `time`, `nohup`) are stripped first.
+ * Transparent prefixes (environment assignments and `time`) are stripped first.
  */
-export function isReadonlyCommand(cmd: string): boolean {
+function matchesPatterns(cmd: string, allowed: RegExp[], denied: RegExp[] = []): boolean {
 	const stripped = cmd.trim().replace(TRANSPARENT_PREFIX_RE, "");
-	return READONLY_PATTERNS.some((p) => p.test(stripped));
+	return (
+		!hasUnsafeShellSyntax(stripped) &&
+		!denied.some((pattern) => pattern.test(stripped)) &&
+		allowed.some((pattern) => pattern.test(stripped))
+	);
+}
+
+export function isReadonlyCommand(cmd: string): boolean {
+	return matchesPatterns(cmd, READONLY_PATTERNS, READONLY_DENY_PATTERNS);
 }
 
 /** Returns true for commands trusted without confirmation only in normal mode. */
 export function isNormalAutoAllowedCommand(cmd: string): boolean {
-	const stripped = cmd.trim().replace(TRANSPARENT_PREFIX_RE, "");
-	return NORMAL_AUTO_PATTERNS.some((p) => p.test(stripped));
+	return matchesPatterns(cmd, NORMAL_AUTO_PATTERNS);
 }
 
 // ─── Skill scripts ──────────────────────────────────────────────────────────
@@ -299,13 +344,8 @@ export function isCdToSubdirOrSame(cmd: string, cwd: string): boolean {
  * Matching is case-sensitive and anchored to the full trimmed command.
  */
 export function matchesSessionPattern(cmd: string, pattern: string): boolean {
-	// Escape all regex special chars except *, then replace * with .*
 	const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
-	try {
-		return new RegExp(`^${escaped}$`).test(cmd.trim());
-	} catch {
-		return false;
-	}
+	return new RegExp(`^${escaped}$`).test(cmd.trim());
 }
 
 // ─── Pattern suggestion ──────────────────────────────────────────────────────
@@ -348,6 +388,15 @@ const COMPOUND_COMMANDS = new Set([
 	"dnf",
 	"pacman",
 ]);
+
+export function suggestPattern(cmd: string): string {
+	const trimmed = cmd.trim();
+	const parts = trimmed.split(/\s+/);
+	if (parts.length <= 1) return trimmed;
+	return COMPOUND_COMMANDS.has(parts[0]) && parts.length > 2
+		? `${parts[0]} ${parts[1]} *`
+		: `${parts[0]} *`;
+}
 
 // ─── Variable assignment detection ────────────────────────────────────────────
 
@@ -408,15 +457,3 @@ export function isVarAssignment(cmd: string): boolean {
 	return hasExport || hasAssignment;
 }
 
-// ─── Pattern suggestion ──────────────────────────────────────────────────────
-
-export function suggestPattern(cmd: string): string {
-	const trimmed = cmd.trim();
-	const parts = trimmed.split(/\s+/);
-	if (parts.length <= 1) return trimmed;
-
-	if (COMPOUND_COMMANDS.has(parts[0]) && parts.length > 2) {
-		return `${parts[0]} ${parts[1]} *`;
-	}
-	return `${parts[0]} *`;
-}

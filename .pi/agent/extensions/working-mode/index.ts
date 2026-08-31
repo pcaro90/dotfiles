@@ -24,9 +24,10 @@
  *
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { isToolCallEventType, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Key } from "@earendil-works/pi-tui";
 import {
+	hasUnsafeShellSyntax,
 	isCdToSubdirOrSame,
 	isNormalAutoAllowedCommand,
 	isPathInsideSkill,
@@ -57,6 +58,15 @@ const READONLY_TOOLS = ["read", "bash", "grep", "find", "ls", "questionnaire"];
 const FULL_TOOLS = ["read", "bash", "edit", "write", "questionnaire"];
 
 const MODE_CYCLE: WorkingMode[] = ["readonly", "normal", "berserker"];
+const MODE_ALIASES = new Map<string, WorkingMode>([
+	["readonly", "readonly"], ["ro", "readonly"], ["r", "readonly"],
+	["normal", "normal"], ["n", "normal"],
+	["berserker", "berserker"], ["berserk", "berserker"], ["b", "berserker"],
+]);
+
+function parseMode(value: unknown): WorkingMode | undefined {
+	return typeof value === "string" ? MODE_ALIASES.get(value.trim().toLowerCase()) : undefined;
+}
 
 type ThemeColor = "warning" | "accent" | "error";
 
@@ -105,14 +115,11 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 		ctx.ui.setStatus("working-mode", ctx.ui.theme.fg(color, label));
 	}
 
-	function setMode(mode: WorkingMode, ctx: ExtensionContext, silent = false): void {
+	function setMode(mode: WorkingMode, ctx: ExtensionContext): void {
 		currentMode = mode;
 		applyModeTools(mode);
 		updateStatus(ctx);
-		if (!silent) {
-			ctx.ui.notify(`Working mode → ${mode}`, "info");
-		}
-		// Persist so the mode survives /resume
+		ctx.ui.notify(`Working mode → ${mode}`, "info");
 		pi.appendEntry("working-mode-state", { mode });
 	}
 
@@ -136,7 +143,11 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 		// Pure variable assignments (no command substitution) are safe
 		if (isVarAssignment(trimmed)) return true;
 
-		// Skill scripts are trusted regardless of where the skill was loaded from.
+		// Explicit session rules override the automatic classifiers.
+		if (sessionAcceptedPatterns.some((pattern) => matchesSessionPattern(subCmd, pattern))) return true;
+
+		// Trust skill scripts, but not shell substitutions or redirections around them.
+		if (hasUnsafeShellSyntax(subCmd)) return false;
 		if (isSkillScriptCommand(subCmd, cwd, skillRoots)) return true;
 
 		// cd to the current directory, a subdirectory, or a loaded skill is OK.
@@ -153,17 +164,8 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 		// Trusted workflows may have side effects, so only auto-allow them in normal mode.
 		if (currentMode === "normal" && isNormalAutoAllowedCommand(subCmd)) return true;
 
-		// Commands previously accepted by the user for this session
-		if (sessionAcceptedPatterns.some((p) => matchesSessionPattern(subCmd, p))) return true;
-
 		return false;
 	}
-
-	// Keep the permission list aligned with Pi's loaded skills. This remains a
-	// separate handler from the existing working-mode prompt injection.
-	pi.on("before_agent_start", (event) => {
-		skillRoots = [...new Set((event.systemPromptOptions.skills ?? []).map((skill) => skill.baseDir))];
-	});
 
 	// ── Shortcut ─────────────────────────────────────────────────────────────
 
@@ -177,12 +179,11 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 	pi.registerCommand("wmode", {
 		description: "Show or set working mode: /wmode [readonly|normal|berserker]",
 		getArgumentCompletions: (prefix: string) => {
-			const modes = ["readonly", "normal", "berserker"];
-			const matching = modes.filter((m) => m.startsWith(prefix));
-			return matching.length > 0 ? matching.map((m) => ({ value: m, label: m })) : null;
+			const matching = MODE_CYCLE.filter((mode) => mode.startsWith(prefix));
+			return matching.length > 0 ? matching.map((mode) => ({ value: mode, label: mode })) : null;
 		},
 		handler: async (args, ctx) => {
-			const arg = args?.trim().toLowerCase();
+			const arg = args?.trim();
 
 			if (!arg) {
 				// Show interactive selector
@@ -201,16 +202,9 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 				return;
 			}
 
-			// Direct mode argument
-			if (arg === "readonly" || arg === "ro" || arg === "r") {
-				setMode("readonly", ctx);
-			} else if (arg === "normal" || arg === "n") {
-				setMode("normal", ctx);
-			} else if (arg === "berserker" || arg === "b" || arg === "berserk") {
-				setMode("berserker", ctx);
-			} else {
-				ctx.ui.notify(`Unknown mode "${arg}". Options: readonly | normal | berserker`, "error");
-			}
+			const mode = parseMode(arg);
+			if (mode) setMode(mode, ctx);
+			else ctx.ui.notify(`Unknown mode "${arg}". Options: readonly | normal | berserker`, "error");
 		},
 	});
 
@@ -224,9 +218,9 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 			return { block: true, reason: `Tool "${event.toolName}" is not active in ${currentMode} mode` };
 		}
 
-		if (event.toolName !== "bash") return undefined;
+		if (!isToolCallEventType("bash", event)) return undefined;
 
-		const rawCommand = event.input.command as string;
+		const rawCommand = event.input.command;
 		const cwd = ctx.cwd;
 
 		// Berserker: unconditional pass-through
@@ -367,7 +361,9 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 
 	// ── System prompt injection ──────────────────────────────────────────────
 
-	pi.on("before_agent_start", async (event) => {
+	pi.on("before_agent_start", (event) => {
+		skillRoots = [...new Set((event.systemPromptOptions.skills ?? []).map((skill) => skill.baseDir))];
+
 		if (currentMode === "readonly") {
 			return {
 				systemPrompt:
@@ -384,30 +380,14 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 
 	// ── Session start / restore ──────────────────────────────────────────────
 
-	pi.on("session_start", async (event, ctx) => {
-		// Determine initial mode from CLI flag
-		let initialMode: WorkingMode = "normal";
-		const wmodeFlag = pi.getFlag("wmode");
-		if (typeof wmodeFlag === "string" && wmodeFlag) {
-			const f = wmodeFlag.toLowerCase().trim();
-			if (f === "readonly" || f === "ro" || f === "r") initialMode = "readonly";
-			else if (f === "berserker" || f === "b" || f === "berserk") initialMode = "berserker";
-		}
-
-		// On resume / fork, restore the last persisted mode
-		if (event.reason === "resume" || event.reason === "fork") {
-			const entries = ctx.sessionManager.getEntries();
-			const stateEntry = entries
-				.filter(
-					(e: { type: string; customType?: string }) =>
-						e.type === "custom" && e.customType === "working-mode-state",
-				)
-				.pop() as { data?: { mode: WorkingMode } } | undefined;
-
-			if (stateEntry?.data?.mode) {
-				initialMode = stateEntry.data.mode;
-			}
-		}
+	pi.on("session_start", (_event, ctx) => {
+		let initialMode = parseMode(pi.getFlag("wmode")) ?? "normal";
+		const stateEntry = ctx.sessionManager
+			.getBranch()
+			.findLast((entry) => entry.type === "custom" && entry.customType === "working-mode-state") as
+			| { data?: { mode?: unknown } }
+			| undefined;
+		initialMode = parseMode(stateEntry?.data?.mode) ?? initialMode;
 
 		// Note: session-accepted patterns are intentionally NOT restored —
 		// they are per-session-runtime, not persisted.
