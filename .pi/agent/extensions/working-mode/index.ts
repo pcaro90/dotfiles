@@ -10,7 +10,7 @@
  *   💀 berserker — no restrictions; everything is allowed without confirmation
  *
  * Features:
- *   • Tab             cycle modes  (readonly → normal → berserker → …)
+ *   • Ctrl+Tab        cycle modes  (readonly → normal → berserker → …)
  *   • /wmode          show selector or set mode directly  (/wmode readonly)
  *   • --wmode flag    set default mode at startup  (pi --wmode readonly)
  *   • Session memory  remember accepted commands for the whole session,
@@ -49,7 +49,7 @@ const SSH_STATE_EVENT = "ssh:state";
 const SSH_UNSUPPORTED_TOOLS = new Set(["grep", "find", "ls"]);
 
 const READONLY_TOOLS = ["read", "bash", "grep", "find", "ls", "questionnaire"];
-const FULL_TOOLS = ["read", "bash", "edit", "write", "grep", "find", "ls", "questionnaire"];
+const FULL_TOOLS = ["read", "bash", "edit", "write", "questionnaire"];
 
 const MODE_CYCLE: WorkingMode[] = ["readonly", "normal", "berserker"];
 
