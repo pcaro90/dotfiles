@@ -27,9 +27,12 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { Key } from "@earendil-works/pi-tui";
 import {
 	isCdToSubdirOrSame,
+	isPathInsideSkill,
 	isReadonlyCommand,
+	isSkillScriptCommand,
 	isVarAssignment,
 	matchesSessionPattern,
+	resolveCdTarget,
 	splitIntoSubcommands,
 	suggestPattern,
 } from "./utils.js";
@@ -66,6 +69,7 @@ const MODE_STATUS: Record<WorkingMode, { label: string; color: ThemeColor }> = {
 export default function workingModeExtension(pi: ExtensionAPI): void {
 	let currentMode: WorkingMode = "normal";
 	let sshActive = false;
+	let skillRoots: string[] = [];
 
 	/**
 	 * Commands (and/or patterns) accepted by the user for the whole session.
@@ -130,9 +134,15 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 		// Pure variable assignments (no command substitution) are safe
 		if (isVarAssignment(trimmed)) return true;
 
-		// cd to the current directory or any subdirectory is always OK
+		// Skill scripts are trusted regardless of where the skill was loaded from.
+		if (isSkillScriptCommand(subCmd, cwd, skillRoots)) return true;
+
+		// cd to the current directory, a subdirectory, or a loaded skill is OK.
 		if (trimmed === "cd" || trimmed.startsWith("cd ")) {
-			if (isCdToSubdirOrSame(subCmd, cwd)) return true;
+			const target = resolveCdTarget(subCmd, cwd);
+			if (isCdToSubdirOrSame(subCmd, cwd) || (target && isPathInsideSkill(target, skillRoots))) {
+				return true;
+			}
 		}
 
 		// Standard read-only commands
@@ -143,6 +153,12 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 
 		return false;
 	}
+
+	// Keep the permission list aligned with Pi's loaded skills. This remains a
+	// separate handler from the existing working-mode prompt injection.
+	pi.on("before_agent_start", (event) => {
+		skillRoots = [...new Set((event.systemPromptOptions.skills ?? []).map((skill) => skill.baseDir))];
+	});
 
 	// ── Shortcut ─────────────────────────────────────────────────────────────
 
@@ -211,9 +227,21 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 		// Berserker: unconditional pass-through
 		if (currentMode === "berserker") return undefined;
 
-		// Decompose into individual sub-commands
+		// Decompose the command while tracking cwd changes that persist in the
+		// current shell. This lets `cd <skill> && ./scripts/foo` resolve correctly.
 		const subCommands = splitIntoSubcommands(rawCommand);
-		const nonAllowed = subCommands.filter((cmd) => !isAutoAllowed(cmd, cwd));
+		const nonAllowed: string[] = [];
+		let effectiveCwd = cwd;
+
+		for (let i = 0; i < subCommands.length; i++) {
+			const subCommand = subCommands[i];
+			if (!isAutoAllowed(subCommand.command, effectiveCwd)) nonAllowed.push(subCommand.command);
+
+			const cdTarget = resolveCdTarget(subCommand.command, effectiveCwd);
+			const nextOperator = subCommands[i + 1]?.operatorBefore;
+			const cdRunsInPipeline = subCommand.operatorBefore === "|" || nextOperator === "|";
+			if (cdTarget && !cdRunsInPipeline && nextOperator !== "||") effectiveCwd = cdTarget;
+		}
 
 		// All sub-commands are auto-allowed
 		if (nonAllowed.length === 0) return undefined;

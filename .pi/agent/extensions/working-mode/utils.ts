@@ -1,9 +1,11 @@
 /**
  * Working Mode — utilities
- * Pure functions for command parsing and pattern matching.
+ * Command parsing, path checks, and pattern matching.
  */
 
-import { normalize, resolve, sep } from "node:path";
+import { realpathSync } from "node:fs";
+import { homedir } from "node:os";
+import { basename, isAbsolute, normalize, relative, resolve, sep } from "node:path";
 
 // ─── Shell command splitting ─────────────────────────────────────────────────
 
@@ -12,17 +14,29 @@ import { normalize, resolve, sep } from "node:path";
  * Splits on: |, ||, &&, ;, \n
  * Respects single and double quoted strings and backslash escapes.
  *
- * Examples:
- *   "ls && rm -rf /"  →  ["ls", "rm -rf /"]
- *   "grep foo | wc"   →  ["grep foo", "wc"]
- *   "echo 'a|b'; ls"  →  ["echo 'a|b'", "ls"]
+ * Each result keeps the operator that preceded it so callers can track
+ * stateful shell operations such as `cd skill && ./scripts/tool`.
  */
-export function splitIntoSubcommands(command: string): string[] {
-	const results: string[] = [];
+export type ShellOperator = "|" | "||" | "&&" | ";" | "\n";
+
+export interface ShellSubcommand {
+	command: string;
+	operatorBefore?: ShellOperator;
+}
+
+export function splitIntoSubcommands(command: string): ShellSubcommand[] {
+	const results: ShellSubcommand[] = [];
 	let current = "";
+	let operatorBefore: ShellOperator | undefined;
 	let inSingle = false;
 	let inDouble = false;
 	let i = 0;
+
+	const push = (nextOperator?: ShellOperator) => {
+		if (current.trim()) results.push({ command: current.trim(), operatorBefore });
+		current = "";
+		operatorBefore = nextOperator;
+	};
 
 	while (i < command.length) {
 		const ch = command[i];
@@ -48,38 +62,19 @@ export function splitIntoSubcommands(command: string): string[] {
 		}
 
 		if (!inSingle && !inDouble) {
-			// || (logical OR — must be checked before single |)
+			// Two-character operators must be checked before a single pipe.
 			if (ch === "|" && command[i + 1] === "|") {
-				if (current.trim()) results.push(current.trim());
-				current = "";
+				push("||");
 				i += 2;
 				continue;
 			}
-			// && (logical AND)
 			if (ch === "&" && command[i + 1] === "&") {
-				if (current.trim()) results.push(current.trim());
-				current = "";
+				push("&&");
 				i += 2;
 				continue;
 			}
-			// | (pipe)
-			if (ch === "|") {
-				if (current.trim()) results.push(current.trim());
-				current = "";
-				i++;
-				continue;
-			}
-			// ; (statement separator)
-			if (ch === ";") {
-				if (current.trim()) results.push(current.trim());
-				current = "";
-				i++;
-				continue;
-			}
-			// \n (newline as statement separator)
-			if (ch === "\n") {
-				if (current.trim()) results.push(current.trim());
-				current = "";
+			if (ch === "|" || ch === ";" || ch === "\n") {
+				push(ch as "|" | ";" | "\n");
 				i++;
 				continue;
 			}
@@ -89,8 +84,8 @@ export function splitIntoSubcommands(command: string): string[] {
 		i++;
 	}
 
-	if (current.trim()) results.push(current.trim());
-	return results.filter((s) => s.length > 0);
+	push();
+	return results;
 }
 
 // ─── Read-only pattern detection ────────────────────────────────────────────
@@ -243,9 +238,6 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*uv\s+run\s+ruff\s+check\b/,
 	/^\s*uv\s+run\s+ty\s+check\b/,
 
-	// Skill scripts — portable across machines (node prefix optional)
-	/^\s*(?:node\s+)?\/home\/.*\/\.pi\/agent\/skills\/web-search\/scripts\/.*\.js\b/,
-	/^\s*(?:node\s+)?\/home\/.*\/\.pi\/agent\/skills\/web-browser\/scripts\/.*\.js\b/,
 ];
 
 /**
@@ -257,6 +249,100 @@ export function isReadonlyCommand(cmd: string): boolean {
 	return READONLY_PATTERNS.some((p) => p.test(stripped));
 }
 
+// ─── Skill scripts ──────────────────────────────────────────────────────────
+
+const SCRIPT_INTERPRETERS = new Set([
+	"bash",
+	"bun",
+	"fish",
+	"node",
+	"perl",
+	"php",
+	"python",
+	"python2",
+	"python3",
+	"ruby",
+	"sh",
+	"zsh",
+]);
+
+function shellWords(command: string): string[] {
+	const words: string[] = [];
+	let current = "";
+	let quote: "'" | '"' | undefined;
+
+	for (let i = 0; i < command.length; i++) {
+		const ch = command[i];
+		if (ch === "\\" && quote !== "'" && i + 1 < command.length) {
+			current += command[++i];
+		} else if ((ch === "'" || ch === '"') && (!quote || quote === ch)) {
+			quote = quote ? undefined : ch;
+		} else if (/\s/.test(ch) && !quote) {
+			if (current) words.push(current);
+			current = "";
+		} else {
+			current += ch;
+		}
+	}
+	if (current) words.push(current);
+	return words;
+}
+
+function realPath(path: string): string | undefined {
+	try {
+		return realpathSync(path);
+	} catch {
+		return undefined;
+	}
+}
+
+function isInside(path: string, parent: string, includeParent = true): boolean {
+	const rel = relative(parent, path);
+	return (
+		(includeParent && rel === "") ||
+		(rel !== "" && rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+	);
+}
+
+function expandHome(path: string): string {
+	return path === "~" ? homedir() : path.startsWith("~/") ? resolve(homedir(), path.slice(2)) : path;
+}
+
+/** Return true when path is the root or a descendant of a loaded skill. */
+export function isPathInsideSkill(path: string, skillRoots: readonly string[]): boolean {
+	const actualPath = realPath(path);
+	if (!actualPath) return false;
+	return skillRoots.some((root) => {
+		const actualRoot = realPath(root);
+		return actualRoot ? isInside(actualPath, actualRoot) : false;
+	});
+}
+
+/** Return true when command directly executes a file under a loaded skill's scripts directory. */
+export function isSkillScriptCommand(command: string, cwd: string, skillRoots: readonly string[]): boolean {
+	const words = shellWords(command.trim().replace(TRANSPARENT_PREFIX_RE, ""));
+	if (words.length === 0) return false;
+
+	let script = words[0];
+	const executable = basename(script);
+	if (SCRIPT_INTERPRETERS.has(executable)) {
+		if (words.length < 2 || words[1].startsWith("-")) return false;
+		script = words[1];
+	} else if (executable === "env") {
+		const interpreter = words[1] ? basename(words[1]) : "";
+		if (!SCRIPT_INTERPRETERS.has(interpreter) || !words[2] || words[2].startsWith("-")) return false;
+		script = words[2];
+	}
+
+	const actualScript = realPath(resolve(cwd, expandHome(script)));
+	if (!actualScript) return false;
+
+	return skillRoots.some((root) => {
+		const scriptsDir = realPath(resolve(root, "scripts"));
+		return scriptsDir ? isInside(actualScript, scriptsDir, false) : false;
+	});
+}
+
 // ─── cd special-case ────────────────────────────────────────────────────────
 
 /**
@@ -266,28 +352,18 @@ export function isReadonlyCommand(cmd: string): boolean {
  * @param cmd  A single sub-command string.
  * @param cwd  The current working directory (absolute path).
  */
+export function resolveCdTarget(cmd: string, cwd: string): string | undefined {
+	const words = shellWords(cmd);
+	if (words.length !== 2 || words[0] !== "cd" || words[1].startsWith("$")) return undefined;
+	return resolve(cwd, expandHome(words[1]));
+}
+
 export function isCdToSubdirOrSame(cmd: string, cwd: string): boolean {
-	const match = cmd.trim().match(/^cd\s+(.+?)$/);
-	if (!match) {
-		// Bare `cd` → goes to $HOME, which is not guaranteed to be a subdirectory.
-		return false;
-	}
+	const target = resolveCdTarget(cmd, cwd);
+	if (!target) return false;
 
-	let target = match[1].trim();
-
-	// Strip surrounding quotes
-	target = target.replace(/^(['"])(.*)\1$/, "$2");
-
-	// ~ refers to home directory — not necessarily a subdirectory of cwd
-	if (target === "~" || target.startsWith("~/") || target.startsWith("$HOME")) {
-		return false;
-	}
-
-	const resolved = resolve(cwd, target);
 	const cwdNorm = normalize(cwd);
-
-	// Must be exactly cwd, or a proper subdirectory (starts with cwd + sep)
-	return resolved === cwdNorm || resolved.startsWith(cwdNorm + sep);
+	return target === cwdNorm || target.startsWith(cwdNorm + sep);
 }
 
 // ─── Session-accepted pattern matching ──────────────────────────────────────
