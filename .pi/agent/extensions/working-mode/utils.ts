@@ -95,9 +95,11 @@ export function splitIntoSubcommands(command: string): ShellSubcommand[] {
  * Handles:
  *   - environment variable assignments  (FOO=bar cmd)
  *   - `time` prefix  (time cmd)
+ *   - shell control words before the command they guard (`if grep`, `do echo`, …)
  * Does NOT strip `sudo` or `nohup` (they are deliberately non-transparent).
  */
-const TRANSPARENT_PREFIX_RE = /^(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*)\s+|time\s+)*/;
+const TRANSPARENT_PREFIX_RE =
+	/^(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*)\s+|(?:time|if|then|elif|else|while|until|do|!)\s+)*/;
 
 // These redirections cannot create or modify files:
 //   >/dev/null, 2>/dev/null, &>/dev/null, 2>&1, >&2
@@ -138,6 +140,11 @@ export function hasUnsafeShellSyntax(command: string): boolean {
  * Patterns are matched against the command after stripping transparent prefixes.
  */
 const READONLY_PATTERNS: RegExp[] = [
+	// Harmless shell control clauses. Commands attached to `if`, `then`,
+	// `while`, `do`, etc. are classified normally via the transparent prefix.
+	/^\s*for\s+[A-Za-z_][A-Za-z0-9_]*\s+in(?:\s+.*)?$/,
+	/^\s*(?:if|then|elif|else|fi|while|until|do|done)\s*$/,
+
 	/^\s*(?:cat|head|tail|less|more|bat)\b/,
 	/^\s*(?:grep|rg|ripgrep|fgrep|egrep|fd|find)\b/,
 	/^\s*(?:ls|eza|exa|lsd|tree)\b/,
@@ -168,6 +175,7 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*pnpm\s+(?!.*--fix\b)(?:list|ls|info|audit)\b/i,
 
 	/^\s*(?:true|false|sleep|man|tldr|help)\b/,
+	/^\s*read\b/,
 	/^\s*test\s/,
 	/^\s*\[\s/,
 ];
@@ -291,7 +299,7 @@ export function isSafeSedCommand(command: string): boolean {
 export function sandboxSedCommand(command: string): string {
 	if (!isSafeSedCommand(command) || shellWords(command).includes("--sandbox")) return command;
 	return command.replace(
-		/^(\s*(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*|time)\s+)*)sed\b/,
+		/^(\s*(?:(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]*|time|if|then|elif|else|while|until|do|!)\s+)*)sed\b/,
 		"$1sed --sandbox",
 	);
 }
