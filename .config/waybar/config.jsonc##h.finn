@@ -12,6 +12,7 @@
       "disk#storage",
       "disk#windows",
       "clock",
+      "custom/swaync",
       "tray",
     ],
     "spacing": 2,

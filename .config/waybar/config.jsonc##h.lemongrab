@@ -15,6 +15,7 @@
       "pulseaudio",
       "bluetooth",
       "battery",
+      "custom/swaync",
       "tray",
     ],
     "spacing": 2,

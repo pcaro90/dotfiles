@@ -328,6 +328,35 @@ button {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   Sway Notification Center
+   ═══════════════════════════════════════════════════════════ */
+
+#custom-swaync {
+    padding: 0 8px;
+    min-width: 26px;
+    color: @tn-green;
+    box-shadow: inset 0 -2px @tn-green;
+}
+
+#custom-swaync:hover {
+    background-color: alpha(@tn-bg-highlight, 0.5);
+}
+
+#custom-swaync.notification,
+#custom-swaync.dnd-notification {
+    color: @tn-red;
+    box-shadow: inset 0 -2px @tn-red;
+}
+
+#custom-swaync.inhibited-notification,
+#custom-swaync.inhibited-none,
+#custom-swaync.dnd-inhibited-notification,
+#custom-swaync.dnd-inhibited-none {
+    color: @tn-comment;
+    box-shadow: inset 0 -2px @tn-comment;
+}
+
+/* ═══════════════════════════════════════════════════════════
    Tray
    ═══════════════════════════════════════════════════════════ */
 
