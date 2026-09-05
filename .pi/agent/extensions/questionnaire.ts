@@ -119,6 +119,7 @@ export default function questionnaire(pi: ExtensionAPI) {
 				let cachedLines: string[] | undefined;
 				let cachedWidth: number | undefined;
 				const answers = new Map<string, Answer>();
+				const customDrafts = new Map<string, string>();
 
 				// Editor for "Type something" option
 				const editorTheme: EditorTheme = {
@@ -184,6 +185,7 @@ export default function questionnaire(pi: ExtensionAPI) {
 				editor.onSubmit = (value) => {
 					if (!inputQuestionId) return;
 					const trimmed = value.trim() || "(no response)";
+					customDrafts.set(inputQuestionId, trimmed);
 					saveAnswer(inputQuestionId, trimmed, trimmed, true);
 					inputMode = false;
 					inputQuestionId = null;
@@ -253,7 +255,7 @@ export default function questionnaire(pi: ExtensionAPI) {
 						if (opt.isOther) {
 							inputMode = true;
 							inputQuestionId = q.id;
-							editor.setText("");
+							editor.setText(customDrafts.get(q.id) ?? "");
 							refresh();
 							return;
 						}
@@ -321,13 +323,17 @@ export default function questionnaire(pi: ExtensionAPI) {
 
 					// Helper to render options list
 					function renderOptions() {
+						const answer = q ? answers.get(q.id) : undefined;
 						for (let i = 0; i < opts.length; i++) {
 							const opt = opts[i];
 							const selected = i === optionIndex;
 							const isOther = opt.isOther === true;
+							const isAnsweredOption = isOther
+								? answer?.wasCustom === true && !inputMode
+								: answer?.wasCustom === false && answer.index === i + 1;
 							const prefix = selected ? theme.fg("accent", "> ") : "  ";
-							const label = `${i + 1}. ${opt.label}${isOther && inputMode ? " ✎" : ""}`;
-							const color = selected || (isOther && inputMode) ? "accent" : "text";
+							const label = `${i + 1}. ${opt.label}${isOther && inputMode ? " ✎" : ""}${isAnsweredOption ? " ✓" : ""}`;
+							const color = selected || (isOther && inputMode) ? "accent" : isAnsweredOption ? "success" : "text";
 
 							addWrappedWithPrefix(prefix, theme.fg(color, label));
 							if (opt.description) {
@@ -374,6 +380,13 @@ export default function questionnaire(pi: ExtensionAPI) {
 						addWrappedWithPrefix(" ", theme.fg("text", q.prompt));
 						lines.push("");
 						renderOptions();
+
+						const answer = answers.get(q.id);
+						if (answer?.wasCustom) {
+							lines.push("");
+							addWrappedWithPrefix(" ", theme.fg("muted", "Your current answer:"));
+							addWrappedWithPrefix("   ", theme.fg("text", answer.label));
+						}
 					}
 
 					lines.push("");
