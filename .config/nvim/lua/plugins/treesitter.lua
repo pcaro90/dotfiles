@@ -5,6 +5,9 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   main = "nvim-treesitter",
   init = function()
+    -- Use the JSON Treesitter parser for jsonl and jsonc, while keeping ft=jsonl/jsonc
+    vim.treesitter.language.register("json", { "jsonl", "jsonc" })
+
     -- Set up an autocommand to enable treesitter and indentation when a file is opened
     vim.api.nvim_create_autocmd("FileType", {
       callback = function()

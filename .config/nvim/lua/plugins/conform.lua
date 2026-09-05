@@ -17,6 +17,7 @@ return {
         htmldjango = { "djlint" },
         json = { "prettier", stop_on_first = true, timeout_ms = 500 },
         jsonc = { "prettier", stop_on_first = true, timeout_ms = 500 },
+        -- jsonl: prettier does not support jsonl
         lua = { "stylua" },
         markdown = { "prettier" },
         nim = { "nph" },
