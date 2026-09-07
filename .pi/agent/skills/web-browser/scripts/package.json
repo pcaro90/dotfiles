@@ -1,6 +1,12 @@
 {
+  "name": "agent-web-browser",
+  "private": true,
   "type": "module",
-  "dependencies": {
-    "ws": "^8.18.0"
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/unit.test.js",
+    "test:browser": "node --test test/integration.test.js"
   }
 }

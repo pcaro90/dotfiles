@@ -1,169 +1,116 @@
 #!/usr/bin/env node
-
-import { connect } from "./cdp.js";
-import { applyActiveEmulation } from "./emulation-state.js";
-
-const DEBUG = process.env.DEBUG === "1";
-const log = DEBUG ? (...args) => console.error("[debug]", ...args) : () => {};
-
-const message = process.argv.slice(2).join(" ");
-if (!message) {
-  console.log("Usage: pick.js 'message'");
-  console.log("\nExample:");
-  console.log('  pick.js "Click the submit button"');
-  process.exit(1);
-}
-
-// Global timeout - 5 minutes for interactive picking
-const globalTimeout = setTimeout(() => {
-  console.error("✗ Global timeout exceeded (5m)");
-  process.exit(1);
-}, 300000);
-
-const PICK_SCRIPT = `(message) => {
-  if (!message) throw new Error("pick() requires a message parameter");
-  return new Promise((resolve) => {
-    const selections = [];
-    const selectedElements = new Set();
-
+import {
+  cli,
+  evaluate,
+  helpRequested,
+  isMain,
+  parseTab,
+  readSessionState,
+  takeValue,
+} from "./shared.js";
+import { withPage } from "./page.js";
+import { domSource } from "./dom.js";
+export const usage =
+  "Usage: pick.js 'Message for the human' [--tab NUMBER|TARGET_ID] [--max-chars N]\nRequires session.js start --headed and a human at the display. Ctrl/Cmd+click adds, Enter finishes, Escape cancels. Timeout: 5 minutes.";
+function picker(message) {
+  return new Promise((resolve, reject) => {
+    const selections = [],
+      outlined = new Map();
     const overlay = document.createElement("div");
-    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483647;pointer-events:none";
-
+    overlay.style.cssText =
+      "position:fixed;inset:0;z-index:2147483647;pointer-events:none";
     const highlight = document.createElement("div");
-    highlight.style.cssText = "position:absolute;border:2px solid #3b82f6;background:rgba(59,130,246,0.1);transition:all 0.1s";
-    overlay.appendChild(highlight);
-
+    overlay.append(highlight);
     const banner = document.createElement("div");
-    banner.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;padding:12px 24px;border-radius:8px;font:14px sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.3);pointer-events:auto;z-index:2147483647";
-
-    const updateBanner = () => {
-      banner.textContent = message + " (" + selections.length + " selected, Cmd/Ctrl+click to add, Enter to finish, ESC to cancel)";
-    };
-    updateBanner();
-
-    document.body.append(banner, overlay);
-
+    banner.style.cssText =
+      "position:fixed;bottom:20px;left:20px;z-index:2147483647;background:#17212b;color:white;padding:16px;font:14px sans-serif";
+    banner.textContent =
+      message + " · Ctrl/Cmd+click adds, Enter finishes, Escape cancels";
+    document.body.append(overlay, banner);
     const cleanup = () => {
-      document.removeEventListener("mousemove", onMove, true);
-      document.removeEventListener("click", onClick, true);
-      document.removeEventListener("keydown", onKey, true);
+      clearTimeout(timer);
+      document.removeEventListener("mousemove", move, true);
+      document.removeEventListener("click", click, true);
+      document.removeEventListener("keydown", key, true);
       overlay.remove();
       banner.remove();
-      selectedElements.forEach((el) => { el.style.outline = ""; });
+      for (const [el, old] of outlined) el.style.outline = old;
     };
-
-    const onMove = (e) => {
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      if (!el || overlay.contains(el) || banner.contains(el)) return;
-      const r = el.getBoundingClientRect();
-      highlight.style.cssText = "position:absolute;border:2px solid #3b82f6;background:rgba(59,130,246,0.1);top:" + r.top + "px;left:" + r.left + "px;width:" + r.width + "px;height:" + r.height + "px";
+    const finish = (value) => {
+      cleanup();
+      resolve(value);
     };
-
-    const buildElementInfo = (el) => {
-      const parents = [];
-      let current = el.parentElement;
-      while (current && current !== document.body) {
-        const parentInfo = current.tagName.toLowerCase();
-        const id = current.id ? "#" + current.id : "";
-        const cls = current.className ? "." + current.className.trim().split(/\\s+/).join(".") : "";
-        parents.push(parentInfo + id + cls);
-        current = current.parentElement;
-      }
-      return {
+    const move = (event) => {
+      const el = event.composedPath()[0];
+      if (!el?.getBoundingClientRect || el === banner) return;
+      const rect = el.getBoundingClientRect();
+      highlight.style.cssText = `position:fixed;border:2px solid #399bff;background:#399bff22;left:${rect.x}px;top:${rect.y}px;width:${rect.width}px;height:${rect.height}px`;
+    };
+    const click = (event) => {
+      if (event.target === banner) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const el = event.composedPath()[0];
+      if (!el || outlined.has(el)) return;
+      selections.push({
         tag: el.tagName.toLowerCase(),
-        id: el.id || null,
-        class: el.className || null,
-        text: (el.textContent || "").trim().slice(0, 200) || null,
-        html: el.outerHTML.slice(0, 500),
-        parents: parents.join(" > "),
-      };
+        selector: suggest(el),
+        text: (el.innerText || "").trim().slice(0, 120),
+      });
+      if (!(event.ctrlKey || event.metaKey)) {
+        finish(selections);
+        return;
+      }
+      outlined.set(el, el.style.outline);
+      el.style.outline = "3px solid #10b981";
+      banner.textContent = `${selections.length} selected; Enter to finish, Escape to cancel`;
     };
-
-    const onClick = (e) => {
-      if (banner.contains(e.target)) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      if (!el || overlay.contains(el) || banner.contains(el)) return;
-
-      if (e.metaKey || e.ctrlKey) {
-        if (!selectedElements.has(el)) {
-          selectedElements.add(el);
-          el.style.outline = "3px solid #10b981";
-          selections.push(buildElementInfo(el));
-          updateBanner();
-        }
-      } else {
-        cleanup();
-        const info = buildElementInfo(el);
-        resolve(selections.length > 0 ? selections : info);
+    const key = (event) => {
+      if (
+        event.key === "Escape" ||
+        (event.key === "Enter" && selections.length)
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        finish(event.key === "Escape" ? null : selections);
       }
     };
-
-    const onKey = (e) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        cleanup();
-        resolve(null);
-      } else if (e.key === "Enter" && selections.length > 0) {
-        e.preventDefault();
-        cleanup();
-        resolve(selections);
-      }
-    };
-
-    document.addEventListener("mousemove", onMove, true);
-    document.addEventListener("click", onClick, true);
-    document.addEventListener("keydown", onKey, true);
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(
+        new Error(
+          "Picker timed out; use read.js --forms for non-interactive inspection",
+        ),
+      );
+    }, 300000);
+    document.addEventListener("mousemove", move, true);
+    document.addEventListener("click", click, true);
+    document.addEventListener("keydown", key, true);
   });
-}`;
-
-try {
-  log("connecting...");
-  const cdp = await connect(5000);
-
-  log("getting pages...");
-  const pages = await cdp.getPages();
-  const page = pages.at(-1);
-
-  if (!page) {
-    console.error("✗ No active tab found");
-    process.exit(1);
-  }
-
-  log("attaching to page...");
-  const sessionId = await cdp.attachToPage(page.targetId);
-
-  log("applying active emulation (if configured)...");
-  await applyActiveEmulation(cdp, sessionId);
-
-  log("waiting for user pick...");
-  const expression = `(${PICK_SCRIPT})(${JSON.stringify(message)})`;
-  const result = await cdp.evaluate(sessionId, expression, 300000);
-
-  log("formatting result...");
-  if (Array.isArray(result)) {
-    for (let i = 0; i < result.length; i++) {
-      if (i > 0) console.log("");
-      for (const [key, value] of Object.entries(result[i])) {
-        console.log(`${key}: ${value}`);
-      }
-    }
-  } else if (typeof result === "object" && result !== null) {
-    for (const [key, value] of Object.entries(result)) {
-      console.log(`${key}: ${value}`);
-    }
-  } else {
-    console.log(result);
-  }
-
-  log("closing...");
-  cdp.close();
-  log("done");
-} catch (e) {
-  console.error("✗", e.message);
-  process.exit(1);
-} finally {
-  clearTimeout(globalTimeout);
-  setTimeout(() => process.exit(0), 100);
 }
+export async function main(argv) {
+  if (helpRequested(argv)) return usage;
+  let tab;
+  const words = [];
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--tab") tab = parseTab(takeValue(argv, i++, "--tab"));
+    else if (argv[i].startsWith("--"))
+      throw new Error(`Unknown option ${argv[i]}`);
+    else words.push(argv[i]);
+  }
+  if (!words.length) throw new Error(usage);
+  if (readSessionState()?.headless !== false)
+    throw new Error(
+      "Picker requires a headed managed browser and a human. Use read.js --forms, or restart with --headed.",
+    );
+  return withPage({ tab }, async (page) => {
+    const value = await evaluate(
+      page.cdp,
+      page.sessionId,
+      `(()=>{${domSource}\nreturn (${picker.toString()})(${JSON.stringify(words.join(" "))});})()`,
+      305000,
+    );
+    return `tab ${page.tab}\n${JSON.stringify(value)}`;
+  });
+}
+if (isMain(import.meta.url)) await cli(main);
