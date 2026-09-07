@@ -149,6 +149,8 @@ const READONLY_PATTERNS: RegExp[] = [
 	/^\s*(?:grep|rg|ripgrep|fgrep|egrep|fd|find)\b/,
 	/^\s*(?:ls|eza|exa|lsd|tree)\b/,
 	/^\s*(?:wc|nl|sort|cut|tr|paste|column|jq|yq)\b/,
+	// uniq/col with flags only: a file operand would be uniq's OUTPUT file.
+	/^\s*(?:uniq|col)\b(?:\s+-\S+)*\s*$/,
 	/^\s*sed\b(?=.*\s--sandbox(?:\s|$))/,
 	/^\s*(?:diff|colordiff|delta)\b/,
 	/^\s*(?:pwd|echo|printf|printenv|uname|whoami|id|date|cal|uptime|which|whereis|type|file|stat)\b/,

@@ -97,3 +97,36 @@ describe("version commands", () => {
 		expect(isReadonlyCommand(command)).toBe(false);
 	});
 });
+
+// `uniq [INPUT [OUTPUT]]` writes to its second operand, so only flag-only
+// invocations are classified as read-only.
+describe("uniq and col", () => {
+	const everySubcommandReadonly = (command: string) =>
+		splitIntoSubcommands(command).every(({ command }) => isReadonlyCommand(command));
+
+	test.each([
+		"uniq",
+		"uniq -c",
+		"uniq -c -d",
+		"uniq -D --all-repeated=separate",
+		"sort counts.txt | uniq -c | sort -rn | head -5",
+		"col",
+		"col -b",
+		"col -bx",
+	])("allows flags-only filters: %s", (command) => {
+		expect(everySubcommandReadonly(command)).toBe(true);
+	});
+
+	test.each([
+		"uniq input.txt output.txt",
+		"uniq -c counts.txt report.txt",
+		"uniq -f 2",
+		"uniq 1 2",
+		"col -b input.tbl output.txt",
+		"col -l 200",
+		"col rm -rf /tmp/x",
+		"col -b < input.tbl > output.txt",
+	])("rejects %s", (command) => {
+		expect(everySubcommandReadonly(command)).toBe(false);
+	});
+});
