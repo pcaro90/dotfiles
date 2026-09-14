@@ -376,17 +376,10 @@ export function formatCodexUsageStatusValue(report: CodexUsageReport, modelOrNow
 	const effectiveNow = typeof modelOrNow === "number" ? modelOrNow : now;
 	const bar = formatSnapshotBar(snapshot);
 
-	if (snapshot.primary && isWindowExhausted(snapshot.primary) && snapshot.primary.resetAt !== undefined) {
-		const primaryCountdown = formatResetCountdown(snapshot.primary.resetAt, effectiveNow);
-		const secondaryCountdown = snapshot.secondary?.resetAt === undefined ? undefined : formatResetCountdown(snapshot.secondary.resetAt, effectiveNow);
-		return secondaryCountdown ? `${bar} ${primaryCountdown}/${secondaryCountdown}` : `${bar} ${primaryCountdown}`;
-	}
-
-	const longWindow = selectLongWindow(snapshot);
-	if (!isWindowExhausted(snapshot.primary) && longWindow?.resetAt !== undefined) {
-		return `${bar} ${formatResetCountdown(longWindow.resetAt, effectiveNow)}`;
-	}
-	return bar;
+	const countdowns = [snapshot.primary, snapshot.secondary]
+		.map((window) => window?.resetAt === undefined ? undefined : formatResetCountdown(window.resetAt, effectiveNow))
+		.filter((countdown): countdown is string => countdown !== undefined);
+	return countdowns.length > 0 ? `${bar} ${countdowns.join("/")}` : bar;
 }
 
 export function formatWeeklyResetCountdown(report: CodexUsageReport, modelOrNow?: CodexUsageModel | number, now = Date.now()): string | undefined {
@@ -515,9 +508,7 @@ function formatTenths(value: number): string {
 export function nextResetCountdownDelayMs(report: CodexUsageReport, now = Date.now(), _model?: CodexUsageModel): number | undefined {
 	const snapshot = selectUsageSnapshot(report, USAGE_LIMIT_ID);
 	if (!snapshot) return undefined;
-	const longWindow = selectLongWindow(snapshot);
-	const resetTimes = [longWindow?.resetAt];
-	if (isWindowExhausted(snapshot.primary) && snapshot.primary !== longWindow) resetTimes.push(snapshot.primary?.resetAt);
+	const resetTimes = [snapshot.primary?.resetAt, snapshot.secondary?.resetAt];
 	const delays = resetTimes
 		.map((resetAt) => resetAt === undefined ? undefined : nextResetCountdownDelayForRemainingMs(resetAt - now))
 		.filter((delay): delay is number => delay !== undefined);
