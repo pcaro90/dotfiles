@@ -15,7 +15,9 @@
  */
 
 import { spawn } from "node:child_process";
-import { isAbsolute, relative, resolve } from "node:path";
+import { createHash, randomUUID } from "node:crypto";
+import { tmpdir } from "node:os";
+import { isAbsolute, posix, relative, resolve } from "node:path";
 import type { ExtensionAPI, Skill } from "@earendil-works/pi-coding-agent";
 import {
 	type BashOperations,
@@ -63,21 +65,45 @@ function createRemoteReadOps(remote: string, remoteCwd: string, localCwd: string
 	};
 }
 
-function createRemoteWriteOps(remote: string, remoteCwd: string, localCwd: string): WriteOperations {
-	const toRemote = (p: string) => p.replace(localCwd, remoteCwd);
+function createRemoteWriteOps(remote: string, remotePath: string): WriteOperations {
 	return {
-		writeFile: async (p, content) => {
+		writeFile: async (_p, content) => {
 			const b64 = Buffer.from(content).toString("base64");
-			await sshExec(remote, `echo ${JSON.stringify(b64)} | base64 -d > ${JSON.stringify(toRemote(p))}`);
+			await sshExec(remote, `echo ${JSON.stringify(b64)} | base64 -d > ${JSON.stringify(remotePath)}`);
 		},
-		mkdir: (dir) => sshExec(remote, `mkdir -p ${JSON.stringify(toRemote(dir))}`).then(() => {}),
+		mkdir: (_dir) => sshExec(remote, `mkdir -p ${JSON.stringify(posix.dirname(remotePath))}`).then(() => {}),
 	};
 }
 
-function createRemoteEditOps(remote: string, remoteCwd: string, localCwd: string): EditOperations {
-	const r = createRemoteReadOps(remote, remoteCwd, localCwd);
-	const w = createRemoteWriteOps(remote, remoteCwd, localCwd);
-	return { readFile: r.readFile, access: r.access, writeFile: w.writeFile };
+function createRemoteEditOps(remote: string, remotePath: string): EditOperations {
+	const w = createRemoteWriteOps(remote, remotePath);
+	return {
+		readFile: () => sshExec(remote, `cat ${JSON.stringify(remotePath)}`),
+		access: () =>
+			sshExec(remote, `test -r ${JSON.stringify(remotePath)} && test -w ${JSON.stringify(remotePath)}`).then(() => {}),
+		writeFile: w.writeFile,
+	};
+}
+
+// write/edit canonicalize their queue key with a local realpath() before invoking
+// custom operations. Remote absolute paths may be inaccessible locally (for
+// example /root/file), so give the built-in tools a deterministic, nonexistent
+// local proxy path while the operations above stay bound to the real remote path.
+const mutationProxyRoot = resolve(tmpdir(), `pi-ssh-mutations-${process.pid}-${randomUUID()}`);
+
+function resolveRemotePath(path: string, remoteCwd: string): string {
+	const normalized = path.startsWith("@") ? path.slice(1) : path;
+	return posix.normalize(posix.isAbsolute(normalized) ? normalized : posix.join(remoteCwd, normalized));
+}
+
+function mutationProxyPath(remote: string, remotePath: string): string {
+	const key = createHash("sha256").update(remote).update("\0").update(remotePath).digest("hex");
+	return resolve(mutationProxyRoot, key);
+}
+
+function restoreProxyPath(error: unknown, proxyPath: string, originalPath: string): unknown {
+	if (error instanceof Error) error.message = error.message.replaceAll(proxyPath, originalPath);
+	return error;
 }
 
 function createRemoteBashOps(remote: string, remoteCwd: string, localCwd: string): BashOperations {
@@ -187,10 +213,28 @@ export default function (pi: ExtensionAPI) {
 		async execute(id, params, signal, onUpdate, ctx) {
 			const ssh = getSsh();
 			if (ssh) {
+				const originalPath = params.path;
+				const remotePath = resolveRemotePath(originalPath, ssh.remoteCwd);
+				const proxyPath = mutationProxyPath(ssh.remote, remotePath);
 				const tool = createWriteToolDefinition(localCwd, {
-					operations: createRemoteWriteOps(ssh.remote, ssh.remoteCwd, localCwd),
+					operations: createRemoteWriteOps(ssh.remote, remotePath),
 				});
-				return tool.execute(id, params, signal, onUpdate, ctx);
+				try {
+					const result = await tool.execute(id, { ...params, path: proxyPath }, signal, onUpdate, ctx);
+					return {
+						...result,
+						content: result.content.map((item) =>
+							item.type === "text"
+								? {
+										...item,
+										text: item.text.replaceAll(proxyPath, originalPath),
+									}
+								: item,
+						),
+					};
+				} catch (error) {
+					throw restoreProxyPath(error, proxyPath, originalPath);
+				}
 			}
 			return localWrite.execute(id, params, signal, onUpdate, ctx);
 		},
@@ -201,10 +245,34 @@ export default function (pi: ExtensionAPI) {
 		async execute(id, params, signal, onUpdate, ctx) {
 			const ssh = getSsh();
 			if (ssh) {
+				const originalPath = params.path;
+				const remotePath = resolveRemotePath(originalPath, ssh.remoteCwd);
+				const proxyPath = mutationProxyPath(ssh.remote, remotePath);
 				const tool = createEditToolDefinition(localCwd, {
-					operations: createRemoteEditOps(ssh.remote, ssh.remoteCwd, localCwd),
+					operations: createRemoteEditOps(ssh.remote, remotePath),
 				});
-				return tool.execute(id, params, signal, onUpdate, ctx);
+				try {
+					const result = await tool.execute(id, { ...params, path: proxyPath }, signal, onUpdate, ctx);
+					return {
+						...result,
+						content: result.content.map((item) =>
+							item.type === "text"
+								? {
+										...item,
+										text: item.text.replaceAll(proxyPath, originalPath),
+									}
+								: item,
+						),
+						details: result.details
+							? {
+									...result.details,
+									patch: result.details.patch.replaceAll(proxyPath, originalPath),
+								}
+							: undefined,
+					};
+				} catch (error) {
+					throw restoreProxyPath(error, proxyPath, originalPath);
+				}
 			}
 			return localEdit.execute(id, params, signal, onUpdate, ctx);
 		},
