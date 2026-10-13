@@ -46,9 +46,9 @@ npm test --prefix scripts
 npm run test:browser --prefix scripts
 ```
 
-The integration suite requires Chrome or Chromium with a working sandbox. It creates its own temporary `BROWSER_HOME`, HTTP fixture, and debug port; uses fake credentials only; and stops only its own managed browser. Override the test binary with `BROWSER_TEST_BIN=/path/to/chrome`. Set `BROWSER_KEEP_TEST_ARTIFACTS=1` to preserve temporary evidence for diagnosis; the default cleans it up. A missing browser or sandbox is a failure to fix, not a silently skipped test or automatic no-sandbox retry.
+The integration suite requires Chrome or Chromium with a working sandbox. It creates its own temporary `BROWSER_HOME`, HTTP fixture, and debug port; uses fake credentials only; and stops only its own managed browser. The self-signed HTTPS case also needs `openssl` to mint its throwaway certificate. Override the test binary with `BROWSER_TEST_BIN=/path/to/chrome`. Set `BROWSER_KEEP_TEST_ARTIFACTS=1` to preserve temporary evidence for diagnosis; the default cleans it up. A missing browser or sandbox is a failure to fix, not a silently skipped test or automatic no-sandbox retry.
 
-The tests cover output budgets, endpoint ownership and custom ports, stable tab addressing, mobile meta viewport versus responsive sizing, per-tab reset, temporary screenshots, unique selectors and shadow roots, input, keyboard and upload behavior, conservative consent, native dialogs, sensitive capture and redirects, retrospective search, command exit codes, and timeouts.
+The tests cover output budgets, endpoint ownership and custom ports, stable tab addressing, mobile meta viewport versus responsive sizing, per-tab reset, temporary screenshots, unique selectors and shadow roots, input, keyboard and upload behavior, conservative consent, native dialogs, sensitive capture and redirects, retrospective search, certificate validation and its two explicit opt-outs, command exit codes, and timeouts.
 
 Also exercise these realistic prompts when changing the workflow:
 

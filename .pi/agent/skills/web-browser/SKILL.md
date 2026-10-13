@@ -1,7 +1,7 @@
 ---
 name: web-browser
 description: "Use when interacting with pages that require real browser behavior: JavaScript rendering or execution, clicks, keyboard input, forms, file uploads, screenshots, cookie/consent dialogs, authenticated sessions, mobile or responsive layouts, console errors, or network debugging. Do not use for ordinary web search, static URL extraction, simple downloads, or non-interactive APIs; prefer web-search or direct HTTP tools. Use this skill even when the request only says a page is blank, a button fails, or a login flow needs inspecting."
-compatibility: "Linux or macOS, Node.js 22+, and Chrome/Chromium. No npm dependencies. Optional rsync for explicitly copying a desktop profile. Set BROWSER_BIN for a nonstandard browser binary."
+compatibility: "Linux or macOS, Node.js 22+, and Chrome/Chromium. No npm dependencies. Optional rsync for explicitly copying a desktop profile and optional openssl to compute certificate pins. Set BROWSER_BIN for a nonstandard browser binary."
 allowed-tools: "bash read"
 ---
 
@@ -19,6 +19,16 @@ node scripts/nav.js https://example.com
 ```
 
 Use `--headed` for a visible window, `--port N` for a busy port, or `BROWSER_BIN=/path/to/chrome` for a custom binary. Commands reuse the stored port and verify both the managed process and its debugging endpoint. Never connect manually to an unrelated browser to bypass a refusal.
+
+Untrusted TLS is refused like any real browser: `net::ERR_CERT_AUTHORITY_INVALID` means the certificate failed validation, not that the site is down. For a development endpoint, pin its key so every other origin keeps validating normally:
+
+```bash
+node scripts/session.js stop
+SPKI=$(openssl s_client -connect localhost:18834 </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64)
+node scripts/session.js start --ignore-certs-spki "$SPKI"
+```
+
+`--ignore-certs` instead accepts any certificate for **every** site in that browser; treat it as a last resort for throwaway local work. The choice is fixed for the life of the browser — `stop` first, and read the `certificates:` line in `start`/`status` before trusting what a page shows. A manually accepted warning (typing through the interstitial) is remembered by the profile and masks the problem for later runs.
 
 Keep the default isolated, reusable profile. Cookies survive restarts. State and artifacts live in `~/.cache/agent-web`; set `BROWSER_HOME` to a separate directory for another browser/session. Stop with `session.js stop`. Inspect the reported Chrome log before considering `--no-sandbox`; use that flag only for a diagnosed sandbox restriction.
 

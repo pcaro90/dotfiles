@@ -45,9 +45,29 @@ start: [--headed | --headless] [--no-sandbox] [--port N]
        [--profile [--profile-source DIR]] [--reset-profile]
 close: [--tab NUMBER|TARGET_ID]
 All commands: [--max-chars N]
-Defaults: headless, sandbox enabled, isolated reusable profile, port 9222.
+Defaults: headless, sandbox enabled, isolated reusable profile, port 9222, TLS validated.
 BROWSER_BIN overrides Chromium; BROWSER_HOME isolates all state/artifacts.
---profile explicitly copies a real profile; use only with authorization and a closed source browser.`;
+--profile explicitly copies a real profile; use only with authorization and a closed source browser.
+--ignore-certs accepts any certificate for every site; --ignore-certs-spki pins leaf public
+keys and keeps validating everything else, so prefer it for a dev endpoint.`;
+
+/** A Chrome SPKI pin is the base64 SHA-256 of the DER SubjectPublicKeyInfo: 43 chars + "=". */
+const spkiPin = /^[A-Za-z0-9+/]{43}=$/;
+export function parseSpkiPins(value, arg = "--ignore-certs-spki") {
+  const pins = String(value ?? "")
+    .split(",")
+    .map((pin) => pin.trim())
+    .filter(Boolean);
+  if (!pins.length)
+    throw new Error(`${arg} needs at least one base64 SHA-256 pin`);
+  for (const pin of pins)
+    if (!spkiPin.test(pin))
+      throw new Error(
+        `${arg} expects the base64 SHA-256 of the certificate public key (44 chars ending in "="), got "${pin}". Compute it with: openssl s_client -connect HOST:PORT </dev/null | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64`,
+      );
+  return [...new Set(pins)];
+}
+export const spkiKey = (pins) => [...(pins || [])].sort().join(",");
 export function parseStartArgs(argv, environment = process.env) {
   const options = {
     headless: true,
@@ -56,6 +76,8 @@ export function parseStartArgs(argv, environment = process.env) {
     portExplicit: !!environment.BROWSER_DEBUG_PORT,
     profile: false,
     resetProfile: false,
+    ignoreCerts: false,
+    ignoreCertsSpki: [],
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -64,6 +86,11 @@ export function parseStartArgs(argv, environment = process.env) {
     else if (arg === "--no-sandbox") options.noSandbox = true;
     else if (arg === "--profile") options.profile = true;
     else if (arg === "--reset-profile") options.resetProfile = true;
+    else if (arg === "--ignore-certs") options.ignoreCerts = true;
+    else if (arg === "--ignore-certs-spki")
+      options.ignoreCertsSpki.push(
+        ...parseSpkiPins(takeValue(argv, i++, arg), arg),
+      );
     else if (arg === "--profile-source") {
       options.profileSource = path.resolve(takeValue(argv, i++, arg));
     } else if (arg === "--port") {
@@ -71,8 +98,13 @@ export function parseStartArgs(argv, environment = process.env) {
       options.portExplicit = true;
     } else throw new Error(`Unknown start option: ${arg}`);
   }
+  options.ignoreCertsSpki = [...new Set(options.ignoreCertsSpki)];
   if (options.profileSource && !options.profile)
     throw new Error("--profile-source requires --profile");
+  if (options.ignoreCerts && options.ignoreCertsSpki.length)
+    throw new Error(
+      "--ignore-certs and --ignore-certs-spki are mutually exclusive; pin the leaf key with --ignore-certs-spki to keep validating every other site.",
+    );
   return options;
 }
 export function chromiumCandidates(
@@ -164,8 +196,20 @@ export function chromeArguments(options, userDataDir) {
     "--window-size=1280,800",
     ...(options.headless ? ["--headless=new"] : []),
     ...(options.noSandbox ? ["--no-sandbox"] : []),
+    ...(options.ignoreCerts ? ["--ignore-certificate-errors"] : []),
+    ...(options.ignoreCertsSpki?.length
+      ? [
+          `--ignore-certificate-errors-spki-list=${options.ignoreCertsSpki.join(",")}`,
+        ]
+      : []),
     "about:blank",
   ];
+}
+export function certificateNote(options) {
+  if (options?.ignoreCerts) return "DISABLED for every site (--ignore-certs)";
+  if (options?.ignoreCertsSpki?.length)
+    return `relaxed only for pinned leaf keys: ${options.ignoreCertsSpki.join(", ")}`;
+  return "validated";
 }
 async function assertPortFree(port) {
   const server = net.createServer();
@@ -250,10 +294,12 @@ export async function runStart(options) {
         options.profile !== existing.profileCopy ||
         (options.portExplicit && options.port !== existing.port) ||
         options.headless !== existing.headless ||
-        options.noSandbox !== existing.noSandbox
+        options.noSandbox !== existing.noSandbox ||
+        !!options.ignoreCerts !== !!existing.ignoreCerts ||
+        spkiKey(options.ignoreCertsSpki) !== spkiKey(existing.ignoreCertsSpki)
       )
         throw new Error(
-          "Managed Chrome already runs with different options. Stop it before changing profile, port, mode, or sandbox.",
+          "Managed Chrome already runs with different options. Stop it before changing profile, port, mode, sandbox, or certificate handling.",
         );
       return `Chrome already running on ${existing.port}; profile preserved.`;
     }
@@ -352,13 +398,15 @@ export async function runStart(options) {
             binary,
             headless: options.headless,
             noSandbox: options.noSandbox,
+            ignoreCerts: options.ignoreCerts,
+            ignoreCertsSpki: options.ignoreCertsSpki,
             profileCopy: options.profile,
             startedAt: new Date().toISOString(),
             tabs: [],
             nextTab: 1,
             emulation: {},
           });
-          return `Started ${binary}\nendpoint: 127.0.0.1:${options.port}\nprofile: ${userDataDir}\n${options.headless ? "headless" : "headed"}; sandbox ${options.noSandbox ? "DISABLED (explicit opt-out)" : "enabled"}\nlog: ${log}`;
+          return `Started ${binary}\nendpoint: 127.0.0.1:${options.port}\nprofile: ${userDataDir}\n${options.headless ? "headless" : "headed"}; sandbox ${options.noSandbox ? "DISABLED (explicit opt-out)" : "enabled"}\ncertificates: ${certificateNote(options)}\nlog: ${log}`;
         }
         await sleep(150);
       }
@@ -413,7 +461,7 @@ export async function runStatus() {
     const cdp = await Cdp.open();
     try {
       const pages = await listPageTargets(cdp);
-      return `endpoint: 127.0.0.1:${state.port} (verified)\nprofile: ${state.userDataDir}\nbinary: ${state.binary}\nsandbox: ${state.noSandbox ? "DISABLED" : "enabled"}\nPer-tab preferences (reapplied on every action/read):\n${pages.map((page) => `${page.tab}. ${page.targetId} · ${deviceNote(state.emulation?.[page.targetId])}`).join("\n")}`;
+      return `endpoint: 127.0.0.1:${state.port} (verified)\nprofile: ${state.userDataDir}\nbinary: ${state.binary}\nsandbox: ${state.noSandbox ? "DISABLED" : "enabled"}\ncertificates: ${certificateNote(state)}\nPer-tab preferences (reapplied on every action/read):\n${pages.map((page) => `${page.tab}. ${page.targetId} · ${deviceNote(state.emulation?.[page.targetId])}`).join("\n")}`;
     } finally {
       cdp.close();
     }

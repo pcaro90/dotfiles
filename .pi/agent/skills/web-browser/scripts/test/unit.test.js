@@ -97,6 +97,43 @@ test("sandbox and loopback default on; sandbox override is explicit", () => {
     ).includes("--no-sandbox"),
   );
 });
+test("certificate validation is on by default and each opt-out is explicit", () => {
+  const pin = "A2zhuQ+CydB5hO6FByyj+ganUZZFSuywKBnFQKRKnPc=";
+  const other = "B2zhuQ+CydB5hO6FByyj+ganUZZFSuywKBnFQKRKnPc=";
+  const plain = parseStartArgs([], {});
+  assert.equal(plain.ignoreCerts, false);
+  assert.deepEqual(plain.ignoreCertsSpki, []);
+  assert.ok(
+    !chromeArguments(plain, "/tmp/profile").some((a) =>
+      a.startsWith("--ignore-certificate-errors"),
+    ),
+  );
+  assert.ok(
+    chromeArguments(parseStartArgs(["--ignore-certs"], {}), "/tmp/profile").includes(
+      "--ignore-certificate-errors",
+    ),
+  );
+  const pinned = parseStartArgs(["--ignore-certs-spki", `${pin},${other},${pin}`], {});
+  assert.deepEqual(pinned.ignoreCertsSpki, [pin, other]);
+  assert.deepEqual(pinned.ignoreCertsSpki, parseStartArgs(["--ignore-certs-spki", pin, "--ignore-certs-spki", other], {}).ignoreCertsSpki);
+  assert.ok(
+    chromeArguments(pinned, "/tmp/profile").includes(
+      `--ignore-certificate-errors-spki-list=${pin},${other}`,
+    ),
+  );
+  assert.throws(
+    () => parseStartArgs(["--ignore-certs-spki", "not-a-pin"], {}),
+    /base64 SHA-256/,
+  );
+  assert.throws(
+    () => parseStartArgs(["--ignore-certs-spki", ""], {}),
+    /at least one/,
+  );
+  assert.throws(
+    () => parseStartArgs(["--ignore-certs", "--ignore-certs-spki", pin], {}),
+    /mutually exclusive/,
+  );
+});
 test("mobile and responsive are different models; desktop resets all overrides", async () => {
   assert.equal(resolveDevice("pixel-8").mode, "mobile");
   assert.equal(deviceArgs(["--viewport", "412x915"]).device.mode, "responsive");

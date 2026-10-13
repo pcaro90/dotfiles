@@ -10,7 +10,10 @@ import {
   symlinkSync,
   writeFileSync,
 } from "node:fs";
+import crypto from "node:crypto";
 import http from "node:http";
+import https from "node:https";
+import net from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -721,6 +724,130 @@ test(
           throw error;
         });
       await close(server);
+      if (process.env.BROWSER_KEEP_TEST_ARTIFACTS)
+        console.log(`Test artifacts: ${root}`);
+      else rmSync(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "self-signed HTTPS stays blocked until the session opts in",
+  { timeout: 180000 },
+  async (t) => {
+    const root = mkdtempSync(path.join(tmpdir(), "agent-browser-tls-"));
+    const key = path.join(root, "key.pem");
+    const cert = path.join(root, "cert.pem");
+    await execute("openssl", [
+      "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1",
+      "-subj", "/CN=localhost",
+      "-addext", "subjectAltName=IP:127.0.0.1,DNS:localhost",
+      "-keyout", key, "-out", cert,
+    ]);
+    const pin = crypto
+      .createHash("sha256")
+      .update(
+        new crypto.X509Certificate(readFileSync(cert)).publicKey.export({
+          type: "spki",
+          format: "der",
+        }),
+      )
+      .digest("base64");
+    const tlsServer = https.createServer(
+      { key: readFileSync(key), cert: readFileSync(cert) },
+      (_req, res) => res.end("self-signed ok"),
+    );
+    await listen(tlsServer);
+    const url = `https://127.0.0.1:${tlsServer.address().port}/`;
+    const reserve = http.createServer();
+    await listen(reserve);
+    const port = String(reserve.address().port);
+    await close(reserve);
+    const env = {
+      ...process.env,
+      BROWSER_HOME: path.join(root, "browser"),
+      BROWSER_BIN: process.env.BROWSER_TEST_BIN || findChromium(),
+    };
+    delete env.BROWSER_DEBUG_PORT;
+    const run = (script, args = []) =>
+      execute(process.execPath, [path.join(scripts, script), ...args], {
+        env,
+        timeout: 35000,
+        maxBuffer: 2 * 1024 * 1024,
+      }).then((result) => result.stdout.trimEnd());
+    // Chromium releases its debug port slightly after the process exits.
+    const waitPortFree = async () => {
+      for (let i = 0; i < 100; i++) {
+        const busy = await new Promise((resolve) => {
+          const probe = net.connect(Number(port), "127.0.0.1");
+          probe.once("connect", () => {
+            probe.destroy();
+            resolve(true);
+          });
+          probe.once("error", () => resolve(false));
+        });
+        if (!busy) return;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      throw new Error(`Debug port ${port} never freed`);
+    };
+    let started = false;
+    const stop = async () => {
+      if (!started) return;
+      started = false;
+      await run("session.js", ["stop"]);
+      await waitPortFree();
+    };
+    const start = async (...flags) => {
+      const output = await run("session.js", ["start", "--port", port, ...flags]);
+      started = true;
+      return output;
+    };
+    try {
+      assert.match(await start(), /certificates: validated/);
+      await assert.rejects(
+        run("nav.js", [url]),
+        (error) =>
+          /ERR_CERT_AUTHORITY_INVALID/.test(error.message) &&
+          /--ignore-certs-spki/.test(error.message),
+        "an untrusted certificate must stay blocked by default",
+      );
+      await stop();
+
+      await t.test("--ignore-certs-spki admits the pinned key only", async () => {
+        assert.match(
+          await start("--ignore-certs-spki", pin),
+          new RegExp(`certificates: relaxed only for pinned leaf keys: ${pin.replace(/[/+]/g, "\\$&")}`),
+        );
+        await run("nav.js", [url]);
+        assert.match(await run("read.js"), /self-signed ok/);
+        await assert.rejects(
+          run("session.js", ["start", "--port", port, "--ignore-certs"]),
+          /Stop it before .* certificate handling/,
+        );
+        await stop();
+      });
+
+      await t.test("--ignore-certs admits any certificate", async () => {
+        assert.match(
+          await start("--ignore-certs"),
+          /certificates: DISABLED for every site/,
+        );
+        await run("nav.js", [url]);
+        assert.match(await run("read.js"), /self-signed ok/);
+        await stop();
+      });
+
+      await t.test("a malformed pin is rejected before launching", async () => {
+        await assert.rejects(
+          run("session.js", ["start", "--port", port, "--ignore-certs-spki", "nope"]),
+          /base64 SHA-256/,
+        );
+        assert.match(await run("session.js", ["status"]), /No managed Chrome/);
+      });
+    } finally {
+      await stop().catch(() => {});
+      await close(tlsServer);
       if (process.env.BROWSER_KEEP_TEST_ARTIFACTS)
         console.log(`Test artifacts: ${root}`);
       else rmSync(root, { recursive: true, force: true });

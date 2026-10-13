@@ -160,7 +160,14 @@ export async function navigate(cdp, sessionId, options) {
       Math.max(1, deadline - Date.now()),
     );
     if (result.errorText)
-      throw new Error(`Navigation failed: ${result.errorText}`);
+      throw new Error(
+        `Navigation failed: ${result.errorText}` +
+          (/CERT_(AUTHORITY_INVALID|UNKNOWN|HAS_EXPIRED|DATE_INVALID)/i.test(
+            result.errorText,
+          )
+            ? ". The certificate was rejected; Chromium does not trust it. Restart the session with session.js start --ignore-certs-spki <base64 SHA-256 pin> (preferred) or --ignore-certs."
+            : ""),
+      );
     if (result.isDownload)
       throw new Error(
         "Navigation became a download; use direct HTTP or inspect browser download state.",
