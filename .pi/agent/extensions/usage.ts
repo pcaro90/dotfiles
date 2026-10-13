@@ -1,6 +1,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
-const CODEX_PROVIDER_ID = "openai-codex";
+const OPENAI_PROVIDER_ID = "openai";
+const LEGACY_CODEX_PROVIDER_ID = "openai-codex";
 const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
 const DEFAULT_TIMEOUT_MS = 15_000;
 const SECOND_MS = 1_000;
@@ -13,7 +14,8 @@ const REFRESH_INTERVAL_MS = 30 * SECOND_MS;
 const REDRAW_BLINK_MS = 150;
 const STATUS_KEY = "aa-codex-usage";
 const MAX_ERROR_BODY_CHARS = 600;
-const STATUS_LABEL_TEXT = "codex";
+// The legacy endpoint reports the shared plan quota, not Pi's app-specific cap.
+const STATUS_LABEL_TEXT = "openai";
 const USAGE_LIMIT_ID = "codex";
 const DUAL_BAR_WIDTH = 10;
 
@@ -144,7 +146,7 @@ export default function usageExtension(pi: ExtensionAPI) {
 	}
 
 	async function refreshCurrentCodexUsageStatusline(ctx: ExtensionContext, force: boolean, model: ExtensionContext["model"] = ctx.model) {
-		if (!isOpenAICodexModel(model)) {
+		if (!isOpenAICodexModel(model) || !ctx.modelRegistry.isUsingOAuth(model)) {
 			clearUsageStatusline(ctx);
 			return;
 		}
@@ -159,7 +161,7 @@ export default function usageExtension(pi: ExtensionAPI) {
 		const previousReport = cache?.report;
 		const result = await queryCurrentUsage(ctx, model);
 		if (requestId !== statuslineRequestId) return;
-		if (!isOpenAICodexModel(ctx.model)) {
+		if (!isOpenAICodexModel(ctx.model) || !ctx.modelRegistry.isUsingOAuth(ctx.model)) {
 			clearUsageStatusline(ctx);
 			return;
 		}
@@ -214,7 +216,7 @@ export default function usageExtension(pi: ExtensionAPI) {
 }
 
 function isOpenAICodexModel(model: ExtensionContext["model"] | undefined): model is PiModel {
-	return model?.provider === CODEX_PROVIDER_ID;
+	return model?.provider === OPENAI_PROVIDER_ID;
 }
 
 async function queryUsage(ctx: ExtensionContext, options: { timeoutMs: number }, _model: CodexUsageModel): Promise<QueryUsageResult> {
@@ -231,7 +233,7 @@ async function queryUsage(ctx: ExtensionContext, options: { timeoutMs: number },
 async function queryViaPiAuth(ctx: ExtensionContext, timeoutMs: number): Promise<CodexUsageReport> {
 	const auth = await resolvePiCodexAuth(ctx);
 	if (!auth) {
-		throw new Error("No Pi OpenAI Codex subscription auth was available. Use a Pi OpenAI Codex model or run /login for OpenAI ChatGPT Plus/Pro (Codex).");
+		throw new Error("No Pi legacy OpenAI Codex subscription auth was available to read the global quota. Run /login for OpenAI Codex (legacy), or check https://chatgpt.com/settings/usage. The new OpenAI OAuth token cannot access this usage endpoint.");
 	}
 	const response = await fetchWithTimeout(CODEX_USAGE_URL, { headers: auth.headers }, timeoutMs);
 	const text = await response.text();
@@ -245,7 +247,9 @@ async function resolvePiCodexAuth(ctx: ExtensionContext): Promise<{ headers: Rec
 	const seen = new Set<string>();
 	const candidates: PiModel[] = [];
 	const add = (model: ExtensionContext["model"] | undefined) => {
-		if (!isOpenAICodexModel(model)) return;
+		// Sign in with ChatGPT (openai) tokens target api.openai.com/v1, not backend-api.
+		// Resolve only the legacy OAuth for this read-only global-quota request.
+		if (model?.provider !== LEGACY_CODEX_PROVIDER_ID || !ctx.modelRegistry.isUsingOAuth(model)) return;
 		const key = `${model.provider}/${model.id}`;
 		if (!seen.has(key)) {
 			seen.add(key);
@@ -483,6 +487,7 @@ function formatEmptyStatuslineBar(ctx: ExtensionContext): string {
 
 function formatStatuslineProblem(ctx: ExtensionContext, errors: UsageQueryError[]): string {
 	const label = ctx.ui.theme.fg("accent", STATUS_LABEL_TEXT);
+	if (isLegacyLoginRequired(errors)) return `${label} ${ctx.ui.theme.fg("muted", "login legacy")}`;
 	const value = isUsageUnavailable(errors)
 		? ctx.ui.theme.fg("muted", "n/a")
 		: ctx.ui.theme.fg("error", "error");
@@ -530,6 +535,20 @@ export function nextResetCountdownDelayForRemainingMs(remainingMs: number): numb
 	return Math.max(1, remainingMs - Math.floor(remainingMs / SECOND_MS) * SECOND_MS + 1);
 }
 
+function isLegacyLoginRequired(errors: UsageQueryError[]): boolean {
+	return errors.length > 0 && errors.every((error) => {
+		const message = error.message.toLowerCase();
+		return [
+			"no pi legacy openai codex subscription auth",
+			"refresh_token_expired",
+			"refresh_token_reused",
+			"invalid_refresh_token",
+			"invalid_grant",
+			"please log in again",
+		].some((text) => message.includes(text));
+	});
+}
+
 export function isUsageUnavailable(errors: UsageQueryError[]): boolean {
 	return errors.length > 0 && errors.every(isUnavailableError);
 }
@@ -537,7 +556,7 @@ export function isUsageUnavailable(errors: UsageQueryError[]): boolean {
 function isUnavailableError(error: UsageQueryError): boolean {
 	const message = error.message.toLowerCase();
 	return [
-		"no pi openai codex subscription auth",
+		"no pi legacy openai codex subscription auth",
 		"no displayable rate-limit windows",
 		"returned no displayable rate-limit windows",
 		"returned 401",
