@@ -1,23 +1,50 @@
 {
-  "lastChangelogVersion": "0.70.2",
-  "collapseChangelo": true,
-  "defaultProvider": "local",
-  "defaultModel": "qwen3.6-27b",
-  "defaultThinkingLevel": "high",
+  "$schema": "https://pi.dev/schemas/settings.schema.json",
+  "lastChangelogVersion": "1.2.0",
   "theme": "tokyonight",
-  "hideThinkingBlock": false,
+  "defaultProvider": "gateway",
+  "defaultModel": "qwen3.8-27b",
+  "defaultThinkingLevel": "high",
+  "hideThinkingBlock": true,
   "enableInstallTelemetry": false,
   "collapseChangelog": true,
   "quietStartup": true,
   "doubleEscapeAction": "tree",
+  "treeFilterMode": "no-tools",
   "enabledModels": [
-    "local/qwen3.6-27b",
-    "github-copilot/claude-sonnet-4.6",
-    "github-copilot/gemini-3.1-pro-preview",
-    "github-copilot/gpt-5-mini",
-    "github-copilot/gpt-5.4"
+    "gateway/qwen3.8-27b",
+    "openai/gpt-6-astra",
+    "openai/gpt-6.1-sol",
+    "openai/gpt-6-luna",
+    "doom/deepseek-v4.1-flash",
+    "ultron/qwen3.8-flash-next"
   ],
   "compaction": {
-    "enabled": false
-  }
+    "enabled": true
+  },
+  "packages": [],
+  "steeringMode": "all",
+  "followUpMode": "all",
+  "tuiMode": "fullscreen",
+  "modelThinkingLevels": {
+    "azure-foundry/gpt-6.1-sol": "xhigh",
+    "doom/deepseek-v4-flash-0731": "max",
+    "doom/deepseek-v4.1-flash": "max",
+    "local/qwen3.8-27b": "xhigh",
+    "openai-codex/gpt-5.6-sol": "high",
+    "openai-codex/gpt-6-astra": "low",
+    "openai-codex/gpt-6-sol": "xhigh",
+    "openai-codex/gpt-6.1-sol": "xhigh",
+    "ultron/qwen3.8-flash-next": "xhigh"
+  },
+  "showCacheMissNotices": true,
+  "markdown": {
+    "mermaid": "streaming"
+  },
+  "cacheWarming": "idle",
+  "fullscreenCopyOnSelect": true,
+  "defaultTools": [
+    "+codemode"
+  ],
+  "deviceId": "7682749e-891c-4540-bba5-474dff3ddab5"
 }
