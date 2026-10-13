@@ -9,6 +9,7 @@
  *                  anything else asks the user
  *                  (with per-session "always allow" memory)
  *   💀 berserker — no restrictions; everything is allowed without confirmation
+ *                  codemode is enabled
  *
  * Features:
  *   • Ctrl+Tab        cycle modes  (readonly → normal → berserker → …)
@@ -58,6 +59,7 @@ const SSH_UNSUPPORTED_TOOLS = new Set(["grep", "find", "ls"]);
 
 const READONLY_TOOLS = ["read", "bash", "grep", "find", "ls", "questionnaire"];
 const FULL_TOOLS = ["read", "bash", "edit", "write", "questionnaire"];
+const BERSERKER_TOOLS = [...FULL_TOOLS, "codemode"];
 
 const MODE_CYCLE: WorkingMode[] = ["readonly", "normal", "berserker"];
 const MODE_ALIASES = new Map<string, WorkingMode>([
@@ -107,7 +109,7 @@ export default function workingModeExtension(pi: ExtensionAPI): void {
 	// ── Helpers ─────────────────────────────────────────────────────────────
 
 	function applyModeTools(mode: WorkingMode): void {
-		const baseTools = mode === "readonly" ? READONLY_TOOLS : FULL_TOOLS;
+		const baseTools = mode === "readonly" ? READONLY_TOOLS : mode === "berserker" ? BERSERKER_TOOLS : FULL_TOOLS;
 		const effectiveTools = sshActive ? baseTools.filter((tool) => !SSH_UNSUPPORTED_TOOLS.has(tool)) : baseTools;
 		pi.setActiveTools(effectiveTools);
 	}
