@@ -12,7 +12,7 @@
 | [frontend-design](skills/frontend-design/)   | Guides creation of distinctive, production-grade frontend interfaces that avoid generic AI aesthetics. Sourced from [Anthropic's skills](https://github.com/anthropics/skills/tree/main/skills/frontend-design) with small changes.                                                                                                            |
 | [skill-reviewer](skills/skill-reviewer/)     | Review, critique, and create AI agent SKILL.md files. Checks frontmatter, structure, tone, conciseness, success criteria, progressive disclosure, behavioral rules, edge cases, and directory layout against best practices.                                                                                                                   |
 | [web-browser](skills/web-browser/)           | Remote control of Chrome/Chromium via the Chrome DevTools Protocol (CDP). Use for JavaScript-dependent pages, clicks, forms, screenshots, authenticated browser sessions, console inspection, and network debugging. Sourced from [mitsuhiko/agent-stuff](https://github.com/mitsuhiko/agent-stuff/tree/main/skills/web-browser) with changes. |
-| [web-search](skills/web-search/)             | Lightweight public web search and URL content extraction via local scripts and provider HTTP APIs. Use for ordinary search, current facts, documentation lookup, source comparison, and static/public URL-to-markdown fetches.                                                                                                                 |
+| [web-search](skills/web-search/)             | Public web search (Exa, TinyFish and Tavily merged) and live URL-to-Markdown extraction with provider fallback, via local scripts and provider HTTP APIs. Use for ordinary search, current facts, documentation lookup and source comparison.                                                                                                     |
 
 ## Prompt Templates
 
@@ -49,16 +49,21 @@ chmod 600 ~/.pi/agent/skills/web-search/.env
 chmod +x ~/.pi/agent/skills/web-search/scripts/search.js ~/.pi/agent/skills/web-search/scripts/fetch.js
 ```
 
-Required `.env` values:
+`.env` values (configure all three for full coverage; a missing key only
+disables that provider):
 
 ```bash
-WEB_SEARCH_PROVIDER=tavily
+EXA_API_KEY=...
+TINYFISH_API_KEY=sk-tinyfish-...
 TAVILY_API_KEY=tvly-...
 ```
+
+Search merges the three providers; fetch tries Exa, then TinyFish (needed for
+Reddit and X), then Tavily.
 
 Smoke test:
 
 ```bash
 ~/.pi/agent/skills/web-search/scripts/search.js "test query" -n 1
-~/.pi/agent/skills/web-search/scripts/fetch.js https://example.com --max-chars 1000
+~/.pi/agent/skills/web-search/scripts/fetch.js https://example.com
 ```

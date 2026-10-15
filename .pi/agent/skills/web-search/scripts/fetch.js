@@ -1,191 +1,153 @@
 #!/usr/bin/env node
+// Extract readable page content, trying Exa, then TinyFish, then Tavily for each URL that fails.
 
+const crypto = require("crypto");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
+const { PROVIDERS, loadKeys, requestJson, urlKey } = require("./lib.js");
 
-const SKILL_DIR = path.resolve(__dirname, "..");
-const ENV_PATH = path.join(SKILL_DIR, ".env");
-const API_URL = "https://api.tavily.com/extract";
+const USAGE = `Usage: fetch.js <url> [url...]
 
-function readDotEnv(file) {
-  if (!fs.existsSync(file)) {
-    throw new Error(`Missing config file: ${file}\nCopy .env.example to .env and set TAVILY_API_KEY.`);
-  }
+Fetches up to 20 public URLs as live Markdown. Long pages are truncated in the
+output and saved in full to a local file whose path is printed.`;
 
-  const env = {};
-  for (const rawLine of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
-    const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
-    if (!match) continue;
-    let value = match[2].trim();
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
-    }
-    env[match[1]] = value;
-  }
-  return env;
-}
-
-function usage() {
-  console.log(`Usage: fetch.js <url> [url...] [options]
-
-Options:
-  --query <text>             Rerank extracted chunks for this intent
-  --chunks <num>             Chunks per source when --query is used (1-5, default: 3)
-  --depth <depth>            basic | advanced (default: basic)
-  --format <format>          markdown | text (default: markdown)
-  --timeout <seconds>        Extraction timeout, 1-60 seconds
-  --max-chars <num>          Max chars per URL (default: 12000)
-  --usage                    Include credit usage when returned
-
-Examples:
-  fetch.js https://example.com/article
-  fetch.js https://example.com/a https://example.com/b --max-chars 8000
-  fetch.js https://example.com/article --query "installation steps" --chunks 3
-`);
-}
-
-function takeValue(args, index, flag) {
-  if (index + 1 >= args.length || args[index + 1].startsWith("--")) {
-    throw new Error(`${flag} requires a value`);
-  }
-  return args[index + 1];
-}
+const MIN_USABLE_CHARS = 300;
+const CHALLENGE = /^(#+\s*)?(just a moment|verify you are human|prove your humanity|access denied|attention required|uh oh!)/im;
+const OUTPUT_DIR = path.join(os.tmpdir(), "pi-web-fetch");
 
 function parseArgs(argv) {
-  const opts = {
-    depth: "basic",
-    format: "markdown",
-    chunks: 3,
-    maxChars: 12000,
-    includeUsage: false,
-  };
-  const urls = [];
-
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-    if (arg === "-h" || arg === "--help") {
-      usage();
-      process.exit(0);
-    } else if (arg === "--query") {
-      opts.query = takeValue(argv, i, arg);
-      i++;
-    } else if (arg === "--chunks") {
-      opts.chunks = parseInt(takeValue(argv, i, arg), 10);
-      i++;
-    } else if (arg === "--depth") {
-      opts.depth = takeValue(argv, i, arg);
-      i++;
-    } else if (arg === "--format") {
-      opts.format = takeValue(argv, i, arg);
-      i++;
-    } else if (arg === "--timeout") {
-      opts.timeout = Number(takeValue(argv, i, arg));
-      i++;
-    } else if (arg === "--max-chars") {
-      opts.maxChars = parseInt(takeValue(argv, i, arg), 10);
-      i++;
-    } else if (arg === "--usage") {
-      opts.includeUsage = true;
-    } else if (arg.startsWith("-")) {
-      throw new Error(`Unknown option: ${arg}`);
-    } else {
-      urls.push(arg);
-    }
+  if (argv.includes("-h") || argv.includes("--help")) { console.log(USAGE); process.exit(0); }
+  const unknown = argv.find(arg => arg.startsWith("-"));
+  if (unknown) throw new Error(`Unknown option: ${unknown}\n\n${USAGE}`);
+  const urls = [...new Set(argv)];
+  if (!urls.length) throw new Error(`Missing URL\n\n${USAGE}`);
+  if (urls.length > 20) throw new Error("At most 20 URLs per call");
+  for (const url of urls) {
+    if (!/^https?:$/.test(new URL(url).protocol)) throw new Error(`Not an HTTP(S) URL: ${url}`);
   }
-
-  if (!urls.length) throw new Error("Missing URL");
-  if (urls.length > 20) throw new Error("Tavily Extract accepts at most 20 URLs per request");
-  if (!Number.isFinite(opts.chunks) || opts.chunks < 1 || opts.chunks > 5) throw new Error("--chunks must be 1-5");
-  if (!Number.isFinite(opts.maxChars) || opts.maxChars < 1) throw new Error("--max-chars must be a positive number");
-  if (opts.timeout != null && (!Number.isFinite(opts.timeout) || opts.timeout < 1 || opts.timeout > 60)) {
-    throw new Error("--timeout must be between 1 and 60 seconds");
-  }
-  return { urls, opts };
+  return urls;
 }
 
-function compact(value, maxChars) {
-  if (value == null) return "";
-  const text = String(value).trim();
-  if (text.length <= maxChars) return text;
-  return `${text.slice(0, maxChars).trim()}\n[... truncated ${text.length - maxChars} chars ...]`;
+// Each extractor returns Map<requestedUrl, { text, title } | { error }>.
+function collect(urls, results, failures) {
+  const byKey = new Map(urls.map(url => [urlKey(url), url]));
+  const find = value => (urls.includes(value) ? value : byKey.get(urlKey(value || "")));
+  const pages = new Map();
+  for (const { url, text, title } of results) {
+    const requested = find(url);
+    if (requested) pages.set(requested, { text: text || "", title: title || "" });
+  }
+  for (const { url, error } of failures) {
+    const requested = find(url);
+    if (requested && !pages.has(requested)) pages.set(requested, { error });
+  }
+  for (const url of urls) if (!pages.has(url)) pages.set(url, { error: "no content returned" });
+  return pages;
 }
 
-function errorMessage(data) {
-  if (!data) return "";
-  if (typeof data === "string") return data;
-  return data.detail?.error || data.error || data.message || JSON.stringify(data);
+const extract = {
+  async exa(urls, keys) {
+    const body = { urls, text: true, maxAgeHours: 0, livecrawlTimeout: 30000 };
+    const data = await requestJson("exa", "https://api.exa.ai/contents", body, keys, 45000);
+    const failures = (data.statuses || []).filter(s => s.status !== "success")
+      .map(s => ({ url: s.id, error: [s.error?.tag, s.error?.httpStatusCode].filter(Boolean).join(" ") || "error" }));
+    return collect(urls, data.results.map(r => ({ url: r.id || r.url, text: r.text, title: r.title })), failures);
+  },
+  async tinyfish(urls, keys) {
+    const pages = new Map();
+    // TinyFish accepts at most 10 URLs per request.
+    const batches = [];
+    for (let i = 0; i < urls.length; i += 10) batches.push(urls.slice(i, i + 10));
+    await Promise.all(batches.map(async batch => {
+      const body = { urls: batch, format: "markdown", ttl: 0, per_url_timeout_ms: 45000 };
+      const data = await requestJson("tinyfish", "https://api.fetch.tinyfish.ai", body, keys, 60000);
+      const failures = (data.errors || []).map(e => ({ url: e.url, error: [e.error, e.status].filter(Boolean).join(" ") }));
+      for (const [url, page] of collect(batch, data.results, failures)) pages.set(url, page);
+    }));
+    return pages;
+  },
+  async tavily(urls, keys) {
+    const body = { urls, format: "markdown", timeout: 30 };
+    const data = await requestJson("tavily", "https://api.tavily.com/extract", body, keys, 40000);
+    const results = data.results.map(r => ({ url: r.url, text: r.raw_content, title: r.title }));
+    return collect(urls, results, data.failed_results || []);
+  },
+};
+
+function problem(page) {
+  if (page.error) return page.error;
+  const text = page.text.trim();
+  if (CHALLENGE.test(text.slice(0, 300))) return "bot challenge or error page";
+  if (text.length < MIN_USABLE_CHARS) return `only ${text.length} chars`;
+  return undefined;
+}
+
+function saveFull(url, page) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  const { hostname, pathname } = new URL(url);
+  const slug = `${hostname}${pathname}`.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").slice(0, 80);
+  const hash = crypto.createHash("sha256").update(url).digest("hex").slice(0, 8);
+  const file = path.join(OUTPUT_DIR, `${slug}-${hash}.md`);
+  fs.writeFileSync(file, `${page.title ? `# ${page.title}\n\n` : ""}Source: ${url}\n\n${page.text}\n`);
+  return file;
 }
 
 async function main() {
-  const { urls, opts } = parseArgs(process.argv.slice(2));
-  const env = readDotEnv(ENV_PATH);
-  const provider = (env.WEB_SEARCH_PROVIDER || "tavily").toLowerCase();
-  if (provider !== "tavily") {
-    throw new Error(`Unsupported WEB_SEARCH_PROVIDER=${provider}. This skill currently implements provider=tavily.`);
-  }
-  const apiKey = env.TAVILY_API_KEY;
-  if (!apiKey || apiKey.includes("YOUR_API_KEY")) {
-    throw new Error(`TAVILY_API_KEY is missing in ${ENV_PATH}`);
-  }
+  const urls = parseArgs(process.argv.slice(2));
+  const keys = loadKeys();
+  const state = new Map(urls.map(url => [url, { page: undefined, fallback: undefined, errors: [] }]));
 
-  const body = {
-    urls: urls.length === 1 ? urls[0] : urls,
-    extract_depth: opts.depth,
-    format: opts.format,
-    include_usage: opts.includeUsage,
-  };
-  if (opts.query) {
-    body.query = opts.query;
-    body.chunks_per_source = opts.chunks;
-  }
-  if (opts.timeout != null) body.timeout = opts.timeout;
-
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(70000),
-  });
-
-  const text = await response.text();
-  let data;
-  try { data = text ? JSON.parse(text) : {}; } catch { data = text; }
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${errorMessage(data)}`);
+  for (const provider of PROVIDERS.filter(p => keys[p])) {
+    const todo = urls.filter(url => !state.get(url).page);
+    if (!todo.length) break;
+    let pages;
+    try {
+      pages = await extract[provider](todo, keys);
+    } catch (error) {
+      for (const url of todo) state.get(url).errors.push(error.message);
+      continue;
+    }
+    for (const [url, page] of pages) {
+      const entry = state.get(url);
+      const issue = problem(page);
+      if (!issue) entry.page = { ...page, provider };
+      else {
+        entry.errors.push(`${provider}: ${issue}`);
+        // Keep the longest imperfect text in case no provider does better.
+        if (page.text && page.text.trim().length > (entry.fallback?.text.trim().length || 0)) entry.fallback = { ...page, provider };
+      }
+    }
   }
 
-  const results = data.results || [];
-  if (!results.length) console.log("No content extracted.");
-
-  results.forEach((result, index) => {
-    console.log(`--- Page ${index + 1} ---`);
-    console.log(`URL: ${result.url || ""}`);
-    if (result.favicon) console.log(`Favicon: ${result.favicon}`);
-    if (result.images && result.images.length) console.log(`Images: ${result.images.join(", ")}`);
-    console.log("Content:");
-    console.log(compact(result.raw_content || "", opts.maxChars));
-    console.log("");
-  });
-
-  const failed = data.failed_results || [];
-  failed.forEach((result, index) => {
-    console.log(`--- Failed ${index + 1} ---`);
-    console.log(`URL: ${result.url || ""}`);
-    console.log(`Error: ${result.error || "Unknown error"}`);
-    console.log("");
-  });
-
-  if (data.response_time != null) console.log(`Response time: ${data.response_time}s`);
-  if (data.usage) console.log(`Usage: ${JSON.stringify(data.usage)}`);
-  if (data.request_id) console.log(`Request ID: ${data.request_id}`);
+  const previewChars = urls.length === 1 ? 15000 : 6000;
+  const blocks = [];
+  let succeeded = 0;
+  for (const url of urls) {
+    const { page, fallback, errors } = state.get(url);
+    const chosen = page || fallback;
+    const lines = [`=== ${url}`];
+    if (!chosen) {
+      lines.push(`Error: no provider could extract this page (${errors.join("; ")})`);
+      blocks.push(lines.join("\n"));
+      continue;
+    }
+    succeeded++;
+    lines.push(`Provider: ${chosen.provider}`);
+    if (!page) lines.push(`Warning: possibly incomplete or not the real page (${errors.join("; ")})`);
+    if (chosen.title) lines.push(`Title: ${chosen.title}`);
+    const text = chosen.text.trim();
+    lines.push("", text.slice(0, previewChars));
+    if (text.length > previewChars) {
+      lines.push("", `[Truncated: showed ${previewChars} of ${text.length} chars. Full text: ${saveFull(url, chosen)}]`);
+    }
+    blocks.push(lines.join("\n"));
+  }
+  console.log(blocks.join("\n\n"));
+  if (!succeeded) process.exit(1);
 }
 
-main().catch((err) => {
-  console.error(`Error: ${err.message}`);
+main().catch(error => {
+  console.error(`Error: ${error.message}`);
   process.exit(1);
 });
