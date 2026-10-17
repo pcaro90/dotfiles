@@ -215,8 +215,9 @@ export default function usageExtension(pi: ExtensionAPI) {
 	});
 }
 
+// Sign in with ChatGPT (openai) and the legacy Codex OAuth (openai-codex) share one plan quota.
 function isOpenAICodexModel(model: ExtensionContext["model"] | undefined): model is PiModel {
-	return model?.provider === OPENAI_PROVIDER_ID;
+	return model?.provider === OPENAI_PROVIDER_ID || model?.provider === LEGACY_CODEX_PROVIDER_ID;
 }
 
 async function queryUsage(ctx: ExtensionContext, options: { timeoutMs: number }, _model: CodexUsageModel): Promise<QueryUsageResult> {
@@ -228,6 +229,44 @@ async function queryUsage(ctx: ExtensionContext, options: { timeoutMs: number },
 	} catch (cause) {
 		return { ok: false, errors: [{ source: "pi-auth", message: errorMessage(cause), cause }] };
 	}
+}
+
+export type CodexQuotaReset =
+	| { ok: true; exhausted: boolean; resetAt?: number; limits: string[] }
+	| { ok: false; error: string };
+
+/**
+ * Global Codex quota state for other extensions (auto-resume): which windows are
+ * exhausted (main and additional per-model limits) and when the last one resets.
+ */
+export async function queryCodexQuotaReset(ctx: ExtensionContext): Promise<CodexQuotaReset> {
+	try {
+		return codexQuotaResetFromReport(await queryViaPiAuth(ctx, DEFAULT_TIMEOUT_MS));
+	} catch (cause) {
+		return { ok: false, error: errorMessage(cause) };
+	}
+}
+
+export function codexQuotaResetFromReport(report: CodexUsageReport): CodexQuotaReset {
+	const limits: string[] = [];
+	const resets: number[] = [];
+	for (const snapshot of report.snapshots) {
+		for (const [name, window] of [["primary", snapshot.primary], ["secondary", snapshot.secondary]] as const) {
+			if (!isWindowExhausted(window)) continue;
+			limits.push(`${snapshot.limitId}/${window?.windowDurationMs ? formatWindowDuration(window.windowDurationMs) : name}`);
+			if (window?.resetAt !== undefined) resets.push(window.resetAt);
+		}
+	}
+	// Every exhausted window must have reset before requests succeed again.
+	return { ok: true, exhausted: limits.length > 0, limits, ...(resets.length ? { resetAt: Math.max(...resets) } : {}) };
+}
+
+function formatWindowDuration(ms: number): string {
+	return ms >= DAY_MS ? `${Math.round(ms / DAY_MS)}d` : `${Math.round(ms / HOUR_MS)}h`;
+}
+
+export function isCodexSubscriptionModel(model: ExtensionContext["model"] | undefined): boolean {
+	return isOpenAICodexModel(model);
 }
 
 async function queryViaPiAuth(ctx: ExtensionContext, timeoutMs: number): Promise<CodexUsageReport> {
