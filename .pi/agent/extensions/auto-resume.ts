@@ -4,9 +4,8 @@
  * When a run ends with a usage-limit / rate-limit error (after Pi's own
  * retries), the session enters a "pending resume" state instead of just
  * stopping. The reset time is taken, in order of preference, from:
- *   0. for Codex subscriptions, the global quota endpoint used by usage.ts
- *      (exhausted window → its resetAt); also re-checked before resuming so a
- *      still-exhausted quota just reschedules instead of sending a request;
+ *   0. for Codex subscriptions, the quota endpoint used by usage.ts: the most
+ *      used window (5h or weekly) is the one blocking, so wait for its reset;
  *   1. the 429 response headers (`after_provider_response`): Codex
  *      `x-codex-{primary,secondary}-*`, Anthropic `anthropic-ratelimit-unified-reset`,
  *      `retry-after(-ms)`, OpenAI `x-ratelimit-reset-*`;
@@ -68,7 +67,6 @@ export default function autoResumeExtension(pi: ExtensionAPI) {
 	let runError: string | undefined;
 	let resuming = false;
 	let attempts = 0;
-	let checking = false;
 	let armId = 0;
 
 	function stopTick() {
@@ -101,7 +99,7 @@ export default function autoResumeExtension(pi: ExtensionAPI) {
 		lastCtx = ctx;
 		stopTick();
 		if (!isCodexSubscriptionModel(ctx.model)) return finishArm(ctx, error, now, headerReset);
-		// Codex: the quota endpoint knows which window is exhausted and when it resets; ask it first.
+		// Codex: the most used plan window (5h or weekly) is the one blocking; ask when it resets.
 		ctx.ui.setStatus(STATUS_KEY, `${ctx.ui.theme.fg("warning", "⏸ quota")} ${ctx.ui.theme.fg("dim", "checking reset…")}`);
 		void queryCodexQuotaReset(ctx).then((quota) => {
 			if (id === armId) finishArm(ctx, error, now, headerReset, quota);
@@ -113,10 +111,10 @@ export default function autoResumeExtension(pi: ExtensionAPI) {
 		let resumeAt: number;
 		let source: Pending["source"];
 		let detail = "";
-		if (quota?.ok && quota.exhausted && quota.resetAt !== undefined) {
+		if (quota?.ok && quota.resetAt !== undefined && quota.resetAt > now) {
 			resumeAt = quota.resetAt + RESET_MARGIN_MS;
 			source = "usage";
-			detail = ` (${quota.limits.join(", ")} exhausted)`;
+			detail = ` (${quota.window} window at ${Math.round(quota.usedPercent)}%)`;
 		} else if (headerReset !== undefined && headerReset > now - MINUTE_MS) {
 			resumeAt = headerReset + RESET_MARGIN_MS;
 			source = "headers";
@@ -127,7 +125,7 @@ export default function autoResumeExtension(pi: ExtensionAPI) {
 			const delay = FALLBACK_DELAYS_MS[Math.min(attempts, FALLBACK_DELAYS_MS.length - 1)];
 			resumeAt = now + delay;
 			source = "fallback";
-			const why = !quota ? "" : !quota.ok ? `Codex usage query failed: ${quota.error}; ` : quota.exhausted ? "Codex usage has no reset time; " : "Codex usage shows no exhausted window; ";
+			const why = !quota ? "" : !quota.ok ? `Codex usage query failed: ${quota.error}; ` : "Codex usage has no reset time; ";
 			detail = ` (${why}reset time unknown, checking again in ${formatRemaining(delay)})`;
 		}
 		// A reset already in the past means the limit is a short one; probe soon instead of looping.
@@ -144,24 +142,10 @@ export default function autoResumeExtension(pi: ExtensionAPI) {
 	async function onTick() {
 		const ctx = lastCtx;
 		if (!pending || !ctx) return stopTick();
-		if (checking) return;
 		if (Date.now() < pending.resumeAt) return renderStatus(ctx);
 		if (!ctx.isIdle() || ctx.hasPendingMessages()) {
 			pending.resumeAt = Date.now() + BUSY_POSTPONE_MS;
 			return renderStatus(ctx);
-		}
-		if (isCodexSubscriptionModel(ctx.model)) {
-			// Avoid a request that would fail again: ask the quota endpoint first.
-			const target = pending;
-			checking = true;
-			const quota = await queryCodexQuotaReset(ctx).finally(() => { checking = false; });
-			if (pending !== target) return;
-			if (quota.ok && quota.exhausted) {
-				const fallback = Date.now() + FALLBACK_DELAYS_MS[0];
-				target.resumeAt = quota.resetAt !== undefined && quota.resetAt > Date.now() ? quota.resetAt + RESET_MARGIN_MS : fallback;
-				target.source = quota.resetAt !== undefined ? "usage" : "fallback";
-				return renderStatus(ctx);
-			}
 		}
 		resume(ctx);
 	}
