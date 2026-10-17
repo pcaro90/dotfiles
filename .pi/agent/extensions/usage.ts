@@ -232,12 +232,13 @@ async function queryUsage(ctx: ExtensionContext, options: { timeoutMs: number },
 }
 
 export type CodexQuotaReset =
-	| { ok: true; exhausted: boolean; resetAt?: number; limits: string[] }
+	| { ok: true; window: string; usedPercent: number; resetAt?: number }
 	| { ok: false; error: string };
 
 /**
- * Global Codex quota state for other extensions (auto-resume): which windows are
- * exhausted (main and additional per-model limits) and when the last one resets.
+ * For other extensions (auto-resume): the most used plan window (5h or weekly)
+ * and when it resets. When the API reports the limit as reached, that window is
+ * the one blocking requests, even if the endpoint shows it slightly below 100%.
  */
 export async function queryCodexQuotaReset(ctx: ExtensionContext): Promise<CodexQuotaReset> {
 	try {
@@ -248,17 +249,23 @@ export async function queryCodexQuotaReset(ctx: ExtensionContext): Promise<Codex
 }
 
 export function codexQuotaResetFromReport(report: CodexUsageReport): CodexQuotaReset {
-	const limits: string[] = [];
-	const resets: number[] = [];
-	for (const snapshot of report.snapshots) {
-		for (const [name, window] of [["primary", snapshot.primary], ["secondary", snapshot.secondary]] as const) {
-			if (!isWindowExhausted(window)) continue;
-			limits.push(`${snapshot.limitId}/${window?.windowDurationMs ? formatWindowDuration(window.windowDurationMs) : name}`);
-			if (window?.resetAt !== undefined) resets.push(window.resetAt);
-		}
+	const snapshot = selectUsageSnapshot(report, USAGE_LIMIT_ID);
+	let best: { name: string; window: NormalizedRateLimitWindow } | undefined;
+	for (const [name, window] of [["primary", snapshot?.primary], ["secondary", snapshot?.secondary]] as const) {
+		if (!window) continue;
+		const used = clampPercent(window.usedPercent);
+		const bestUsed = best ? clampPercent(best.window.usedPercent) : -1;
+		// On a tie, the later reset is the one that unblocks requests.
+		if (used > bestUsed || (used === bestUsed && (window.resetAt ?? 0) > (best?.window.resetAt ?? 0))) best = { name, window };
 	}
-	// Every exhausted window must have reset before requests succeed again.
-	return { ok: true, exhausted: limits.length > 0, limits, ...(resets.length ? { resetAt: Math.max(...resets) } : {}) };
+	if (!best) return { ok: false, error: "Codex usage returned no plan windows" };
+	const label = best.window.windowDurationMs ? formatWindowDuration(best.window.windowDurationMs) : best.name;
+	return {
+		ok: true,
+		window: label,
+		usedPercent: clampPercent(best.window.usedPercent),
+		...(best.window.resetAt === undefined ? {} : { resetAt: best.window.resetAt }),
+	};
 }
 
 function formatWindowDuration(ms: number): string {
