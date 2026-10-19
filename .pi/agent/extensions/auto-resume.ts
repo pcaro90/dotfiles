@@ -38,6 +38,7 @@ const TICK_MS = 15 * SECOND_MS;
 const RESET_MARGIN_MS = 60 * SECOND_MS;
 const BUSY_POSTPONE_MS = 30 * SECOND_MS;
 const HEADER_FRESH_MS = 2 * MINUTE_MS;
+const FULL_PERCENT = 90;
 const FALLBACK_DELAYS_MS = [5 * MINUTE_MS, 15 * MINUTE_MS, 30 * MINUTE_MS, 60 * MINUTE_MS];
 const RESUME_PROMPT =
 	"[auto-resume] The usage limit that interrupted the previous run has reset. " +
@@ -111,7 +112,10 @@ export default function autoResumeExtension(pi: ExtensionAPI) {
 		let resumeAt: number;
 		let source: Pending["source"];
 		let detail = "";
-		if (quota?.ok && quota.resetAt !== undefined && quota.resetAt > now) {
+		// Only a window that is (nearly) full explains the block. Right after a reset the API can keep
+		// refusing for a while with the windows near 0%; waiting for the other window would be wrong.
+		const full = quota?.ok && quota.usedPercent >= FULL_PERCENT;
+		if (quota?.ok && full && quota.resetAt !== undefined && quota.resetAt > now) {
 			resumeAt = quota.resetAt + RESET_MARGIN_MS;
 			source = "usage";
 			detail = ` (${quota.window} window at ${Math.round(quota.usedPercent)}%)`;
@@ -125,7 +129,10 @@ export default function autoResumeExtension(pi: ExtensionAPI) {
 			const delay = FALLBACK_DELAYS_MS[Math.min(attempts, FALLBACK_DELAYS_MS.length - 1)];
 			resumeAt = now + delay;
 			source = "fallback";
-			const why = !quota ? "" : !quota.ok ? `Codex usage query failed: ${quota.error}; ` : "Codex usage has no reset time; ";
+			const why = !quota ? ""
+				: !quota.ok ? `Codex usage query failed: ${quota.error}; `
+				: !full ? `no Codex window is full, most used is ${quota.window} at ${Math.round(quota.usedPercent)}%; `
+				: "Codex usage has no reset time; ";
 			detail = ` (${why}reset time unknown, checking again in ${formatRemaining(delay)})`;
 		}
 		// A reset already in the past means the limit is a short one; probe soon instead of looping.
