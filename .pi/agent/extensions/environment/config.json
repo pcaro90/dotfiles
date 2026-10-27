@@ -1,0 +1,17 @@
+{
+  "toolchain": {
+    "includePath": true,
+    "roots": [
+      "/usr",
+      "/opt",
+      "~/.nimble",
+      "~/.zvm",
+      "~/.rustup",
+      "~/.local/pipx",
+      "~/.local/share/uv/tools",
+      "~/.local/share/pnpm",
+      "~/src/3rd/radare2"
+    ]
+  },
+  "sshAgentSocket": "/run/user/1000/gcr/ssh"
+}

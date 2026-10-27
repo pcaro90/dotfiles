@@ -1,0 +1,17 @@
+{
+  "name": "pi-environment",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test tests",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "1.4.0",
+    "@earendil-works/pi-tui": "1.4.0",
+    "@types/bun": "latest",
+    "@types/node": "^22",
+    "typebox": "^1.4.3",
+    "typescript": "^7.0.2"
+  }
+}
