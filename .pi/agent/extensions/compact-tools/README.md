@@ -4,7 +4,7 @@ Presentation-only extension for Pi 1.0.2's public tool-renderer API. Automatical
 
 ## Display
 
-- One collapsed row per call: tool, abbreviated path/command, compact English statistics, and status. Durations appear only for `bash`, `powershell`, and `codemode`; reads, edits, writes, and other tools have no clock.
+- One collapsed row per call: tool, abbreviated path/command, compact English statistics, and status. Durations appear only for `bash` and `codemode`; reads, edits, writes, and other tools have no clock.
 - Below 80 terminal columns, remove the expansion arrow and tool-name alignment padding, use single-space separators, and place the clock immediately after the summary. Wider terminals keep the aligned layout and expansion arrows.
 - Preserve Pi's special read labels: `[skill] <name>` with skill colors, `read resource` for `AGENTS.md`/`AGENTS.override.md`/`CLAUDE.md` (including Pi's uppercase variants), and `read docs` for Pi's own README, docs, and examples.
 - No result, script, write-content, or diff previews while collapsed.
@@ -13,7 +13,7 @@ Presentation-only extension for Pi 1.0.2's public tool-renderer API. Automatical
 - Click a row to expand/collapse just that call. `Ctrl+O` (or the configured `app.tools.expand` key) expands/collapses globally. Expanded rows use the original tool renderers and retain all available arguments, output, and diffs; underlying tool-output truncation is unchanged.
 - Long collapsed rows are clipped to terminal width, preserving the end of file paths. They never wrap.
 
-Supports built-in `read`, `bash`, `powershell`, `edit`, `write`, `grep`, `find`, `ls`, `codemode`, `tool_search`, and `mcp__…` tools. Other extension tools, especially interactive tools such as `questionnaire`, retain their original UI and separate groups.
+Supports built-in `read`, `bash`, `edit`, `write`, `codemode`, `tool_search`, and `mcp__…` tools; `grep`, `find`, `ls`, and `powershell` are left to Pi because `environment` blocks them. Other extension tools, especially interactive tools such as `questionnaire`, retain their original UI and separate groups.
 
 Images remain at their original transcript position and are not merged into text groups. Visible assistant text, thinking labels, user messages, and custom entries separate groups. Consecutive calls join across assistant-message and turn boundaries, including calls issued one at a time. Enabling `showCacheMissNotices` does not itself create a separator: only a cache/usage or thinking-drop notice Pi actually displays does. Notice detection uses public session/model data and mirrors Pi 1.0.2's display thresholds. Reload/resume reconstruct the same grouping.
 

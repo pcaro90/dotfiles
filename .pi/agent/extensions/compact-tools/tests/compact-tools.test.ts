@@ -10,7 +10,9 @@ import { Text, stripTerminalSequences, visibleWidth } from "@earendil-works/pi-t
 import compactTools from "../index.js";
 import { SETTINGS_ENTRY, TIMINGS_ENTRY, ToolStore } from "../model.js";
 import { describeRow, formatDuration, lineCount, singleLine } from "../format.js";
-import { collectCacheNotices, hasCacheNotice, hasThinkingDropNotice } from "../notices.js";
+import { CacheNotices, hasThinkingDropNotice } from "../notices.js";
+
+const hasCacheNotice = (entries: any[], message: any, price: () => number) => new CacheNotices(price).check(entries, message);
 import { renderHeader } from "../render.js";
 
 initTheme("dark");
@@ -338,7 +340,10 @@ test("notice detection matches significance thresholds, cache support, warming, 
 	assert.equal(hasCacheNotice([...prior, { type: "compaction" }] as any, current(30_000, 0.3), () => 0), false);
 	assert.equal(hasCacheNotice([{ type: "usage", kind: "cache_warm", usage: usage(30_000) }] as any, current(30_000, 0.3), () => 0), true);
 	const miss = current(30_000, 0.3);
-	assert.ok(collectCacheNotices([...prior, { type: "message", message: miss }] as any, () => 0).has(miss));
+	assert.ok(new CacheNotices(() => 0).catchUp([...prior, { type: "message", message: miss }] as any).has(miss));
+	const scanner = new CacheNotices(() => 0);
+	assert.equal(scanner.check(prior, miss), true);
+	assert.equal(scanner.catchUp([...prior, { type: "message", message: miss }] as any).size, 0, "a checked message is not counted again once persisted");
 });
 
 test("asynchronous cache-warming entries separate tools only when their notice is visible", async () => {
@@ -412,10 +417,8 @@ test("mobile headers use compact English metadata and clocks only for shells and
 		["edit", { path: "asr.py" }, result("Edited", { diff: "+x\n".repeat(12) + "-x\n".repeat(4) }), 1000, "✓ edit asr.py +12 -4"],
 		["bash", { command: "pytest" }, result("ok\n".repeat(34)), 1800, "✓ bash pytest o:34 1.8s"],
 		["bash", { command: "python script.py\n" + "# comment\n".repeat(93) }, result("a\nb\nc"), 2100, "✓ bash python script.py s:94 o:3 2.1s"],
-		["powershell", { command: "Get-Date" }, result("today"), 123, "✓ powershell Get-Date o:1 123ms"],
 		["codemode", { code: "one\n".repeat(94) }, result("Script completed\nWall time 4.2 seconds\nOutput:\n", { calls: Array.from({ length: 8 }, () => ({ status: "ok" })) }), 4200, "✓ codemode s:94 c:8 4.2s"],
 		["codemode", { code: "console.log(1)" }, result(""), 123, "✓ codemode 123ms"],
-		["ls", { path: "." }, result(), 1000, "✓ ls ."],
 		["mcp__docs__search", { query: "docs" }, result(), 1000, "✓ mcp__docs__search docs"],
 	];
 	for (const [name, args, value, duration, expected] of examples) {
@@ -515,4 +518,21 @@ test("narrow layout changes at 80 columns without changing expansion or row coun
 	assert.ok(plain(h.snapshot(40)).join("\n").includes("FIRST_SECRET"));
 	await h.commands.get("compact-tools").handler("collapse", h.ctx);
 	assert.equal(h.snapshot(40).length, 3);
+});
+
+test("streaming deltas regroup only when grouping inputs change, and keep arguments current", () => {
+	const store = new ToolStore();
+	store.beginAssistant(); store.observeAssistant(assistant([call("a")])); store.endAssistant(false);
+	store.beginAssistant();
+	store.observeAssistant(assistant([call("b", "read", { path: "pho" })]));
+	const a = store.rows.get("a")!, b = store.rows.get("b")!;
+	assert.equal(b.group, a.group);
+	store.observeAssistant(assistant([call("b", "read", { path: "photo.ts" })]));
+	assert.equal(b.args.path, "photo.ts");
+	assert.equal(b.group, a.group);
+	store.observeAssistant(assistant([call("b", "read", { path: "photo.png" })]));
+	assert.notEqual(b.group, a.group, "an image read leaves the text group");
+	store.observeAssistant(assistant([{ type: "text", text: "  " }, call("b", "read", { path: "photo.png" })]));
+	store.observeAssistant(assistant([{ type: "text", text: "Visible" }, call("b", "read", { path: "photo.png" })]));
+	assert.equal(store.rows.get("b")!.group.rows.length, 1);
 });

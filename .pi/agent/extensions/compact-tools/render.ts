@@ -69,7 +69,7 @@ function body(row: ToolRow, store: ToolStore, theme: Theme): NonNullable<ToolRow
 		invalidate: () => { row.body = undefined; store.redraw(row); },
 		// We own the clock. Don't start a second shell-renderer timer, and don't
 		// recompute edit previews against files that have already been modified.
-		executionStarted: ["bash", "powershell"].includes(row.name) ? false : row.executionStarted,
+		executionStarted: row.name === "bash" ? false : row.executionStarted,
 		argsComplete: row.name === "edit" ? false : row.argsComplete,
 	};
 	let call: Component;

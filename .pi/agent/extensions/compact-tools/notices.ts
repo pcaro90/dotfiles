@@ -8,26 +8,45 @@ export type CacheReadPrice = (provider: string, model: string) => number;
  * Mirrors Pi 1.0.2's visible-cache-notice thresholds using public session/model
  * data. Its internal cache-stat helpers are not exported to extensions. A setting
  * being enabled is not itself a visible boundary.
+ *
+ * Incremental: catchUp() only reads entries appended since its last call, so
+ * checking each new message does not rescan the whole session.
  */
-class CacheNotices {
+export class CacheNotices {
 	private previous?: { promptTokens: number; reportedCache: boolean };
+	private cursor = 0;
+	// A message checked at message_end is not counted again when its entry is persisted (and vice versa).
+	private results = new WeakMap<Assistant, boolean>();
 
 	constructor(private readPrice: CacheReadPrice) {}
 
-	observe(entry: SessionEntry): boolean {
-		if (entry.type === "compaction" || entry.type === "branch_summary") {
-			this.previous = undefined;
-		} else if (entry.type === "usage" && entry.kind === "cache_warm") {
-			const usage = entry.usage;
-			const promptTokens = usage.input + usage.cacheRead + usage.cacheWrite;
-			if (promptTokens > 0) this.previous = { promptTokens, reportedCache: true };
-		} else if (entry.type === "message" && entry.message.role === "assistant") {
-			return this.assistant(entry.message);
+	/** Observes new entries and returns the assistant messages among them that show a notice. */
+	catchUp(entries: readonly SessionEntry[]): Set<Assistant> {
+		const visible = new Set<Assistant>();
+		for (; this.cursor < entries.length; this.cursor++) {
+			const entry = entries[this.cursor];
+			if (entry.type === "compaction" || entry.type === "branch_summary") {
+				this.previous = undefined;
+			} else if (entry.type === "usage" && entry.kind === "cache_warm") {
+				const usage = entry.usage;
+				const promptTokens = usage.input + usage.cacheRead + usage.cacheWrite;
+				if (promptTokens > 0) this.previous = { promptTokens, reportedCache: true };
+			} else if (entry.type === "message" && entry.message.role === "assistant" && !this.results.has(entry.message) && this.assistant(entry.message)) {
+				visible.add(entry.message);
+			}
 		}
-		return false;
+		return visible;
 	}
 
-	assistant(message: Assistant): boolean {
+	/** Whether a message that follows `entries` shows a notice. */
+	check(entries: readonly SessionEntry[], message: Assistant): boolean {
+		this.catchUp(entries);
+		return this.assistant(message);
+	}
+
+	private assistant(message: Assistant): boolean {
+		const known = this.results.get(message);
+		if (known !== undefined) return known;
 		const usage = message.usage;
 		if (!usage) return false;
 		const promptTokens = usage.input + usage.cacheRead + usage.cacheWrite;
@@ -46,27 +65,9 @@ class CacheNotices {
 		if (promptTokens > 0) {
 			this.previous = { promptTokens, reportedCache: (previous?.reportedCache ?? false) || usage.cacheRead + usage.cacheWrite > 0 };
 		}
+		this.results.set(message, visible);
 		return visible;
 	}
-}
-
-export function collectCacheNotices(entries: readonly SessionEntry[], readPrice: CacheReadPrice): Set<Assistant> {
-	const scan = new CacheNotices(readPrice);
-	const messages = new Set<Assistant>();
-	for (const entry of entries) {
-		if (scan.observe(entry) && entry.type === "message" && entry.message.role === "assistant") messages.add(entry.message);
-	}
-	return messages;
-}
-
-export function hasCacheNotice(entries: readonly SessionEntry[], message: Assistant, readPrice: CacheReadPrice): boolean {
-	const scan = new CacheNotices(readPrice);
-	// message_end normally precedes persistence; skipping the same object also
-	// keeps this usable by clients that already persisted their current snapshot.
-	for (const entry of entries) {
-		if (entry.type !== "message" || entry.message !== message) scan.observe(entry);
-	}
-	return scan.assistant(message);
 }
 
 function droppedThinking(message: Assistant): number {

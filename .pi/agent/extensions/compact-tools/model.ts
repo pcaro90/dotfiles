@@ -5,8 +5,9 @@ export type RenderContext = Parameters<NonNullable<ToolRenderers["renderCall"]>>
 
 export const TIMINGS_ENTRY = "compact-tools:timings";
 export const SETTINGS_ENTRY = "compact-tools:settings";
-const BUILT_INS = new Set(["read", "bash", "powershell", "edit", "write", "grep", "find", "ls", "codemode", "tool_search"]);
-const TIMED_TOOLS = new Set(["bash", "powershell", "codemode"]);
+const BUILT_INS = new Set(["read", "bash", "edit", "write", "codemode", "tool_search"]);
+const TIMED_TOOLS = new Set(["bash", "codemode"]);
+const IMAGE_PATH = /\.(png|jpe?g|gif|webp|bmp)(?:$|[?#])/i;
 
 export function showsDuration(name: string): boolean {
 	return TIMED_TOOLS.has(name);
@@ -41,21 +42,32 @@ export interface ToolRow {
 	bodyState: Record<string, unknown>;
 }
 
-function hasVisibleContent(message: Extract<AgentMessage, { role: "assistant" }>): boolean {
-	// Hidden thinking still produces Pi's visible "Thinking…" row.
-	return message.stopReason === "length" || message.content.some((part) => (part.type === "text" && !!part.text.trim()) || (part.type === "thinking" && !!part.thinking.trim()));
+type Assistant = Extract<AgentMessage, { role: "assistant" }>;
+
+function hasVisibleContent(message: Assistant): boolean {
+	// Hidden thinking still produces Pi's visible "Thinking…" row. /\S/ stops at the first
+	// visible character instead of copying the whole streamed text like trim().
+	return message.stopReason === "length" || message.content.some((part) => (part.type === "text" && /\S/.test(part.text)) || (part.type === "thinking" && /\S/.test(part.thinking)));
+}
+
+function isImageRead(name: string, args: Record<string, unknown>): boolean {
+	return name === "read" && IMAGE_PATH.test(String(args.path ?? args.file_path ?? ""));
 }
 
 function hasImage(row: ToolRow): boolean {
-	return !!row.result?.content.some((part) => part.type === "image") ||
-		(row.name === "read" && /\.(png|jpe?g|gif|webp|bmp)(?:$|[?#])/i.test(String(row.args.path ?? row.args.file_path ?? "")));
+	return !!row.result?.content.some((part) => part.type === "image") || isImageRead(row.name, row.args);
+}
+
+/** Everything grouping depends on; streaming deltas that keep it unchanged need no regrouping. */
+function groupingSignature(message: Assistant): string {
+	return `${hasVisibleContent(message)}|${message.content.map((part) => part.type === "toolCall" ? `${part.id}:${part.name}:${isImageRead(part.name, part.arguments)}` : "").join(",")}`;
 }
 
 /** Only presentation state: no tool execution, transcript rewriting, or result truncation. */
 export class ToolStore {
 	readonly rows = new Map<string, ToolRow>();
 	private tail?: ToolGroup;
-	private message?: { previous?: ToolGroup; groups: Map<string, ToolGroup> };
+	private message?: { previous?: ToolGroup; groups: Map<string, ToolGroup>; signature?: string };
 	private sequence = 0;
 
 	clear(): void {
@@ -99,9 +111,17 @@ export class ToolStore {
 	}
 
 	/** Observe complete snapshots, including streaming arguments and late text. */
-	observeAssistant(message: Extract<AgentMessage, { role: "assistant" }>): void {
+	observeAssistant(message: Assistant): void {
 		if (!this.message) this.beginAssistant();
 		const current = this.message!;
+		const signature = groupingSignature(message);
+		if (signature === current.signature) {
+			for (const part of message.content) {
+				if (part.type === "toolCall" && this.rows.has(part.id)) this.ensure(part.id, part.name, part.arguments);
+			}
+			return;
+		}
+		current.signature = signature;
 		const visible = hasVisibleContent(message);
 		let canJoin = !visible;
 		let segment: ToolRow[] = [];

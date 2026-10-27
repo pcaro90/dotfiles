@@ -3,7 +3,7 @@ import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { sessionEntryToContextMessages, type AgentToolResult, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { GroupSlot, EMPTY } from "./render.js";
 import { SETTINGS_ENTRY, TIMINGS_ENTRY, showsDuration, supportsTool, ToolStore } from "./model.js";
-import { canShowAssistantNotice, collectCacheNotices, hasCacheNotice, hasThinkingDropNotice } from "./notices.js";
+import { CacheNotices, canShowAssistantNotice, hasThinkingDropNotice } from "./notices.js";
 
 export default function compactTools(pi: ExtensionAPI): void {
 	const store = new ToolStore();
@@ -13,6 +13,11 @@ export default function compactTools(pi: ExtensionAPI): void {
 	let timer: ReturnType<typeof setInterval> | undefined;
 	const running = new Set<string>();
 	const unpersisted = new Map<string, number>();
+	let notices: CacheNotices | undefined;
+
+	function cacheNotices(ctx: ExtensionContext): CacheNotices {
+		return notices ??= new CacheNotices((provider, model) => ctx.modelRegistry.find(provider, model)?.cost.cacheRead ?? 0);
+	}
 
 	function stopClock(): void {
 		if (timer) clearInterval(timer);
@@ -52,6 +57,7 @@ export default function compactTools(pi: ExtensionAPI): void {
 		running.clear();
 		unpersisted.clear();
 		store.clear();
+		notices = undefined;
 		tui = ctx.mode === "tui";
 		if (!tui) return;
 		entryCursor = ctx.sessionManager.getEntries().length;
@@ -60,9 +66,7 @@ export default function compactTools(pi: ExtensionAPI): void {
 		enabled = settings?.type === "custom" && typeof (settings.data as { enabled?: unknown } | undefined)?.enabled === "boolean"
 			? (settings.data as { enabled: boolean }).enabled : true;
 		const noticesEnabled = pi.getSettings().showCacheMissNotices ?? false;
-		const cacheNotices = noticesEnabled
-			? collectCacheNotices(ctx.sessionManager.getEntries(), (provider, model) => ctx.modelRegistry.find(provider, model)?.cost.cacheRead ?? 0)
-			: undefined;
+		const restoredNotices = noticesEnabled ? cacheNotices(ctx).catchUp(ctx.sessionManager.getEntries()) : undefined;
 		for (const entry of ctx.sessionManager.buildContextEntries()) {
 			if (entry.type === "custom" && [SETTINGS_ENTRY, TIMINGS_ENTRY].includes(entry.customType)) continue;
 			if (entry.type === "custom" || entry.type === "usage") {
@@ -78,7 +82,7 @@ export default function compactTools(pi: ExtensionAPI): void {
 						const row = store.rows.get(part.id);
 						if (row) row.argsComplete = true;
 					}
-					store.endAssistant(canShowAssistantNotice(message) && (cacheNotices?.has(message) ?? false));
+					store.endAssistant(canShowAssistantNotice(message) && (restoredNotices?.has(message) ?? false));
 				} else if (message.role === "toolResult") {
 					resultMessage(message);
 				} else if (message.role !== "system" && !(message.role === "custom" && !message.display)) {
@@ -149,7 +153,7 @@ export default function compactTools(pi: ExtensionAPI): void {
 			store.observeAssistant(event.message);
 			const message = event.message;
 			const visibleNotice = !!pi.getSettings().showCacheMissNotices && canShowAssistantNotice(message) && (
-				hasCacheNotice(ctx.sessionManager.getEntries(), message, (provider, model) => ctx.modelRegistry.find(provider, model)?.cost.cacheRead ?? 0) ||
+				cacheNotices(ctx).check(ctx.sessionManager.getEntries(), message) ||
 				hasThinkingDropNotice(ctx.sessionManager.getBranch(), message)
 			);
 			store.endAssistant(visibleNotice);

@@ -49,7 +49,7 @@ export function readPresentation(row: ToolRow): ReadPresentation {
 	if (typeof raw !== "string" || !raw) return fallback;
 	let path = raw.replace(/^@/, "").replace(/[\u00a0\u2000-\u200a\u202f\u205f\u3000]/g, " ");
 	if (path === "~") path = homedir();
-	else if (path.startsWith("~/") || (process.platform === "win32" && path.startsWith("~\\"))) path = homedir() + path.slice(1);
+	else if (path.startsWith("~/")) path = homedir() + path.slice(1);
 	if (path.startsWith("file://")) {
 		try { path = fileURLToPath(path); } catch { return fallback; }
 	}
@@ -89,13 +89,13 @@ function outputLines(row: ToolRow): number {
 		return Math.max(0, truncation.totalLines);
 	}
 	const structured = row.result?.structuredContent;
-	if ((row.name === "bash" || row.name === "powershell") && structured && typeof structured === "object" && typeof (structured as { output?: unknown }).output === "string") {
+	if (row.name === "bash" && structured && typeof structured === "object" && typeof (structured as { output?: unknown }).output === "string") {
 		return lineCount((structured as { output: string }).output);
 	}
 	const content = row.result?.content ?? [];
 	const blocks = row.name === "codemode" && content[0]?.type === "text" && SCRIPT_HEADER.test(content[0].text) ? content.slice(1) : content;
 	let text = blocks.filter((part) => part.type === "text").map((part) => part.text).join("\n");
-	if (row.name === "bash" || row.name === "powershell") {
+	if (row.name === "bash") {
 		text = text.replace(/(?:\n\n)?Command exited with code \d+\s*$/, "");
 	}
 	if (typeof detail.fullOutputPath === "string") {
@@ -151,8 +151,7 @@ export function describeRow(row: ToolRow): Description {
 			}
 			break;
 		}
-		case "bash":
-		case "powershell": {
+		case "bash": {
 			const command = typeof args.command === "string" ? args.command : "";
 			primary = singleLine(command.split("\n").find((line) => line.trim() && !line.trim().startsWith("#")) ?? command) || "…";
 			const lines = lineCount(command);
@@ -180,14 +179,6 @@ export function describeRow(row: ToolRow): Description {
 			}
 			break;
 		}
-		case "grep":
-		case "find":
-			primary = `${singleLine(args.pattern) || "…"} ${shortenPath(rawPath ?? ".", row.context?.cwd)}`;
-			break;
-		case "ls":
-			primary = shortenPath(rawPath ?? ".", row.context?.cwd);
-			path = true;
-			break;
 		case "tool_search":
 			primary = singleLine(args.query ?? args.pattern) || "…";
 			break;
