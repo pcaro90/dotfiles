@@ -46,25 +46,19 @@ export interface ToolRouter {
 	bash(command: string): Backend;
 	track<T>(run: () => Promise<T>): Promise<T>;
 }
-/** Keep Pi's schemas, exact-edit semantics, renderers, image support, output schemas, and mutation queues. */
-export function registerEnvironmentTools(pi: ExtensionAPI, router: ToolRouter): void {
+type Run = (command: string, input?: string) => Promise<Buffer>;
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp"];
+
+/** Pi's own file tool, run on a hashed local proxy name; every real access goes through the routed backend. */
+function registerFileTool(pi: ExtensionAPI, router: ToolRouter, create: (cwd: string, options?: any) => any, mutation: boolean, operations: (run: Run, path: string) => object): void {
 	pi.registerTool({
-		...createReadToolDefinition(router.localRoot()),
-		async execute(id, params, signal, onUpdate, ctx) {
+		...create(router.localRoot()),
+		async execute(id: string, params: any, signal: AbortSignal | undefined, onUpdate: any, ctx: any) {
 			return router.track(async () => {
-				const { backend, path } = router.file(params.path, false);
-				backend.assertAccess?.(path, false);
+				const { backend, path } = router.file(params.path, mutation);
+				backend.assertAccess?.(path, mutation);
 				const proxy = proxyPath(backend, path);
-				const tool = createReadToolDefinition("/", { operations: {
-					readFile: () => backendCapture(backend, `cat -- ${q(path)}`, { signal }),
-					access: async () => { await backendCapture(backend, `test -r ${q(path)}`, { signal }); },
-					detectImageMimeType: async () => {
-						try {
-							const mime = (await backendCapture(backend, `file --mime-type -b -- ${q(path)}`, { signal })).toString().trim();
-							return ["image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp"].includes(mime) ? mime : null;
-						} catch { return null; }
-					},
-				} });
+				const tool = create("/", { operations: operations((command, input) => backendCapture(backend, command, { signal, input }), path) });
 				// Pi's native path normalization probes the host filesystem too. Give it
 				// only the virtual name; all actual access goes through the chosen backend.
 				try { return replaceProxy(await tool.execute(id, { ...params, path: proxy }, signal, onUpdate, ctx), proxy, params.path); }
@@ -72,39 +66,30 @@ export function registerEnvironmentTools(pi: ExtensionAPI, router: ToolRouter): 
 			});
 		},
 	});
-	pi.registerTool({
-		...createWriteToolDefinition(router.localRoot()),
-		async execute(id, params, signal, onUpdate, ctx) {
-			return router.track(async () => {
-				const { backend, path } = router.file(params.path, true);
-				backend.assertAccess?.(path, true);
-				const proxy = proxyPath(backend, path);
-				const tool = createWriteToolDefinition("/", { operations: {
-					mkdir: async () => { await backendCapture(backend, `mkdir -p -- ${q(dirname(path))}`, { signal }); },
-					writeFile: async (_path, content) => { await backendCapture(backend, `cat > ${q(path)}`, { signal, input: content }); },
-				} });
-				try { return replaceProxy(await tool.execute(id, { ...params, path: proxy }, signal, onUpdate, ctx), proxy, params.path); }
-				catch (error) { if (error instanceof Error) error.message = error.message.replaceAll(proxy, params.path); throw error; }
-			});
+}
+
+/** Keep Pi's schemas, exact-edit semantics, renderers, image support, output schemas, and mutation queues. */
+export function registerEnvironmentTools(pi: ExtensionAPI, router: ToolRouter): void {
+	const writeFile = (run: Run, path: string) => async (_path: string, content: string) => { await run(`cat > ${q(path)}`, content); };
+	registerFileTool(pi, router, createReadToolDefinition, false, (run, path) => ({
+		readFile: () => run(`cat -- ${q(path)}`),
+		access: async () => { await run(`test -r ${q(path)}`); },
+		detectImageMimeType: async () => {
+			try {
+				const mime = (await run(`file --mime-type -b -- ${q(path)}`)).toString().trim();
+				return IMAGE_TYPES.includes(mime) ? mime : null;
+			} catch { return null; }
 		},
-	});
-	pi.registerTool({
-		...createEditToolDefinition(router.localRoot()),
-		async execute(id, params, signal, onUpdate, ctx) {
-			return router.track(async () => {
-				const { backend, path } = router.file(params.path, true);
-				backend.assertAccess?.(path, true);
-				const proxy = proxyPath(backend, path);
-				const tool = createEditToolDefinition("/", { operations: {
-					readFile: () => backendCapture(backend, `cat -- ${q(path)}`, { signal }),
-					access: async () => { await backendCapture(backend, `test -r ${q(path)} && test -w ${q(path)}`, { signal }); },
-					writeFile: async (_path, content) => { await backendCapture(backend, `cat > ${q(path)}`, { signal, input: content }); },
-				} });
-				try { return replaceProxy(await tool.execute(id, { ...params, path: proxy }, signal, onUpdate, ctx), proxy, params.path); }
-				catch (error) { if (error instanceof Error) error.message = error.message.replaceAll(proxy, params.path); throw error; }
-			});
-		},
-	});
+	}));
+	registerFileTool(pi, router, createWriteToolDefinition, true, (run, path) => ({
+		mkdir: async () => { await run(`mkdir -p -- ${q(dirname(path))}`); },
+		writeFile: writeFile(run, path),
+	}));
+	registerFileTool(pi, router, createEditToolDefinition, true, (run, path) => ({
+		readFile: () => run(`cat -- ${q(path)}`),
+		access: async () => { await run(`test -r ${q(path)} && test -w ${q(path)}`); },
+		writeFile: writeFile(run, path),
+	}));
 	pi.registerTool({
 		...createBashToolDefinition(router.localRoot()),
 		async execute(id, params, signal, onUpdate, ctx) {

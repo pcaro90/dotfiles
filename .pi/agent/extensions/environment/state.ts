@@ -1,8 +1,8 @@
 import { existsSync, realpathSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
+import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { compactReadPaths, CONFIG_PATH, defaultReadPaths } from "./config.js";
-export { defaultReadPaths } from "./config.js";
+export { defaultReadPaths, inside } from "./config.js";
 
 export const STATE_ENTRY = "environment-state";
 export const MESSAGE_TYPE = "environment-change";
@@ -32,10 +32,6 @@ export type Resource =
 	| { type: "docker" }
 	| { type: "mcp"; server: string };
 
-export function inside(path: string, parent: string): boolean {
-	const rel = relative(parent, path);
-	return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
-}
 export function expandPath(path: string, cwd: string, home = homedir()): string {
 	const p = path.startsWith("@") ? path.slice(1) : path;
 	return resolve(cwd, p === "~" ? home : p.startsWith("~/") ? resolve(home, p.slice(2)) : p);
@@ -58,7 +54,7 @@ export function initialState(cwd: string, profile = defaultReadPaths()): Environ
 	return {
 		version: 1, mode: "bubble", localRoot: realpathSync(cwd), remote: null,
 		readPaths: [...profile], profileReadPaths: [...profile], readGrants: [], writePaths: [realpathSync(cwd), "/tmp"],
-		sshAgent: false, docker: false, mcpServers: [], sshSkills: [], omitDocs: false,
+		sshAgent: false, docker: false, mcpServers: [], sshSkills: ["@documentation"], omitDocs: false,
 	};
 }
 export function decodeState(value: unknown): EnvironmentState {

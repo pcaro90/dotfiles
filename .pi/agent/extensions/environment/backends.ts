@@ -18,8 +18,7 @@ const aliases: Record<string, string> = { "/bin": "usr/bin", "/sbin": "usr/bin",
 
 export const BUBBLE_AGENT_SOCKET = "/run/environment/ssh-agent.sock";
 interface SocketSources { agent?: string; docker?: string }
-export function sshAgentSocket(): string | undefined { return selectAgentSocket(); }
-function socketSources(): SocketSources { return { agent: sshAgentSocket(), docker: dockerSocket() }; }
+function socketSources(): SocketSources { return { agent: selectAgentSocket(), docker: dockerSocket() }; }
 /** The SSH broker may use the agent without granting the socket to the bubble. */
 export function sshEnvironment(extra: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
 	const env = { ...process.env, ...extra };
@@ -182,7 +181,6 @@ export function remotePath(path: string, remote: Remote): string {
 	const p = path.startsWith("@") ? path.slice(1) : path;
 	return posix.resolve(remote.cwd, p === "~" ? remote.home : p.startsWith("~/") ? posix.join(remote.home, p.slice(2)) : p);
 }
-export function localPath(path: string, cwd: string): string { return expandPath(path, cwd); }
 export function bubbleFailure(error: unknown): Error {
 	const message = error instanceof Error ? error.message : String(error);
 	if (/^(aborted|timeout:)/.test(message) || message.startsWith("Blocked by the current bubble:")) return new Error(message);

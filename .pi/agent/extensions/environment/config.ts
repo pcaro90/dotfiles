@@ -44,7 +44,7 @@ export function loadConfig(path = CONFIG_PATH): EnvironmentConfig {
 	catch (error) { throw new Error(`Invalid JSON in Environment config (${path}): ${error instanceof Error ? error.message : String(error)}`); }
 	return parseConfig(parsed, path);
 }
-function inside(path: string, parent: string): boolean {
+export function inside(path: string, parent: string): boolean {
 	const rel = relative(parent, path);
 	return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
 }

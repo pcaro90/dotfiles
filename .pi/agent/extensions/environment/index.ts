@@ -6,11 +6,11 @@ import type { ExtensionAPI, ExtensionContext, Skill } from "@earendil-works/pi-c
 import { Text, type KeyId } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import {
-	bubbleBackend, directBackend, localPath, remotePath, probeBubble, resolveSshTarget, sshBackend,
-	requireSocket, sshAgentSocket, dockerSocket, type Backend,
+	bubbleBackend, directBackend, remotePath, probeBubble, resolveSshTarget, sshBackend, requireSocket, dockerSocket, type Backend,
 } from "./backends.js";
+import { selectAgentSocket } from "./config.js";
 import {
-	STATE_ENTRY, MESSAGE_TYPE, initialState, restoreState, applyResource, canonicalPath, commandWords,
+	STATE_ENTRY, MESSAGE_TYPE, initialState, restoreState, applyResource, canonicalPath, commandWords, expandPath,
 	describeResource, footerStatus, fullStatus, inside, policyKey, refreshReadProfile, stateMessage, summary, type EnvironmentState, type Mode, type Resource,
 } from "./state.js";
 import { bashOperations, registerEnvironmentTools } from "./tools.js";
@@ -48,7 +48,7 @@ export function localSkillScript(command: string, skills: Skill[], cwd: string):
 	let script = words[0];
 	if (interpreters.has(basename(script ?? ""))) script = words[1];
 	if (!script || !script.startsWith("/")) return undefined;
-	const lexical = localPath(script, cwd);
+	const lexical = expandPath(script, cwd);
 	const candidates = skills.filter((skill) => inside(lexical, resolve(skill.baseDir, "scripts")));
 	if (!candidates.length) return undefined; // Other absolute commands belong to the remote; never stat them locally.
 	const path = canonicalPath(lexical);
@@ -65,7 +65,6 @@ export default function environment(pi: ExtensionAPI): void {
 	// Register the router even if config.json is broken: session_start must fail closed,
 	// rather than a factory exception leaving Pi's unrestricted built-ins in place.
 	let state = initialState(process.cwd(), []);
-	state.sshSkills = ["@documentation"];
 	let sessionBase = structuredClone(state);
 	let allSkills: Skill[] = [];
 	let sessionId = "uninitialized";
@@ -126,10 +125,14 @@ export default function environment(pi: ExtensionAPI): void {
 		pi.appendEntry(STATE_ENTRY, structuredClone(state));
 		status(ctx);
 	};
+	const commit = (candidate: EnvironmentState, ctx: ExtensionContext) => {
+		state = candidate; ready = true; failure = "";
+		persist(ctx);
+	};
 	const validateResources = (resources: Resource[], enabled: boolean) => {
 		let candidate = structuredClone(state);
 		for (const resource of resources) {
-			if (enabled && resource.type === "ssh_agent") requireSocket(sshAgentSocket(), "SSH agent");
+			if (enabled && resource.type === "ssh_agent") requireSocket(selectAgentSocket(), "SSH agent");
 			if (enabled && resource.type === "docker") requireSocket(dockerSocket(), "Docker");
 			if (resource.type === "mcp" && !/^[A-Za-z0-9_-]+$/.test(resource.server)) throw new Error("Invalid MCP server name.");
 			candidate = applyResource(candidate, resource, enabled);
@@ -150,8 +153,7 @@ export default function environment(pi: ExtensionAPI): void {
 			if (!ctx.isIdle() || inFlight) throw new Error("Execution started while changing target; stop it and retry the mode change.");
 			if (state !== previous || generation !== requestedGeneration) throw new Error("Environment changed while selecting the execution target; retry.");
 			candidate.mode = mode;
-			state = candidate; ready = true; failure = "";
-			persist(ctx);
+			commit(candidate, ctx);
 			ctx.ui.notify(`Environment → ${summary(state)}`, mode === "direct" ? "warning" : "info");
 		},
 		async grant(resources, enabled, ctx) {
@@ -161,8 +163,7 @@ export default function environment(pi: ExtensionAPI): void {
 			// Missing mounts or invalid socket grants must not partially modify the policy.
 			if (candidate.mode === "bubble") await probeBubble(candidate, sessionId, skillRoots());
 			if (state !== previous || generation !== requestedGeneration) throw new Error("Environment changed while validating this grant; retry with the current policy.");
-			state = candidate; ready = true; failure = "";
-			persist(ctx);
+			commit(candidate, ctx);
 		},
 		async refreshProfile(ctx) {
 			if (!ready && state.mode !== "bubble") ensureReady();
@@ -174,8 +175,7 @@ export default function environment(pi: ExtensionAPI): void {
 				ctx.ui.notify("Toolchain profile is already up to date.", "info");
 				return;
 			}
-			state = candidate; ready = true; failure = "";
-			persist(ctx);
+			commit(candidate, ctx);
 		},
 		async setSkills(names, ctx) {
 			ensureReady();
@@ -215,7 +215,7 @@ export default function environment(pi: ExtensionAPI): void {
 		localRoot: () => state.localRoot, backend, track,
 		file(path, mutation) {
 			ensureReady();
-			if (state.mode !== "ssh") return { backend: backend(), path: localPath(path, state.localRoot) };
+			if (state.mode !== "ssh") return { backend: backend(), path: expandPath(path, state.localRoot) };
 			// Mutations always belong to SSH. Local read exceptions require an explicit
 			// absolute skill/artifact path, never a realpath lookup of an arbitrary remote name.
 			const requested = path.startsWith("@") ? path.slice(1) : path;
@@ -295,9 +295,9 @@ export default function environment(pi: ExtensionAPI): void {
 				const [action, ...rest] = commandWords(args);
 				if (action === "reset") {
 					if (!ctx.isIdle() || inFlight) throw new Error("Stop the current turn before resetting Environment.");
-					const candidate = initialState(ctx.cwd); candidate.sshSkills = ["@documentation"]; candidate.omitDocs = state.omitDocs;
+					const candidate = initialState(ctx.cwd); candidate.omitDocs = state.omitDocs;
 					await probeBubble(candidate, sessionId, skillPaths(allSkills));
-					state = candidate; ready = true; failure = ""; persist(ctx); return;
+					commit(candidate, ctx); return;
 				}
 				if (action === "refresh") { await controls.refreshProfile(ctx); return; }
 				if (action === "bubble" || action === "direct" || action === "ssh") { await controls.setMode(action, ctx, rest.join(" ") || undefined); return; }
@@ -327,7 +327,6 @@ export default function environment(pi: ExtensionAPI): void {
 		try {
 			const saved = restoreState(ctx.sessionManager.getBranch());
 			state = saved ?? initialState(ctx.cwd);
-			if (!saved) state.sshSkills = ["@documentation"];
 			// Explicit flags win on process startup and initialize new/legacy sessions. A
 			// saved Environment policy wins on /reload and in-process session switches.
 			const ssh = pi.getFlag("ssh") as string | undefined;
