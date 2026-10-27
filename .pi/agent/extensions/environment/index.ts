@@ -322,7 +322,6 @@ export default function environment(pi: ExtensionAPI): void {
 
 	pi.on("session_start", async (event, ctx) => {
 		generation++; ready = false; restoreAnnouncement(ctx); allSkills = []; approvalQueue = Promise.resolve(); shortcutQueue = Promise.resolve();
-		ctx.ui.setStatus("working-mode", undefined); ctx.ui.setStatus("ssh", undefined);
 		sessionId = ctx.sessionManager.getSessionId();
 		try {
 			const saved = restoreState(ctx.sessionManager.getBranch());

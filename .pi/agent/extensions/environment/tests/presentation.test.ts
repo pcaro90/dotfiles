@@ -35,15 +35,11 @@ describe("compact Environment presentation", () => {
 		expect(stateMessage(state)).toContain("BUBBLE"); expect(stateMessage(state)).toContain("request_access");
 		expect(fullStatus(state)).toContain("/toolchain/detail-199");
 	});
-	test("visible changes say what happened instead of looking like repeated status rows", () => {
-		const state = initialState(root), label = summary(state);
-		expect(messageLabel({ content: `Toolchain profile refreshed; session grants retained.\n${stateMessage(state)}` })).toBe(`${label} · ↻ toolchain`);
-		expect(messageLabel({ content: "", details: { summary: label, reason: "Granted: Personal SSH agent (all loaded identities)." } })).toBe(`${label} · + SSH agent`);
-	});
-	test("old verbose messages also collapse; expanded view preserves their content", () => {
-		const content = `Environment: BUBBLE · ${root}\nRO: a very long old inventory\nPolicy details`;
-		const message = { content, details: { mode: "bubble" } };
-		expect(messageLabel(message)).toBe(summary(initialState(root)));
+	test("snapshots collapse to their summary, failures to their first line; expanded view keeps the content", () => {
+		const state = initialState(root);
+		const message = { content: `${stateMessage(state)}\nPolicy details`, details: { summary: summary(state), mode: "bubble" } };
+		expect(messageLabel(message)).toBe(summary(state));
+		expect(messageLabel({ content: "Environment initialization failed; execution is blocked.\nmore" })).toBe("⛔ Environment initialization failed; execution is blocked.");
 		const theme: any = { fg: (_: string, value: string) => value };
 		const collapsed = renderEnvironmentMessage(message, false, theme).render(28);
 		expect(collapsed).toHaveLength(1); expect(visibleWidth(collapsed[0])).toBeLessThanOrEqual(28);

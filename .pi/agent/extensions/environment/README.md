@@ -24,7 +24,7 @@ pi --ssh user@host:/remote/path
 `--ssh` and `--direct` are mutually exclusive. Explicit flags select the target on process
 startup. Without flags, a resumed session restores its saved Environment policy; a new
 session starts in bubble mode. `/reload` preserves the current policy instead of reapplying
-startup flags. Legacy/new sessions without saved Environment state use the supplied flags.
+startup flags. Sessions without saved Environment state use the supplied flags.
 IPv6 targets use `user@[address]:/path`.
 
 Inside Pi:
@@ -122,8 +122,8 @@ New sessions use the current config. Existing sessions keep their saved profile 
 retains explicit RO/RW grants, aliases, agent/Docker/MCP permissions and the execution mode,
 and applies to new operations only. It reapplies configured defaults, including defaults
 previously removed from the session. `/env reset` additionally discards session grants.
-Legacy sessions infer their original profile from the first Environment snapshot on the
-active branch; no hard-coded copy of the old toolchain list is needed.
+State saved by early versions of Environment, without this profile metadata, is rejected
+on restore like any invalid state; `/env reset` restores the defaults.
 
 Agent selection is read for each new execution independently of profile refresh. Unknown
 keys, relative roots, invalid JSON or a missing config file produce explicit errors, not
@@ -286,9 +286,7 @@ The footer uses **🫧** (bubble), **💻** (direct), **🌐 host:path** (SSH), 
 without an `Env:` label or redundant local path. In bubble mode, **🔑** and **🐳** appear beside
 **🫧** while their respective grants are enabled.
 
-Transcript messages collapse to one line and can be expanded. The renderer also compacts
-old verbose `environment-change` messages already stored in a session. New model-facing
-messages summarize the RO inventory instead of listing every installed toolchain path;
+Transcript messages collapse to one line and can be expanded. Model-facing messages summarize the RO inventory instead of listing every installed toolchain path;
 `/env resources`, `/env status full`, and "Show full status" retain the full details.
 
 ## MCP and other extensions
@@ -304,7 +302,7 @@ extensions/stdio MCP servers remain host processes. Other unknown custom tools a
 in bubble mode until an adapter is implemented. In direct/SSH mode, external integrations
 retain their own normal execution environment, independently of the workspace target.
 
-## Development and migration
+## Development
 
 The extension uses Pi's exported operation interfaces and preserves built-in schemas,
 renderers, image reading, structured codemode output, exact multi-edit behavior and mutation
@@ -349,9 +347,3 @@ SSH authentication (the checks only run `pwd` and `hostname`, including `host:/t
 ```sh
 PI_ENVIRONMENT_LIVE_SSH=moriapulsar bun test tests/cli.test.ts
 ```
-
-`ssh.ts` and `working-mode/` have been moved outside the auto-loaded extensions directory
-into `~/.pi/agent/extension-backups/` during migration. `/wmode`, its CLI flag and the old multi-mode
-cycle are retired. Ctrl+Tab now toggles only the two local Environment modes. Run
-`/reload` or restart Pi to replace handlers already loaded
-in an existing process. Do not reload both old extensions alongside Environment.

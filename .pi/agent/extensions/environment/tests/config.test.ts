@@ -92,11 +92,11 @@ describe("non-destructive profile refresh", () => {
 		const state = applyResource(initialState(project, [tools]), { type: "path", path: tools, access: "ro" });
 		expect(refreshReadProfile(state, []).readPaths).toEqual([tools]);
 	});
-	test("legacy branch migration uses the original snapshot, not a hard-coded old profile", () => {
-		const first = { ...initialState(project, ["/old/profile"]), profileReadPaths: undefined, readGrants: undefined };
+	test("the latest branch snapshot wins; state without profile metadata is rejected, not migrated", () => {
+		const first = initialState(project, ["/old/profile"]);
 		const last = { ...first, readPaths: [...first.readPaths, "/session/reference"] };
-		const migrated = restoreState([first, last].map((data) => ({ type: "custom", customType: STATE_ENTRY, data })))!;
-		expect(migrated.profileReadPaths).toEqual(["/old/profile"]); expect(migrated.readGrants).toEqual(["/session/reference"]);
-		expect(refreshReadProfile(migrated, ["/new/profile"]).readPaths).toEqual(["/new/profile", "/session/reference"]);
+		const entries = (...states: unknown[]) => states.map((data) => ({ type: "custom", customType: STATE_ENTRY, data }));
+		expect(restoreState(entries(first, last))!.readPaths).toEqual(last.readPaths);
+		expect(() => restoreState(entries({ ...last, profileReadPaths: undefined, readGrants: undefined }))).toThrow("/env reset");
 	});
 });

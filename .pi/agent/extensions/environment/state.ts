@@ -16,8 +16,8 @@ export interface EnvironmentState {
 	readPaths: string[];
 	writePaths: string[];
 	/** Last applied profile and explicit session grants, for non-destructive profile refresh. */
-	profileReadPaths?: string[];
-	readGrants?: string[];
+	profileReadPaths: string[];
+	readGrants: string[];
 	sshAgent: boolean;
 	docker: boolean;
 	mcpServers: string[];
@@ -62,9 +62,8 @@ export function decodeState(value: unknown): EnvironmentState {
 	const strings = (x: unknown): x is string[] => Array.isArray(x) && x.every((s) => typeof s === "string" && !s.includes("\0"));
 	if (!v || v.version !== 1 || !["bubble", "direct", "ssh"].includes(v.mode)
 		|| typeof v.localRoot !== "string" || !isAbsolute(v.localRoot)
-		|| !strings(v.readPaths) || !strings(v.writePaths) || !strings(v.mcpServers) || !strings(v.sshSkills)
-		|| ![...v.readPaths, ...v.writePaths].every(isAbsolute)
-		|| [v.profileReadPaths, v.readGrants].some((paths) => paths !== undefined && (!strings(paths) || !paths.every(isAbsolute)))
+		|| ![v.readPaths, v.writePaths, v.profileReadPaths, v.readGrants, v.mcpServers, v.sshSkills].every(strings)
+		|| ![...v.readPaths, ...v.writePaths, ...v.profileReadPaths, ...v.readGrants].every(isAbsolute)
 		|| typeof v.sshAgent !== "boolean" || typeof v.docker !== "boolean" || typeof v.omitDocs !== "boolean"
 		|| (v.pathAliases !== undefined && (!v.pathAliases || Array.isArray(v.pathAliases) || typeof v.pathAliases !== "object"
 			|| !Object.entries(v.pathAliases).every(([alias, target]) => isAbsolute(alias) && typeof target === "string" && isAbsolute(target) && !alias.includes("\0") && !target.includes("\0"))))
@@ -73,19 +72,12 @@ export function decodeState(value: unknown): EnvironmentState {
 	return structuredClone(v);
 }
 export function restoreState(entries: readonly any[]): EnvironmentState | undefined {
-	const snapshots = entries.filter((e) => e.type === "custom" && e.customType === STATE_ENTRY);
-	if (!snapshots.length) return undefined;
-	const state = decodeState(snapshots.at(-1).data);
-	// Legacy sessions predate profile metadata. Their first branch snapshot records the
-	// original defaults; subsequent additions remain explicit grants instead of being reset.
-	state.profileReadPaths ??= decodeState(snapshots[0].data).readPaths;
-	state.readGrants ??= state.readPaths.filter((p) => !state.profileReadPaths!.includes(p));
-	return state;
+	const snapshot = entries.findLast((e) => e.type === "custom" && e.customType === STATE_ENTRY);
+	return snapshot && decodeState(snapshot.data);
 }
 export function refreshReadProfile(state: EnvironmentState, profile = defaultReadPaths()): EnvironmentState {
 	const next = structuredClone(state);
-	const oldProfile = state.profileReadPaths ?? [];
-	const grants = [...new Set([...(state.readGrants ?? []), ...state.readPaths.filter((p) => !oldProfile.includes(p))])];
+	const grants = [...new Set([...state.readGrants, ...state.readPaths.filter((p) => !state.profileReadPaths.includes(p))])];
 	next.profileReadPaths = [...profile];
 	next.readGrants = grants;
 	next.readPaths = compactReadPaths([...profile, ...grants].filter((p) => !state.writePaths.includes(p)));
@@ -93,7 +85,6 @@ export function refreshReadProfile(state: EnvironmentState, profile = defaultRea
 }
 export function applyResource(state: EnvironmentState, resource: Resource, enabled = true): EnvironmentState {
 	const next = structuredClone(state);
-	next.readGrants ??= state.readPaths.filter((p) => !(state.profileReadPaths ?? []).includes(p));
 	const update = (items: string[], value: string) => enabled ? [...new Set([...items, value])] : items.filter((p) => p !== value);
 	if (resource.type === "path") {
 		const requested = expandPath(resource.path, state.localRoot);
