@@ -404,6 +404,13 @@ describe("actual Bubblewrap boundary", () => {
 		const controller = new AbortController(); controller.abort();
 		await expect(bubbleBackend(policy, session).run("true", { signal: controller.signal })).rejects.toThrow("aborted");
 	});
+	test("cancellation does not wait for a detached descendant holding the output", async () => {
+		const controller = new AbortController(), start = performance.now();
+		setTimeout(() => controller.abort(), 100);
+		await expect(runProcess("/bin/bash", ["-c", "setsid sleep 5 & sleep 5"], { signal: controller.signal })).rejects.toThrow("aborted");
+		await expect(runProcess("/bin/bash", ["-c", "setsid sleep 5 & sleep 5"], { timeout: 0.1 })).rejects.toThrow("timeout:");
+		expect(performance.now() - start).toBeLessThan(2000);
+	});
 });
 
 describe("four real Pi tool definitions", () => {

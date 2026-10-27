@@ -21,6 +21,8 @@ export function runProcess(program: string, args: string[], options: RunOptions 
 		let timedOut = false;
 		const stop = () => {
 			try { if (child.pid) process.kill(-child.pid, "SIGKILL"); } catch { child.kill("SIGKILL"); }
+			// A detached descendant (setsid, daemon) may still hold the pipes; "close" must not wait for it.
+			child.stdout.destroy(); child.stderr.destroy();
 		};
 		const timer = options.timeout && options.timeout > 0 ? setTimeout(() => { timedOut = true; stop(); }, options.timeout * 1000) : undefined;
 		const cleanup = () => { if (timer) clearTimeout(timer); options.signal?.removeEventListener("abort", stop); };
