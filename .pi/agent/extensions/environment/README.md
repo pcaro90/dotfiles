@@ -177,7 +177,10 @@ like any other project. This is intentional, not a credential boundary for that 
 Grant an existing directory when the desired file does not exist yet. File and directory
 grants are canonicalized and preserve explicitly requested symlink names as aliases (for
 example, `~/.ssh/config` pointing into another directory). Merely having a symlink in a
-workspace does not expose its unmounted destination. More-specific RO/RW mounts override parent mounts. Removing a
+workspace does not expose its unmounted destination. A destination in the host home that is
+not granted would resolve to the private home inside the bubble, a different file: `read`,
+`write` and `edit` refuse such a symlink with the usual `request_access` guidance, while Bash
+cannot be checked (`echo x > link` writes into the private home). More-specific RO/RW mounts override parent mounts. Removing a
 grant does not remove access inherited from a broader grant. Missing/stale paths can still
 be revoked through `/env resources` or `/env revoke`; `/env reset` is another recovery path.
 

@@ -139,7 +139,9 @@ export function bubbleBackend(state: EnvironmentState, sessionId: string, skillR
 			// A file bind dereferences its source (e.g. /etc/localtime). Symlinks inside a
 			// mounted directory still need an exposed destination; the OS is the final boundary.
 			const withinSource = lexical && inside(canonical, canonicalPath(lexical.source));
-			if (!allowed(lexical) || (!lexical?.private && !withinSource && !allowed(actual))) throw new Error(`Blocked by the current bubble: ${write ? "write" : "read"} access to ${path} is not granted. Ask the user with request_access for ${write ? "RW" : "RO"} access to this path or its parent.`);
+			// A symlink that leaves a real mount for the host home lands in the private home there:
+			// a different file, so it is blocked rather than silently redirected.
+			if (!allowed(lexical) || (!lexical?.private && !withinSource && (!allowed(actual) || actual?.private))) throw new Error(`Blocked by the current bubble: ${write ? "write" : "read"} access to ${path} is not granted. Ask the user with request_access for ${write ? "RW" : "RO"} access to this path or its parent.`);
 		},
 		async run(command, options = {}) {
 			const env = bubbleEnvironment(state, sockets);

@@ -432,6 +432,14 @@ describe("four real Pi tool definitions", () => {
 		await expect(h.execute("write", { path: join(readonly, "tool-denied"), content: "no" })).rejects.toThrow("Blocked by the current bubble");
 		await expect(h.execute("edit", { path: join(readonly, "data"), edits: [{ oldText: "readonly", newText: "changed" }] })).rejects.toThrow("Blocked by the current bubble");
 	});
+	test("a project symlink into the host home is blocked, not redirected to the private home", async () => {
+		const h = await loaded();
+		const link = join(project, "home-link"); symlinkSync(join(secret, "hidden"), link);
+		await expect(h.execute("read", { path: link })).rejects.toThrow("Blocked by the current bubble");
+		await expect(h.execute("write", { path: link, content: "redirected" })).rejects.toThrow("Blocked by the current bubble");
+		await expect(h.execute("edit", { path: link, edits: [{ oldText: "secret", newText: "changed" }] })).rejects.toThrow("Blocked by the current bubble");
+		expect(readFileSync(join(secret, "hidden"), "utf8")).toBe("secret\n");
+	});
 	test("bash error gives permission guidance and retains structured output", async () => {
 		const h = await loaded();
 		const result = await h.execute("bash", { command: `printf bad > ${shellQuote(join(readonly, "bash-denied"))}` });
