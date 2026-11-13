@@ -133,7 +133,7 @@
     "exec": "swaync-client -swb",
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw",
-    "on-click-middle": "swaync-client -C -sw",
+    "on-click-middle": "swaync-client -C -sw -cp",
     "escape": true,
   },
 }
