@@ -17,7 +17,7 @@ Supports built-in `read`, `bash`, `edit`, `write`, `codemode`, `tool_search`, an
 
 Images remain at their original transcript position and are not merged into text groups. Visible assistant text, thinking labels, user messages, and custom entries separate groups. Consecutive calls join across assistant-message and turn boundaries, including calls issued one at a time. Enabling `showCacheMissNotices` does not itself create a separator: only a cache/usage or thinking-drop notice Pi actually displays does. Notice detection uses public session/model data and mirrors Pi 1.0.2's display thresholds. Reload/resume reconstruct the same grouping.
 
-Execution is never replaced, and neither model-facing results nor prompts are modified. Shell/codemode timings are saved in hidden `compact-tools:timings` session entries outside model context. Recorded durations survive reload/resume/tree navigation. Older timings for other tools are ignored, and calls without recorded timings do not receive invented durations. Non-TUI modes retain their original renderers.
+Execution is never replaced, and neither model-facing results nor prompts are modified. Shell/codemode timings are saved at `tool_execution_end` in hidden `compact-tools:timings` session entries outside model context. No `turn_end` or `agent_before_settle` handlers are registered, avoiding unnecessary context reconstruction. Recorded durations survive reload/resume/tree navigation. Older timings for other tools are ignored, and calls without recorded timings do not receive invented durations. Non-TUI modes retain their original renderers.
 
 ## Notation
 

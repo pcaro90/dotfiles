@@ -12,7 +12,6 @@ export default function compactTools(pi: ExtensionAPI): void {
 	let entryCursor = 0;
 	let timer: ReturnType<typeof setInterval> | undefined;
 	const running = new Set<string>();
-	const unpersisted = new Map<string, number>();
 	let notices: CacheNotices | undefined;
 
 	function cacheNotices(ctx: ExtensionContext): CacheNotices {
@@ -40,12 +39,6 @@ export default function compactTools(pi: ExtensionAPI): void {
 		timer.unref?.();
 	}
 
-	function persistTimings(): void {
-		if (!unpersisted.size) return;
-		pi.appendEntry(TIMINGS_ENTRY, { durations: Object.fromEntries(unpersisted) });
-		unpersisted.clear();
-	}
-
 	function resultMessage(message: Extract<AgentMessage, { role: "toolResult" }>): void {
 		const row = store.rows.get(message.toolCallId);
 		if (!row) return;
@@ -55,7 +48,6 @@ export default function compactTools(pi: ExtensionAPI): void {
 	function restore(ctx: ExtensionContext): void {
 		stopClock();
 		running.clear();
-		unpersisted.clear();
 		store.clear();
 		notices = undefined;
 		tui = ctx.mode === "tui";
@@ -179,17 +171,15 @@ export default function compactTools(pi: ExtensionAPI): void {
 		if (!row) return;
 		if (showsDuration(row.name) && row.startedAt !== undefined) {
 			row.durationMs = Math.max(0, performance.now() - row.startedAt);
-			unpersisted.set(row.id, row.durationMs);
+			pi.appendEntry(TIMINGS_ENTRY, { durations: { [row.id]: row.durationMs } });
 		}
 		store.setResult(row, event.result as AgentToolResult<unknown>, false, event.isError);
 		running.delete(row.id);
 		if (!running.size) stopClock();
 	});
-	pi.on("turn_end", (_event, ctx) => { if (enabled && ctx.mode === "tui") persistTimings(); });
-	pi.on("agent_end", (_event, ctx) => {
+	pi.on("agent_end", () => {
 		stopClock();
 		running.clear();
-		if (enabled && ctx.mode === "tui") persistTimings();
 	});
 
 	pi.registerCommand("compact-tools", {

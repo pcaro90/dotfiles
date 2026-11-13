@@ -77,7 +77,7 @@ function harness(entries: any[] = [], mode = "tui", notices = false) {
 		await emit("tool_execution_end", { toolCallId: id, toolName: "read", result: value, isError: error });
 		component.updateResult({ ...value, isError: error });
 	};
-	return { ready, emit, add, snapshot, message, finish, resolver: (name: string, next?: any) => resolver(name, () => next), ctx, commands, appended, components, reloads: () => reloads };
+	return { ready, emit, add, snapshot, message, finish, resolver: (name: string, next?: any) => resolver(name, () => next), ctx, commands, handlers, appended, components, reloads: () => reloads };
 }
 
 test("eight reads occupy nine lines, including one separator; no calls are folded", async () => {
@@ -259,12 +259,33 @@ test("only timed tools persist timings outside model context; nested calls creat
 	await h.emit("tool_execution_start", { toolCallId: "a/1", toolName: "read", args: { path: "nested.ts" }, parentToolCallId: "a" });
 	assert.match(plain(h.snapshot(40))[1], /◌.*\d+ms/);
 	for (const part of parts) await h.finish(part.id);
-	await h.emit("turn_end");
 	assert.equal(h.appended.length, 1);
 	assert.equal(h.appended[0].customType, TIMINGS_ENTRY);
 	assert.deepEqual(Object.keys(h.appended[0].data.durations), ["a"]);
 	assert.ok(h.appended[0].data.durations.a >= 0);
 	assert.equal(h.snapshot().length, 5);
+	await h.emit("session_shutdown");
+});
+
+test("timings persist immediately on out-of-order completion without context-edit boundary handlers", async () => {
+	const h = harness(); await h.ready;
+	assert.equal(h.handlers.has("turn_end"), false);
+	assert.equal(h.handlers.has("agent_before_settle"), false);
+	const parts = [call("a", "bash", { command: "echo a" }), call("b", "codemode", { code: "console.log(1)" })];
+	await h.message(parts);
+	for (const part of parts) await h.emit("tool_execution_start", { toolCallId: part.id, toolName: part.name, args: part.arguments });
+	await h.emit("tool_execution_end", { toolCallId: "b/1", toolName: "bash", parentToolCallId: "b", result: result(), isError: false });
+	assert.equal(h.appended.length, 0);
+	await h.finish("b", result("Script failed"), true);
+	assert.equal(h.appended.length, 1, "persist failed codemode before the shell or turn ends");
+	assert.deepEqual(Object.keys(h.appended[0].data.durations), ["b"]);
+	assert.ok(h.appended[0].data.durations.b >= 0);
+	await h.finish("a");
+	assert.equal(h.appended.length, 2);
+	assert.deepEqual(Object.keys(h.appended[1].data.durations), ["a"]);
+	assert.ok(h.appended.every((entry) => entry.type === "custom" && entry.customType === TIMINGS_ENTRY));
+	await h.emit("agent_end");
+	assert.equal(h.appended.length, 2, "no duplicate timing writes at run end");
 	await h.emit("session_shutdown");
 });
 
