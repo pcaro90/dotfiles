@@ -11,6 +11,7 @@
       "disk#root",
       "disk#storage",
       "disk#windows",
+      "custom/aiusage",
       "clock",
       "pulseaudio",
       "bluetooth",

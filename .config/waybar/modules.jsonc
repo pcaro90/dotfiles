@@ -57,6 +57,14 @@
       "high": 80,
     },
   },
+  "custom/aiusage": {
+    "exec-if": "test -x ~/src/aiusage-waybar/aiusage.py",
+    "exec": "~/src/aiusage-waybar/aiusage.py bar",
+    "return-type": "json",
+    "interval": 30,
+    "on-click": "~/src/aiusage-waybar/aiusage.py popup",
+    "tooltip": true,
+  },
   "clock": {
     "format": "{:%F %a %H:%M}",
   },

@@ -247,6 +247,37 @@ button {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   AI usage — estados low / medium / high / stale
+   ═══════════════════════════════════════════════════════════ */
+
+#custom-aiusage {
+    padding: 0 8px;
+    color: @tn-fg;
+}
+
+#custom-aiusage:hover {
+    background-color: alpha(@tn-bg-highlight, 0.5);
+}
+
+#custom-aiusage.low {
+    box-shadow: inset 0 -2px @tn-green;
+}
+
+#custom-aiusage.medium {
+    box-shadow: inset 0 -2px @tn-yellow;
+}
+
+#custom-aiusage.high {
+    box-shadow: inset 0 -2px @tn-red;
+}
+
+#custom-aiusage.stale,
+#custom-aiusage.missing {
+    color: @tn-comment;
+    box-shadow: inset 0 -2px @tn-comment;
+}
+
+/* ═══════════════════════════════════════════════════════════
    Bluetooth
    ═══════════════════════════════════════════════════════════ */
 
