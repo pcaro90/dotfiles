@@ -127,8 +127,12 @@
     bindsym $mod+t exec $menu
     bindsym $mod+backslash exec thunar
 
-    ### Clipboard menu
+## Clipboard menu
     bindsym $mod+p exec bash -c 'cliphist list | rofi -dmenu -disable-history | cliphist decode | wl-copy'
+
+## Handy PTT
+    bindsym --no-repeat XF86Mail exec pkill -USR2 -x handy
+    bindsym --release XF86Mail exec pkill -USR2 -x handy
 
 ## Sway Control
     bindsym $mod+q kill
