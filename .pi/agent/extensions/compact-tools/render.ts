@@ -1,7 +1,7 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { Text, sliceByColumn, truncateToWidth, visibleWidth, type Component, type TuiMouseEvent, type TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { describeRow, displayTitle, formatDuration } from "./format.js";
-import { showsDuration, type RenderContext, type ToolRow, ToolStore } from "./model.js";
+import { resetRendering, showsDuration, type RenderContext, type ToolRow, ToolStore } from "./model.js";
 
 export const EMPTY: Component = { render: () => [], invalidate() {} };
 export const NARROW_WIDTH = 80;
@@ -66,7 +66,7 @@ function body(row: ToolRow, store: ToolStore, theme: Theme): NonNullable<ToolRow
 	const context: RenderContext = {
 		...row.context!, args: row.args, state: row.bodyState, expanded: true,
 		lastComponent: undefined, isPartial: row.isPartial, isError: row.isError,
-		invalidate: () => { row.body = undefined; store.redraw(row); },
+		invalidate: () => { resetRendering(row); store.redraw(row); },
 		// We own the clock. Don't start a second shell-renderer timer, and don't
 		// recompute edit previews against files that have already been modified.
 		executionStarted: row.name === "bash" ? false : row.executionStarted,
@@ -90,6 +90,27 @@ function body(row: ToolRow, store: ToolStore, theme: Theme): NonNullable<ToolRow
 	return row.body;
 }
 
+/** A long history repaints on every keystroke, so finished rows reuse their lines until width or state changes. */
+function rowLines(row: ToolRow, store: ToolStore, theme: Theme, width: number, toolWidth: number): string[] {
+	const expanded = store.expanded(row);
+	const cached = row.lines;
+	if (cached && cached.width === width && cached.toolWidth === toolWidth && cached.expanded === expanded && cached.durationMs === row.durationMs) {
+		return cached.lines;
+	}
+	const lines = [renderHeader(row, store, theme, width, toolWidth)];
+	if (expanded && row.context) {
+		const components = body(row, store, theme);
+		const innerWidth = Math.max(1, width - 4);
+		const detail = [...components.call.render(innerWidth), ...(components.result?.render(innerWidth) ?? [])];
+		while (detail.length && !detail[0].trim()) detail.shift();
+		while (detail.length && !detail.at(-1)!.trim()) detail.pop();
+		for (const line of detail) lines.push(paint(`    ${line}`, width, row, theme));
+	}
+	// Live rows have a ticking clock and streaming arguments: always redraw them.
+	row.lines = row.isPartial ? undefined : { width, toolWidth, expanded, durationMs: row.durationMs, lines };
+	return lines;
+}
+
 /** Each native call keeps its slot. Only the first slot draws the shared block. */
 export class GroupSlot implements Component {
 	private layout: { row: ToolRow; start: number; end: number }[] = [];
@@ -104,15 +125,7 @@ export class GroupSlot implements Component {
 		const lines: string[] = [];
 		for (const row of rows) {
 			const start = lines.length;
-			lines.push(renderHeader(row, this.store, this.theme, width, toolWidth));
-			if (this.store.expanded(row) && row.context) {
-				const components = body(row, this.store, this.theme);
-				const innerWidth = Math.max(1, width - 4);
-				const detail = [...components.call.render(innerWidth), ...(components.result?.render(innerWidth) ?? [])];
-				while (detail.length && !detail[0].trim()) detail.shift();
-				while (detail.length && !detail.at(-1)!.trim()) detail.pop();
-				for (const line of detail) lines.push(paint(`    ${line}`, width, row, this.theme));
-			}
+			for (const line of rowLines(row, this.store, this.theme, width, toolWidth)) lines.push(line);
 			this.layout.push({ row, start, end: lines.length });
 		}
 		return lines;
@@ -128,6 +141,6 @@ export class GroupSlot implements Component {
 
 	invalidate(): void {
 		this.layout = [];
-		for (const row of this.row.group.rows) row.body = undefined;
+		for (const row of this.row.group.rows) resetRendering(row);
 	}
 }

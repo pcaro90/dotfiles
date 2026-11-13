@@ -40,6 +40,14 @@ export interface ToolRow {
 	original?: ToolRenderers;
 	body?: { call: import("@earendil-works/pi-tui").Component; result?: import("@earendil-works/pi-tui").Component };
 	bodyState: Record<string, unknown>;
+	/** Painted lines of a finished row for the last width it was drawn at. */
+	lines?: { width: number; toolWidth: number; expanded: boolean; durationMs?: number; lines: string[] };
+}
+
+/** Anything that can change a row's appearance must drop both its body and its painted lines. */
+export function resetRendering(row: ToolRow): void {
+	row.body = undefined;
+	row.lines = undefined;
 }
 
 type Assistant = Extract<AgentMessage, { role: "assistant" }>;
@@ -106,7 +114,9 @@ export class ToolStore {
 			this.rows.set(id, row);
 		}
 		row.name = name;
-		row.args = args && typeof args === "object" ? args as Record<string, unknown> : {};
+		const next = args && typeof args === "object" ? args as Record<string, unknown> : {};
+		if (next !== row.args) row.lines = undefined;
+		row.args = next;
 		return row;
 	}
 
@@ -177,7 +187,7 @@ export class ToolStore {
 		row.result = { ...row.result, ...result };
 		row.isPartial = isPartial;
 		row.isError = isError;
-		row.body = undefined;
+		resetRendering(row);
 		// Native Pi draws images outside renderCall/renderResult. Keep image calls at
 		// their original transcript position rather than moving them into an anchor.
 		if (hasImage(row) && row.group.rows.length > 1) {
@@ -202,7 +212,7 @@ export class ToolStore {
 		row.argsComplete = context.argsComplete;
 		row.isPartial = context.isPartial;
 		row.isError = context.isError;
-		row.body = undefined;
+		resetRendering(row);
 	}
 
 	expanded(row: ToolRow): boolean {
@@ -211,7 +221,7 @@ export class ToolStore {
 
 	toggle(row: ToolRow): void {
 		row.localExpanded = !this.expanded(row);
-		row.body = undefined;
+		resetRendering(row);
 		this.redraw(row);
 	}
 
@@ -223,7 +233,7 @@ export class ToolStore {
 	resetLocalExpansion(): void {
 		for (const row of this.rows.values()) {
 			row.localExpanded = undefined;
-			row.body = undefined;
+			resetRendering(row);
 		}
 	}
 }
