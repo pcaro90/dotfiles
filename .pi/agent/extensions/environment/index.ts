@@ -247,7 +247,7 @@ export default function environment(pi: ExtensionAPI): void {
 
 	pi.registerTool({
 		name: "request_access", label: "Request access", exposure: "model-only",
-		description: "Ask the user to grant local bubble resources for this session: RO/RW paths, personal SSH agent, Docker, or an external MCP server. Does not change execution mode or retry commands. Existing executions are unaffected.",
+		description: "Ask the user to grant local bubble resources for this session: RO/RW paths, personal SSH agent (also RO ~/.ssh/config and ~/.ssh/known_hosts when present), Docker, or an external MCP server. Does not change execution mode or retry commands. Existing executions are unaffected.",
 		parameters: Type.Object({ resources: Type.Array(ResourceSchema, { minItems: 1, maxItems: 20 }), reason: Type.String({ minLength: 1 }) }),
 		async execute(_id, params, signal, _update, ctx) {
 			const requestGeneration = generation;

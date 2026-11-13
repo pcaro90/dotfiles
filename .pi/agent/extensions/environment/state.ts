@@ -108,7 +108,7 @@ export function applyResource(state: EnvironmentState, resource: Resource, enabl
 export function describeResource(resource: Resource): string {
 	switch (resource.type) {
 		case "path": return `${resource.access.toUpperCase()} ${resource.path}`;
-		case "ssh_agent": return "Personal SSH agent (all loaded identities)";
+		case "ssh_agent": return "Personal SSH agent (all loaded identities) + RO ~/.ssh/config and ~/.ssh/known_hosts (when present)";
 		case "docker": return "Docker (full access to the local daemon)";
 		case "mcp": return `External MCP server: ${resource.server}`;
 	}
@@ -142,6 +142,7 @@ export function stateMessage(state: EnvironmentState): string {
 	if (state.mode === "bubble") {
 		lines.push(`RW: ${state.writePaths.join(", ") || "none"}. RO: ${state.readPaths.length} configured paths + local skills. Other host paths hidden; home/cache private; network open.`);
 		lines.push(`SSH agent ${state.sshAgent ? "on" : "off"}; Docker ${state.docker ? "on" : "off"}; external MCP: ${state.mcpServers.join(", ") || "none"}.`);
+		if (state.sshAgent) lines.push("SSH agent access includes RO ~/.ssh/config and ~/.ssh/known_hosts when present; private keys and other SSH files are not automatically exposed.");
 		lines.push("If blocked, ask the user with request_access; do not switch modes to bypass a denial.");
 	} else if (state.mode === "ssh") {
 		lines.push(`Project tools and ! run remotely; AGENTS.md, selected skills and Pi artifacts remain local (${state.localRoot}). Local skill scripts use the local bubble; SSH skills: ${state.sshSkills.join(", ") || "none"}.`);

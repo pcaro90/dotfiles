@@ -185,13 +185,18 @@ grant does not remove access inherited from a broader grant. Missing/stale paths
 be revoked through `/env resources` or `/env revoke`; `/env reset` is another recovery path.
 
 The **personal SSH agent is all-or-nothing**, without copying private keys into the
-bubble. Docker grants access to the local Unix socket and, when present, `~/.docker` RO;
-it is full daemon access, not command filtering. Known SSH/Docker socket paths are masked
-when disabled even if a broad mount such as `/tmp` would expose them. Other sockets/files
-under shared `/tmp` are intentionally not comprehensively filtered. SSH aliases and host
-verification files are separate filesystem resources: grant RO to `~/.ssh/config`,
-`~/.ssh/known_hosts` and any included configuration as needed. The agent capability alone
-does not mount private key files or the complete `~/.ssh` directory.
+bubble. Enabling it also mounts **`~/.ssh/config` and `~/.ssh/known_hosts` RO**, when
+present, including symlinked files. Missing files are skipped. These automatic mounts
+follow the agent capability: revoking it removes them from new executions, while explicit
+filesystem grants remain in effect (including an explicit RW grant for either file).
+Included configuration and other host-verification files still need separate grants; the
+capability does not mount private key files or the complete `~/.ssh` directory. Read-only
+`known_hosts` cannot save new host keys; update it on the host or explicitly grant RW.
+
+Docker grants access to the local Unix socket and, when present, `~/.docker` RO; it is full
+daemon access, not command filtering. Known SSH/Docker socket paths are masked when disabled
+even if a broad mount such as `/tmp` would expose them. Other sockets/files under shared
+`/tmp` are intentionally not comprehensively filtered.
 
 The agent source is selected in this order:
 
@@ -203,8 +208,8 @@ The agent source is selected in this order:
 If SSH/tmux did not inherit the desktop variable but the socket exists on the same host,
 the fallback works without agent forwarding, a tmux query, or a shell startup hook. Detection
 is not authorization: `/env allow ssh-agent` or `request_access` must still grant access.
-The bubble mounts only that socket at **`/run/environment/ssh-agent.sock`** and exports that
-internal path as `SSH_AUTH_SOCK`. The host SSH backend uses the same selection independently
+The bubble mounts that socket at **`/run/environment/ssh-agent.sock`** alongside the two
+optional SSH files, and exports the internal socket path as `SSH_AUTH_SOCK`. The host SSH backend uses the same selection independently
 of whether the bubble has a grant; an unavailable agent does not disable OpenSSH's normal
 key-file authentication. Direct mode retains its normal host environment.
 

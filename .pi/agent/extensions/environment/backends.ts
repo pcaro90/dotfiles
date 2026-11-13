@@ -57,6 +57,19 @@ export function bubbleMounts(state: EnvironmentState, sessionId: string, skillRo
 	const scratch = privateHome(sessionId);
 	for (const p of [scratch, resolve(scratch, ".cache"), resolve(scratch, ".config"), resolve(scratch, ".local/share")]) mkdirSync(p, { recursive: true, mode: 0o700 });
 	add(homedir(), "rw", scratch, true);
+	if (state.sshAgent) {
+		add(BUBBLE_AGENT_SOCKET, "ro", requireSocket(sockets.agent, "SSH agent"));
+		// Only these optional files accompany the agent; never expose the whole .ssh directory.
+		// Apply explicit filesystem grants afterwards so their RO/RW policy still wins.
+		for (const name of ["config", "known_hosts"]) {
+			const path = resolve(homedir(), ".ssh", name);
+			if (!existsSync(path)) continue;
+			if (!statSync(path).isFile()) throw new Error(`SSH agent resource is not a regular file: ${path}`);
+			const target = realpathSync(path);
+			add(target, "ro");
+			if (path !== target) { add(path, "ro", target); pathAliases[path] ??= target; }
+		}
+	}
 	for (const path of state.readPaths) add(path, "ro");
 	// Automatic skill grants need the advertised aliases too, not only real paths hidden behind the private home.
 	for (const root of skillRoots) {
@@ -69,7 +82,6 @@ export function bubbleMounts(state: EnvironmentState, sessionId: string, skillRo
 		if (state.writePaths.includes(target)) add(alias, "rw", target);
 		else if (state.readPaths.includes(target) || skillTargets.has(target)) add(alias, "ro", target);
 	}
-	if (state.sshAgent) add(BUBBLE_AGENT_SOCKET, "ro", requireSocket(sockets.agent, "SSH agent"));
 	if (state.docker) {
 		const socket = requireSocket(sockets.docker, "Docker");
 		add(socket, "ro");
