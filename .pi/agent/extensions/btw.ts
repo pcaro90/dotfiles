@@ -18,11 +18,18 @@
  * Needs one main request in this process first: after a restart or /reload there is nothing to
  * replay, and a request from a different model or another /tree branch cannot reuse the cache.
  *
+ * BTW prompts: `/btw /<name> [args]` (also typed in the overlay) expands `<agentDir>/btw-prompts/<name>.md`,
+ * which uses the prompt template format (frontmatter `description`/`argument-hint`, `$1`, `$@`,
+ * `${@:N}`, `${1:-default}`…). Only that directory is read, so these side-question prompts never
+ * become main-chat commands. It is re-read on every use: no /reload needed.
+ *
  * Based on https://github.com/mitsuhiko/agent-stuff/blob/main/extensions/btw.ts
  */
-import { convertToLlm, getMarkdownTheme, type ExtensionAPI, type ExtensionCommandContext, type ExtensionContext, type SessionEntry, type Theme } from "@earendil-works/pi-coding-agent";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, join } from "node:path";
+import { convertToLlm, getAgentDir, getMarkdownTheme, parseFrontmatter, type ExtensionAPI, type ExtensionCommandContext, type ExtensionContext, type SessionEntry, type Theme } from "@earendil-works/pi-coding-agent";
 import type { AssistantMessage, Message, ToolResultMessage, Usage } from "@earendil-works/pi-ai";
-import { Container, Input, Key, Markdown, matchesKey, truncateToWidth, visibleWidth, wrapTextWithAnsi, type Focusable, type KeybindingsManager, type TUI } from "@earendil-works/pi-tui";
+import { Container, Input, Key, Markdown, matchesKey, truncateToWidth, visibleWidth, wrapTextWithAnsi, type AutocompleteItem, type Focusable, type KeybindingsManager, type TUI } from "@earendil-works/pi-tui";
 
 const ENTRY_TYPE = "btw-thread-entry";
 const RESET_TYPE = "btw-thread-reset";
@@ -79,6 +86,127 @@ export function splicePayload(captured: Payload, tailPayload: Payload): Payload 
 	const spliced: Payload = { ...structuredClone(captured), [key]: [...(captured[key] as unknown[]), ...added] };
 	delete spliced.previous_response_id;
 	return spliced;
+}
+
+export type BtwPrompt = { name: string; description: string; argumentHint?: string; content: string; path: string };
+
+export function btwPromptsDir(): string {
+	return join(getAgentDir(), "btw-prompts");
+}
+
+/** The `*.md` files directly in `dir` (symlinks followed), by name. A missing directory is empty. */
+export function loadBtwPrompts(dir: string): Map<string, BtwPrompt> {
+	const prompts = new Map<string, BtwPrompt>();
+	let files: string[];
+	try {
+		files = readdirSync(dir).filter((file) => file.endsWith(".md")).sort();
+	} catch {
+		return prompts;
+	}
+	for (const file of files) {
+		const path = join(dir, file);
+		try {
+			if (!statSync(path).isFile()) continue;
+			const { frontmatter, body } = parseFrontmatter<Record<string, unknown>>(readFileSync(path, "utf8"));
+			const firstLine = body.split("\n").find((line) => line.trim())?.trim() ?? "";
+			const description = typeof frontmatter.description === "string" && frontmatter.description ? frontmatter.description : firstLine.slice(0, 60);
+			const argumentHint = typeof frontmatter["argument-hint"] === "string" ? frontmatter["argument-hint"] : undefined;
+			const name = basename(file, ".md");
+			prompts.set(name, { name, description, argumentHint, content: body, path });
+		} catch {
+			// Unreadable or malformed file: skip it.
+		}
+	}
+	return prompts;
+}
+
+/** Shell-like argument splitting, as pi does for prompt templates (`parseCommandArgs`, not exported). */
+export function parseCommandArgs(argsString: string): string[] {
+	const args: string[] = [];
+	let current = "";
+	let hasToken = false;
+	let inQuote: string | null = null;
+	let quoteStart = 0;
+	for (let i = 0; i < argsString.length; i++) {
+		const char = argsString[i]!;
+		if (inQuote) {
+			if (char === "\\" && argsString[i + 1] === inQuote) {
+				current += inQuote;
+				i++;
+			} else if (char === inQuote) inQuote = null;
+			else current += char;
+		} else if ((char === '"' || char === "'") && !hasToken) {
+			// Quotes only open an argument, so apostrophes inside words stay literal.
+			inQuote = char;
+			quoteStart = i;
+			hasToken = true;
+		} else if (/\s/.test(char)) {
+			if (hasToken) {
+				args.push(current);
+				current = "";
+				hasToken = false;
+			}
+		} else {
+			current += char;
+			hasToken = true;
+		}
+		if (inQuote && i === argsString.length - 1) {
+			// Unclosed quote: keep it as text and parse the rest again.
+			inQuote = null;
+			current = argsString[quoteStart]!;
+			i = quoteStart;
+		}
+	}
+	if (hasToken) args.push(current);
+	return args;
+}
+
+/** Prompt template placeholder substitution, as pi does it (`substituteArgs`, not exported). */
+export function substituteArgs(content: string, args: string[]): string {
+	const allArgs = args.join(" ");
+	return content.replace(/\$\{(\d+|ARGUMENTS|@):-([^}]*)\}|\$\{@:(\d+)(?::(\d+))?\}|\$(ARGUMENTS|@|\d+)/g, (_match, defaultTarget, defaultValue, sliceStart, sliceLength, simple) => {
+		if (defaultTarget) {
+			const value = defaultTarget === "@" || defaultTarget === "ARGUMENTS" ? allArgs : args[parseInt(defaultTarget, 10) - 1];
+			return value ? value : defaultValue;
+		}
+		if (sliceStart) {
+			const start = Math.max(0, parseInt(sliceStart, 10) - 1);
+			return (sliceLength ? args.slice(start, start + parseInt(sliceLength, 10)) : args.slice(start)).join(" ");
+		}
+		if (simple === "ARGUMENTS" || simple === "@") return allArgs;
+		return args[parseInt(simple, 10) - 1] ?? "";
+	});
+}
+
+/**
+ * `/name [args]` → the expanded BTW prompt; anything else is a plain question. `/a/b…` (a path)
+ * stays plain; an unknown `/name` is an error rather than a literal question.
+ */
+export function expandBtwInput(input: string, prompts: Map<string, BtwPrompt>): { text: string } | { error: string } {
+	const match = input.match(/^\/([^\s/]+)(?:\s+([\s\S]*))?$/);
+	if (!match) return { text: input };
+	const prompt = prompts.get(match[1]!);
+	if (!prompt) {
+		const known = [...prompts.keys()].map((name) => `/${name}`).join(", ");
+		return { error: `Unknown BTW prompt /${match[1]}. ${known ? `Available: ${known}` : `No prompts in ${btwPromptsDir()}`}.` };
+	}
+	const text = substituteArgs(prompt.content, parseCommandArgs(match[2] ?? "")).trim();
+	return text ? { text } : { error: `BTW prompt /${prompt.name} is empty.` };
+}
+
+export function btwCompletions(prefix: string, prompts: Map<string, BtwPrompt>): AutocompleteItem[] | null {
+	if (/\s/.test(prefix)) return null;
+	const items: AutocompleteItem[] = [
+		...[...prompts.values()].map((prompt) => ({
+			value: `/${prompt.name} `,
+			label: `/${prompt.name}`,
+			description: [prompt.argumentHint, prompt.description].filter(Boolean).join(" — ") || undefined,
+		})),
+		{ value: "inject", label: "inject", description: "Summarize the side thread into the main chat" },
+		{ value: "reset", label: "reset", description: "Discard the side thread" },
+	];
+	const filtered = items.filter((item) => item.label.startsWith(prefix));
+	return filtered.length ? filtered : null;
 }
 
 function emptyUsage(): Usage {
@@ -298,13 +426,14 @@ export default function btw(pi: ExtensionAPI) {
 		return age > CACHE_TTL_S ? ` · main request ${Math.round(age / 60)} min old: the cache may have expired` : "";
 	}
 
-	async function runQuestion(ctx: ExtensionContext, question: string): Promise<void> {
+	/** `question` is what the user typed (shown in the thread); `prompt` is what the model gets (a BTW prompt expanded). */
+	async function runQuestion(ctx: ExtensionContext, question: string, prompt: string): Promise<void> {
 		if (pending && !pending.error) return notify(ctx, "BTW is still answering the previous question.", "warning");
 		pending = { question, answer: "", tools: [] };
 		abort = new AbortController();
 		setStatus(`Asking ${ctx.model?.id ?? ""}…${cacheWarning()}`);
 		try {
-			const text = (thread.length ? NEXT_PREFIX : FIRST_PREFIX) + (ctx.isIdle() ? "" : BUSY_NOTE) + question;
+			const text = (thread.length ? NEXT_PREFIX : FIRST_PREFIX) + (ctx.isIdle() ? "" : BUSY_NOTE) + prompt;
 			const result = await ask(ctx, text, abort.signal);
 			const turn: BtwTurn = { question, ...result, provider: ctx.model!.provider, model: ctx.model!.id, timestamp: Date.now() };
 			thread.push(turn);
@@ -380,9 +509,11 @@ export default function btw(pi: ExtensionAPI) {
 				view = new BtwOverlay(tuiRef, theme, keybindings, (width) => transcript(width, theme), () => status, (value) => {
 					const question = value.trim();
 					if (!question) return setStatus("Type a question first.");
+					const expanded = expandBtwInput(question, loadBtwPrompts(btwPromptsDir()));
+					if ("error" in expanded) return setStatus(expanded.error);
 					view?.setDraft("");
 					draft = "";
-					void runQuestion(ctx, question);
+					void runQuestion(ctx, question, expanded.text);
 				}, () => void closeFlow(ctx));
 				view.setDraft(draft);
 				view.focused = true;
@@ -410,18 +541,21 @@ export default function btw(pi: ExtensionAPI) {
 	}
 
 	pi.registerCommand("btw", {
-		description: "Side chat about the main session, reusing its prompt cache. `/btw <question>` asks right away; `/btw inject` or `/btw reset`",
+		description: "Side chat about the main session, reusing its prompt cache. `/btw <question>` or `/btw /<prompt> [args]` asks right away; `/btw inject` or `/btw reset`",
+		getArgumentCompletions: (prefix) => btwCompletions(prefix, loadBtwPrompts(btwPromptsDir())),
 		handler: async (args, ctx) => {
 			const question = args.trim();
 			if (question === "inject") return injectSummary(ctx);
 			if (question === "reset") return resetThread(true);
+			const expanded = expandBtwInput(question, loadBtwPrompts(btwPromptsDir()));
+			if ("error" in expanded) return notify(ctx, expanded.error, "warning");
 			if (!question && thread.length && ctx.hasUI && !overlay) {
 				const choice = await ctx.ui.select("BTW side chat:", ["Continue previous thread", "Start fresh"]);
 				if (!choice) return;
 				if (choice === "Start fresh") resetThread(true);
 			}
 			openOverlay(ctx);
-			if (question) await runQuestion(ctx, question);
+			if (question) await runQuestion(ctx, question, expanded.text);
 		},
 	});
 
